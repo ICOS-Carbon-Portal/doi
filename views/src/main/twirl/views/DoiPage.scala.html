@@ -1,0 +1,12 @@
+@(jsFastOpt: Boolean = false)
+@CpCommonPage("Carbon Portal's DOI minting service"){
+}{
+	<div id="main">
+	</div>
+	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>
+
+	<script type="text/javascript">
+			se.lu.nateko.cp.doi.DoiApp().main();
+	</script>
+}
+
