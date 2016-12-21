@@ -15,12 +15,28 @@ lazy val commonJvmSettings = Seq(
 	)
 ) ++ commonSettings
 
-lazy val core = project.in(file("core"))
+lazy val shared = crossProject
+	.crossType(CrossType.Pure)
+	.in(file("shared"))
+	.settings(
+		name := "doi-shared",
+		version := "0.1.0-SNAPSHOT"
+	)
+	.jsSettings(commonSettings: _*)
+	.jvmSettings(commonJvmSettings: _*)
+	.jsSettings(name := "doi-shared-js")
+	.jvmSettings(name := "doi-shared-jvm")
+
+lazy val sharedJs = shared.js
+lazy val sharedJvm = shared.jvm
+
+lazy val core = project
+	.in(file("core"))
+	.dependsOn(sharedJvm)
 	.settings(commonJvmSettings: _*)
 	.settings(
 		name := "doi-core",
 		version := "0.1.0-SNAPSHOT",
-		unmanagedSourceDirectories in Compile += baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala",
 		publishTo := {
 			val nexus = "https://repo.icos-cp.eu/content/repositories/"
 			if (isSnapshot.value)
@@ -31,7 +47,8 @@ lazy val core = project.in(file("core"))
 		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
-lazy val views = (project in file("views"))
+lazy val views = project
+	.in(file("views"))
 	.settings(commonSettings: _*)
 	.enablePlugins(SbtTwirl)
 	.settings(
@@ -41,21 +58,22 @@ lazy val views = (project in file("views"))
 	)
 
 lazy val app = crossProject
+	.crossType(CrossType.Dummy)
 	.in(file("."))
 	.settings(
 		name := "doi",
-		unmanagedSourceDirectories in Compile += baseDirectory.value  / "shared" / "src" / "main" / "scala",
 		libraryDependencies ++= Seq(
 			"com.lihaoyi" %%% "upickle" % "0.4.4"
 		)
 	)
+	.jsSettings(commonSettings: _*)
+	.jvmSettings(commonJvmSettings: _*)
 	.jsSettings(
 		name := "doi-js",
 		libraryDependencies ++= Seq(
 			"com.lihaoyi" %%% "scalatags" % "0.6.2"
 		)
 	)
-	.jsSettings(commonSettings: _*)
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
@@ -69,16 +87,16 @@ lazy val app = crossProject
 				originalStrategy(x)
 		}
 	)
-	.jvmSettings(commonJvmSettings: _*)
+	.jsConfigure(_.dependsOn(sharedJs))
 	.jvmConfigure(_.dependsOn(views, core))
 
-lazy val appJS = app.js
-lazy val appJVM = app.jvm
+lazy val appJs = app.js
+lazy val appJvm = app.jvm
 	.settings(
-		resources.in(Compile) += fastOptJS.in(appJS, Compile).value.data,
-		watchSources ++= watchSources.in(appJS, Compile).value,
+		resources.in(Compile) += fastOptJS.in(appJs, Compile).value.data,
+		watchSources ++= watchSources.in(appJs, Compile).value,
 		assembledMappings.in(assembly) := {
-			val finalJsFile = fullOptJS.in(appJS, Compile).value.data
+			val finalJsFile = fullOptJS.in(appJs, Compile).value.data
 			assembledMappings.in(assembly).value :+ sbtassembly.MappingSet(None, Vector((finalJsFile, finalJsFile.getName)))
 		}
 	)
