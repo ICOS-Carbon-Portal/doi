@@ -6,6 +6,8 @@ import org.scalajs.dom
 import dom.document
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
+import se.lu.nateko.cp.doi.meta.Title
+import se.lu.nateko.cp.doi.meta.TitleType
 
 object DoiApp extends JSApp {
 	def main(): Unit = {
@@ -16,9 +18,14 @@ object DoiApp extends JSApp {
 	def mainLayout = div(
 		div(cls := "page-header")(
 			h1("Carbon Portal DOI minting service"),
-			p(attr("hidden") := "false")("I am hidden")
+			p(depTest)
 		)
 	)
+
+	def depTest: String = {
+		val title = Title("Some title", "en-us", Some(TitleType.Subtitle))
+		title.toString
+	}
 
 }
 
