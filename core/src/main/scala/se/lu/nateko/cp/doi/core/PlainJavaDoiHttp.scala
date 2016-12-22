@@ -26,16 +26,16 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	def postUtf8Text(url: URL, text: String): Future[DoiResponse] = Future{
+	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
 		conn.setDoOutput(true)
-		conn.setRequestProperty("Content-Type", "text/plain;charset=UTF-8")
+		conn.setRequestProperty("Content-Type", contentType)
 		conn.setRequestMethod("POST")
 
 		try{
 			val out = conn.getOutputStream()
-			out.write(text.getBytes("UTF-8"))
+			out.write(payload.getBytes("UTF-8"))
 			out.close()
 
 			toDoiResponse(conn, conn.getInputStream())

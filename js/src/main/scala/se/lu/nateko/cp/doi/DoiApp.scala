@@ -23,7 +23,7 @@ object DoiApp extends JSApp {
 	)
 
 	def depTest: String = {
-		val title = Title("Some title", "en-us", Some(TitleType.Subtitle))
+		val title = Title("Some title", Some("en-us"), Some(TitleType.Subtitle))
 		title.toString
 	}
 

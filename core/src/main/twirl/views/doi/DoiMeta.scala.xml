@@ -1,0 +1,29 @@
+@(meta: se.lu.nateko.cp.doi.DoiMeta)
+<resource xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd" xmlns="http://datacite.org/schema/kernel-3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<identifier identifierType="DOI">@(meta.id.toString)</identifier>
+	<creators>
+		@for(creator <- meta.creators){
+			<creator>
+				<creatorName>@(creator.name.toString)</creatorName>
+				@for(nameId <- creator.nameId){
+					<nameIdentifier nameIdentifierScheme="@(nameId.scheme.name)"
+						@for(schemeUri <- nameId.scheme.uri) {schemeURI="@schemeUri"}>@(nameId.id)</nameIdentifier>
+				}
+				@for(aff <- creator.affiliations){
+					<affiliation>@aff</affiliation>
+				}
+			</creator>
+		}
+	</creators>
+	<titles>
+		@for(title <- meta.titles){
+			<title
+				@for(lang <- title.lang){xml:lang="@lang"}
+				@for(titleType <- title.titleType) {titleType="@(titleType.toString)"}
+			>@(title.value)</title>
+		}
+	</titles>
+	<publisher>@(meta.publisher)</publisher>
+	<publicationYear>@(meta.publicationYear)</publicationYear>
+</resource>
+

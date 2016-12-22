@@ -12,5 +12,5 @@ trait DoiHttp {
 
 	def getText(url: URL): Future[DoiResponse]
 
-	def postUtf8Text(url: URL, text: String): Future[DoiResponse]
+	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse]
 }

@@ -8,10 +8,13 @@ trait SelfValidating{
 		if(list.isEmpty) None else Some(list.mkString("\n"))
 	}
 
+	protected def allGood(items: Seq[SelfValidating]): Option[String] = joinErrors(items.map(_.error): _*)
+
+	protected def nonNull(obj: AnyRef)(msg: String): Option[String] =
+		if(obj == null) Some(msg) else None
+
 	protected def nonEmpty(s: String)(msg: String): Option[String] =
 		if(s == null || s.length == 0) Some(msg) else None
-
-	protected def allGood(items: Seq[SelfValidating]): Option[String] = joinErrors(items.map(_.error): _*)
 
 	protected def nonEmpty(items: Seq[SelfValidating])(msg: String): Option[String] =
 		if(items.isEmpty) Some(msg) else allGood(items)
@@ -34,10 +37,31 @@ case class GenericName(name: String) extends Name{
 }
 
 case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends SelfValidating{
-	def error = ???
+	import NameIdentifierScheme.{Orcid, Isni}
+
+	def error = joinErrors(
+		nonEmpty(id)("Name identifier must not be empty"),
+		nonNull(scheme)("Name Identifier scheme must be provided"),
+		scheme match {
+			case Orcid =>
+				if(id.matches("""^(\d{4}\-?){3}\d{3}[0-9X]$""")) None
+				else Some("Wrong ORCID ID format")
+
+			case Isni =>
+				if(id.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
+				else Some("Wrong ISNI ID format")
+
+			case _ => Some("Only ORCID and ISNI name identifier schemes are supported")
+		}
+	)
 }
 
 case class NameIdentifierScheme(name: String, uri: Option[String])
+
+object NameIdentifierScheme{
+	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org"))
+	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org"))
+}
 
 case class Creator(
 	name: Name,
@@ -52,8 +76,12 @@ case class Creator(
 	)
 }
 
-case class Title(value: String, lang: String, titleType: Option[TitleType.Value]) extends SelfValidating{
-	def error = ???
+case class Title(value: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(value)("Title must not be empty"),
+		lang.flatMap(l => nonEmpty(l)("Title languate is not required but must not be empty if provided"))
+		//TODO Add lang value validation (must have the form 'en:us')
+	)
 }
 
 case class Contributor(

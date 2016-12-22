@@ -34,9 +34,11 @@ lazy val core = project
 	.in(file("core"))
 	.dependsOn(sharedJvm)
 	.settings(commonJvmSettings: _*)
+	.enablePlugins(SbtTwirl)
 	.settings(
 		name := "doi-core",
 		version := "0.1.0-SNAPSHOT",
+		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
 		publishTo := {
 			val nexus = "https://repo.icos-cp.eu/content/repositories/"
 			if (isSnapshot.value)

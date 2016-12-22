@@ -5,15 +5,16 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import scala.io.Source
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.Doi
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
 	val doiBase: URL = new URL(config.endpoint, "doi")
 	val metaBase: URL = new URL(config.endpoint, "metadata")
 
-	def doi(suffix: String) = config.doiPrefix + "/" + suffix
-	def doiUrl(suffix: String) = new URL(doiBase, doi(suffix))
-	def metaUrl(suffix: String) = new URL(metaBase, doi(suffix))
+	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
+	def doiUrl(doi: Doi) = new URL(doiBase, doi.toString)
+	def metaUrl(doi: Doi) = new URL(metaBase, doi.toString)
 
 	def listDois: Future[Seq[String]] = {
 
@@ -26,15 +27,27 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		}(response))
 	}
 
-	def createDoi(suffix: String, targetUrl: URL): Future[Unit] = {
-		val payload = s"doi=${doi(suffix)}\nurl=$targetUrl"
+	def setDoi(meta: DoiMeta, targetUrl: URL): Future[Unit] = {
+		postMetadata(meta).flatMap(_ => setUrl(meta.id, targetUrl))
+	}
 
-		http.postUtf8Text(doiBase, payload).flatMap(analyzeResponse{
+	def getMetadata(doi: Doi): Future[DoiMeta] = ???
+
+	private def setUrl(doi: Doi, targetUrl: URL): Future[Unit] = {
+		val payload = s"doi=$doi\nurl=$targetUrl"
+
+		http.postPayload(doiBase, payload, "text/plain;charset=UTF-8").flatMap(analyzeResponse{
 			case 201 => Future.successful(())
 		})
 	}
 
-	def getMetadata(suffix: String): Future[DoiMeta] = ???
+	private def postMetadata(meta: DoiMeta): Future[Unit] = {
+		val xml = views.xml.doi.DoiMeta(meta)
+
+		http.postPayload(metaBase, xml.body, "application/xml;charset=UTF-8").flatMap(analyzeResponse{
+			case 201 => Future.successful(())
+		})
+	}
 
 	private def makeFailure[T](response: http.DoiResponse): Future[T] = {
 		val msg = response.message + ": " + response.body
