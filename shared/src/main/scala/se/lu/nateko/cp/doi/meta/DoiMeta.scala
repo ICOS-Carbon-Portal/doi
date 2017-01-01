@@ -37,7 +37,7 @@ case class GenericName(name: String) extends Name{
 }
 
 case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends SelfValidating{
-	import NameIdentifierScheme.{Orcid, Isni}
+	import NameIdentifierScheme._
 
 	def error = joinErrors(
 		nonEmpty(id)("Name identifier must not be empty"),
@@ -51,7 +51,10 @@ case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends Self
 				if(id.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
 				else Some("Wrong ISNI ID format")
 
-			case _ => Some("Only ORCID and ISNI name identifier schemes are supported")
+			case _ if(supported.contains(scheme)) => None
+			case _ =>
+				val supportedNames = supported.map(_.name).mkString(", ")
+				Some("Only the following name identifier schemes are supported: " + supportedNames)
 		}
 	)
 }
@@ -61,6 +64,7 @@ case class NameIdentifierScheme(name: String, uri: Option[String])
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org"))
+	val supported = Seq(Orcid, Isni)
 }
 
 case class Creator(
@@ -76,13 +80,38 @@ case class Creator(
 	)
 }
 
-case class Title(value: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
+case class Title(title: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
 	def error = joinErrors(
-		nonEmpty(value)("Title must not be empty"),
-		lang.flatMap(l => nonEmpty(l)("Title languate is not required but must not be empty if provided"))
-		//TODO Add lang value validation (must have the form 'en:us')
+		nonEmpty(title)("Title must not be empty"),
+		lang.flatMap(l => nonEmpty(l)("Title language is not required but must not be empty if provided"))
 	)
 }
+
+case class ResourceType(resourceType: String, resourceTypeGeneral: ResourceTypeGeneral.Value) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(resourceType)("Specific resource type must not be empty"),
+		nonNull(resourceTypeGeneral)("The general resource type must be specified")
+	)
+}
+
+case class SubjectScheme(subjectScheme: String, schemeUri: Option[String])
+object SubjectScheme{
+	val Dewey = SubjectScheme("dewey", Some("http://dewey.info"))
+}
+
+case class Subject(
+	val subject: String,
+	val lang: Option[String] = None,
+	val subjectScheme: Option[SubjectScheme] = None,
+	val valueUri: Option[String] = None
+) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(subject)("Subject must not be empty"),
+		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided"))
+		//TODO Add valueUri validation
+	)
+}
+
 
 case class Contributor(
 	name: GenericName,

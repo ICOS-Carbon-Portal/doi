@@ -17,7 +17,9 @@ case class DoiMeta(
 	creators: Seq[Creator],
 	titles: Seq[Title],
 	publisher: String,
-	publicationYear: Int
+	publicationYear: Int,
+	resourceType: ResourceType,
+	subjects: Seq[Subject] = Nil
 ) extends SelfValidating{
 
 	def error = joinErrors(
@@ -25,6 +27,7 @@ case class DoiMeta(
 		nonEmpty(creators)("At lease one creator is required"),
 		nonEmpty(titles)("At lease one title is required"),
 		nonEmpty(publisher)("Publisher is required"),
-		if(publicationYear < 1000 || publicationYear > 3000) Some("Invalid publication year") else None
+		if(publicationYear < 1000 || publicationYear > 3000) Some("Invalid publication year") else None,
+		resourceType.error
 	)
 }

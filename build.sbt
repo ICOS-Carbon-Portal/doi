@@ -20,7 +20,8 @@ lazy val shared = crossProject
 	.in(file("shared"))
 	.settings(
 		name := "doi-shared",
-		version := "0.1.0-SNAPSHOT"
+		version := "0.1.0-SNAPSHOT",
+		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
 	)
 	.jsSettings(commonSettings: _*)
 	.jvmSettings(commonJvmSettings: _*)
