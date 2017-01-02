@@ -20,7 +20,7 @@
 			<title
 				@for(lang <- title.lang){xml:lang="@lang"}
 				@for(titleType <- title.titleType) {titleType="@(titleType.toString)"}
-			>@(title.value)</title>
+			>@(title.title)</title>
 		}
 	</titles>
 	<publisher>@(meta.publisher)</publisher>

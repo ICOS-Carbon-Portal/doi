@@ -29,7 +29,8 @@ object Playground {
 			Title("Carbon Portal home page", None, None)
 		),
 		publisher = "ICOS Carbon Portal",
-		publicationYear = 2016
+		publicationYear = 2016,
+		resourceType = ResourceType("website", ResourceTypeGeneral.Service)
 	)
 
 	def testCreate = client.setDoi(example, new URL("https://www.icos-cp.eu/"))

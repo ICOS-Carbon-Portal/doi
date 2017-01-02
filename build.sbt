@@ -50,16 +50,6 @@ lazy val core = project
 		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
-lazy val views = project
-	.in(file("views"))
-	.settings(commonSettings: _*)
-	.enablePlugins(SbtTwirl)
-	.settings(
-		name := "doi-views",
-		version := "0.1.0",
-		libraryDependencies += "se.lu.nateko.cp" %% "views-core" % "0.2-SNAPSHOT"
-	)
-
 lazy val app = crossProject
 	.crossType(CrossType.Dummy)
 	.in(file("."))
@@ -80,7 +70,8 @@ lazy val app = crossProject
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http" % "10.0.0"
+			"com.typesafe.akka" %% "akka-http" % "10.0.0",
+			"se.lu.nateko.cp" %% "views-core" % "0.2-SNAPSHOT"
 		),
 		assemblyMergeStrategy.in(assembly) := {
 			case PathList(name) if(name.endsWith("-fastopt.js")) =>
@@ -91,7 +82,7 @@ lazy val app = crossProject
 		}
 	)
 	.jsConfigure(_.dependsOn(sharedJs))
-	.jvmConfigure(_.dependsOn(views, core))
+	.jvmConfigure(_.dependsOn(core).enablePlugins(SbtTwirl))
 
 lazy val appJs = app.js
 lazy val appJvm = app.jvm

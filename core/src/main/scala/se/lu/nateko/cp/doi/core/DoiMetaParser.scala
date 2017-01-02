@@ -18,8 +18,9 @@ object DoiMetaParser {
 			doi <- parseDoi(xml);
 			creators <- parseCreators(xml);
 			titles <- parseTitles(xml);
-			publicationYear <- publicationYearTry
-		) yield DoiMeta(doi, creators, titles, publisher, publicationYear)
+			publicationYear <- publicationYearTry;
+			resourceType <- parseResourceType(xml)
+		) yield DoiMeta(doi, creators, titles, publisher, publicationYear, resourceType)
 
 		metaTry.flatMap(validate)
 	}
@@ -45,6 +46,8 @@ object DoiMetaParser {
 		val titleTries = (xml \ "titles" \ "title").map(parseTitle)
 		titleTries.map(_.get)
 	}
+
+	def parseResourceType(xml: Node): Try[ResourceType] = ???
 
 	private def parseCreator(xml: Node): Try[Creator] = {
 		val nameNodes = xml \ "creatorName"

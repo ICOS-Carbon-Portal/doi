@@ -28,10 +28,10 @@ object Main{
 		val route = {
 			get{
 				pathSingleSlash{
-					complete(views.html.DoiPage())
+					complete(views.html.doi.DoiPage())
 				} ~
 				path("develop"){
-					complete(views.html.DoiPage(true))
+					complete(views.html.doi.DoiPage(true))
 				} ~
 				getFromResourceDirectory("")
 			} ~
