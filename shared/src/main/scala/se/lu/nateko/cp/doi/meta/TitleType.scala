@@ -6,4 +6,5 @@ object TitleType extends Enumeration {
 	val AlternativeTitle = Value("AlternativeTitle")
 	val Subtitle = Value("Subtitle")
 	val TranslatedTitle = Value("TranslatedTitle")
+	val Other = Value("Other")
 }

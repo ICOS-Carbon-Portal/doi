@@ -9,7 +9,6 @@ object ContributorType extends Enumeration{
 	val DataManager = Value("DataManager")
 	val Distributor = Value("Distributor")
 	val Editor = Value("Editor")
-	val Funder = Value("Funder")
 	val HostingInstitution = Value("HostingInstitution")
 	val Other = Value("Other")
 	val Producer = Value("Producer")

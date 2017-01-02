@@ -13,33 +13,32 @@ class DoiMetaParserTest extends FunSuite{
 	def getTestXml: Elem = XML.load(getClass.getResource("/doiMetaExampleFull.xml"))
 
 	test("Parses the full DataCite metadata example successfully"){
-		val actual = DoiMetaParser.parse(getTestXml).get
-
 		val expected = DoiMeta(
 			id = Doi("10.5072", "example-full"),
 			creators = Seq(
-				Creator(GenericName("Miller, Elizabeth"), None, Nil)
+				Creator(
+					PersonalName("Elizabeth", "Miller"),
+					Seq(NameIdentifier("0000-0001-5000-0007", NameIdentifierScheme("ORCID", Some("http://orcid.org/")))),
+					Seq("DataCite")
+				)
 			),
+			contributors = Nil,
 			titles = Seq(
-				Title("Full DataCite XML Example", None, None),
-				Title("Demonstration of DataCite Properties.", None, None)
+				Title("Full DataCite XML Example", Some("en-us"), None),
+				Title("Demonstration of DataCite Properties.", Some("en-us"), Some(TitleType.Subtitle))
 			),
 			publisher = "DataCite",
-			publicationYear = 2014
+			publicationYear = 2014,
+			resourceType = ResourceType("XML", ResourceTypeGeneral.Software)
 		)
 
-		assert(actual === expected)
+		assertResult(expected){
+			DoiMetaParser.parse(getTestXml).get
+		}
 	}
 
 	test("Parses DOI ID successfully"){
 		val doi = DoiMetaParser.parseDoi(getTestXml).get
 	}
 
-	test("Parses creators successfully"){
-		val creators = DoiMetaParser.parseCreators(getTestXml).get
-	}
-
-	test("Parses titles successfully"){
-		val creators = DoiMetaParser.parseTitles(getTestXml).get
-	}
 }

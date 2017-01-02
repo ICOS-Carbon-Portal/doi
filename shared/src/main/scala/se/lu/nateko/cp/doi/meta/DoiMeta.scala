@@ -51,9 +51,9 @@ case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends Self
 				if(id.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
 				else Some("Wrong ISNI ID format")
 
-			case _ if(supported.contains(scheme)) => None
+			case _ if(supported.contains(scheme.name)) => None
 			case _ =>
-				val supportedNames = supported.map(_.name).mkString(", ")
+				val supportedNames = supported.mkString(", ")
 				Some("Only the following name identifier schemes are supported: " + supportedNames)
 		}
 	)
@@ -64,21 +64,36 @@ case class NameIdentifierScheme(name: String, uri: Option[String])
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org"))
-	val supported = Seq(Orcid, Isni)
+	val supported = Seq(Orcid, Isni).map(_.name)
 }
 
-case class Creator(
-	name: Name,
-	nameId: Option[NameIdentifier],
-	affiliations: Seq[String]
-) extends SelfValidating{
+sealed trait Person extends SelfValidating{
+	val name: Name
+	val nameIds: Seq[NameIdentifier]
+	val affiliations: Seq[String]
 
 	def error = joinErrors(
 		name.error,
-		nameId.flatMap(_.error),
+		allGood(nameIds),
 		joinErrors(affiliations.map(aff => nonEmpty(aff)("Affiliation is not required but must not be empty if provided")): _*)
 	)
 }
+
+case class Creator(name: Name, nameIds: Seq[NameIdentifier], affiliations: Seq[String]) extends Person
+
+case class Contributor(
+	name: Name,
+	nameIds: Seq[NameIdentifier],
+	affiliations: Seq[String],
+	contributorType: ContributorType.Value
+) extends Person{
+
+	override def error = joinErrors(
+		super.error,
+		nonNull(contributorType)("Contributor type must be specified")
+	)
+}
+
 
 case class Title(title: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
 	def error = joinErrors(
@@ -112,10 +127,4 @@ case class Subject(
 	)
 }
 
-
-case class Contributor(
-	name: GenericName,
-	nameId: Option[NameIdentifier],
-	affiliation: Seq[String],
-	contributorType: ContributorType.Value
-)
+case class Date(date: String, dateType: DateType.Value)

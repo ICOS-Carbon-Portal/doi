@@ -21,10 +21,11 @@ object Playground {
 		creators = Seq(
 			Creator(
 				name = GenericName("ICOS CP"),
-				nameId = None,
+				nameIds = Nil,
 				affiliations = Nil
 			)
 		),
+		contributors = Nil,
 		titles = Seq(
 			Title("Carbon Portal home page", None, None)
 		),
