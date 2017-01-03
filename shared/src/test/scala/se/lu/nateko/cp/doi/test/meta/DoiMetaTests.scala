@@ -25,4 +25,20 @@ class DoiMetaTests extends FunSpec{
 			assert(error.get.contains("Only the following name identifier schemes are supported"))
 		}
 	}
+
+	describe("URI validation support"){
+
+		def error(uri: String): Option[String] = new SelfValidating{
+			def error = validUri(uri)
+		}.error
+
+		it("accepts plain HTTP[S] URLS"){
+			assertResult(None)(error("http://bebe.com"))
+			assertResult(None)(error("https://bebe.com"))
+		}
+
+		it("rejects a dummy string"){
+			assert(error("dummy").isDefined)
+		}
+	}
 }

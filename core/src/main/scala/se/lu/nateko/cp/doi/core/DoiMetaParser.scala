@@ -19,15 +19,23 @@ object DoiMetaParser {
 		val creators = (xml \ "creators" \ "creator").map(parseCreator)
 		val publisher = (xml \ "publisher").text.trim
 		val publicationYearString = (xml \ "publicationYear").text.trim
-		//TODO Parse contributors
-		val contributors = Nil
+		val subjects = (xml \ "subjects" \ "subject").map(parseSubject)
+		val formats = (xml \ "formats" \ "format").map(_.text.trim)
+		val rights = (xml \ "rightsList" \ "rights").map(parseRights)
 
 		val metaTry = for(
 			doi <- parseDoi(xml);
+			contributors <- tryAll((xml \ "contributors" \ "contributor").map(parseContributor));
 			titles <- tryAll((xml \ "titles" \ "title").map(parseTitle));
 			publicationYear <- Try(publicationYearString.toInt);
-			resourceType <- parseResourceType(xml)
-		) yield DoiMeta(doi, creators, contributors, titles, publisher, publicationYear, resourceType)
+			resourceType <- parseResourceType(xml);
+			dates <- tryAll((xml \ "dates" \ "date").map(parseDate));
+			version <- parseVersion(xml);
+			descriptions <- tryAll((xml \ "descriptions" \ "description").map(parseDescription))
+		) yield DoiMeta(
+			doi, creators, titles, publisher, publicationYear, resourceType, subjects,
+			contributors, dates, formats, version, rights, descriptions
+		)
 
 		metaTry.flatMap(validate)
 	}
@@ -47,15 +55,26 @@ object DoiMetaParser {
 	def parseResourceType(xml: Node): Try[ResourceType] = {
 		val resTyp = xml \ "resourceType"
 		val resTypGen = resTyp \@ "resourceTypeGeneral"
-		
+
 		inEnum(ResourceTypeGeneral, resTypGen).map(ResourceType(resTyp.text.trim, _))
 	}
 
-	private def parseCreator(xml: Node): Creator = {
-		val name = parseName(xml, "creatorName")
-		val affiliations = (xml \ "affiliation").map(_.text.trim)
+	private def parseCreator(xml: Node): Creator = parsePerson(xml, "creator", Creator)
+	private def parseContributor(xml: Node): Try[Contributor] = {
+		val contrTypeText = xml \@ "contributorType"
+
+		inEnum(ContributorType, contrTypeText).map{contrType =>
+			parsePerson(xml, "contributor", Contributor.apply(_, _, _, contrType))
+		}
+	}
+
+	private type PersonConstructor[T <: Person] = (Name, Seq[NameIdentifier], Seq[String]) => T
+
+	private def parsePerson[T <: Person](xml: Node, kind: String, cons:  PersonConstructor[T]): T = {
+		val name = parseName(xml, kind + "Name")
 		val nameIds = (xml \ "nameIdentifier").map(parseNameId)
-		Creator(name, nameIds, affiliations)
+		val affiliations = (xml \ "affiliation").map(_.text.trim)
+		cons(name, nameIds, affiliations)
 	}
 
 	private def parseName(xml: Node, genericTag: String): Name = {
@@ -77,7 +96,7 @@ object DoiMetaParser {
 
 	private def parseTitle(xml: Node): Try[Title] = {
 		val titleTxt = xml.text.trim
-		val lang = xml.attribute(XML.namespace, "lang").map(_.text)
+		val lang = parseLang(xml)
 		val titleTypeOpt = xml.attribute("titleType").map(tType => inEnum(TitleType, tType.text))
 
 		titleTypeOpt match {
@@ -86,6 +105,56 @@ object DoiMetaParser {
 			case Some(Failure(exc)) => Failure(exc)
 		}
 	}
+
+	private def parseSubject(xml: Node): Subject = {
+		val subject = xml.text.trim
+		val lang = parseLang(xml)
+		val scheme = parseSubjectScheme(xml)
+		val valueUri = xml.attribute("valueURI").map(_.text)
+		Subject(xml.text.trim, lang, scheme, valueUri)
+	}
+
+	private def parseSubjectScheme(xml: Node): Option[SubjectScheme] = {
+		val schemeOpt = xml.attribute("subjectScheme").map(_.text)
+		val schemeUri = xml.attribute("schemeURI").map(_.text)
+		schemeOpt.orElse(schemeUri).map(scheme =>
+			SubjectScheme(scheme, schemeUri)
+		)
+	}
+
+	private def parseDate(xml: Node): Try[Date] = {
+		val dateTypeText = xml \@ "dateType"
+
+		inEnum(DateType, dateTypeText).map(Date(xml.text.trim, _))
+	}
+
+	private[this] val versionRegex = """^(\d{1,2})\.(\d{1,2})""".r
+	private def parseVersion(xml: Node): Try[Option[Version]] = {
+		val versTag = xml \ "version"
+		if(versTag.isEmpty) Success(None)
+		else {
+			val versText = versTag.text.trim
+			versText match {
+				case versionRegex(major, minor) => Success(Some(Version(major.toInt, minor.toInt)))
+				case _ => fail(s"Unsupported version format: '$versText', use 'N[N].N[N]'")
+			}
+		}
+	}
+
+	private def parseRights(xml: Node) =
+		Rights(xml.text.trim, xml.attribute("rightsURI").map(_.text))
+
+
+	private def parseDescription(xml: Node): Try[Description] = {
+		val lang = parseLang(xml)
+		val descrTypeText = xml \@ "descriptionType"
+		inEnum(DescriptionType, descrTypeText).map(descrType =>
+			Description(xml.text.trim, descrType, lang)
+		)
+	}
+
+	private def parseLang(xml: Node): Option[String] =
+		xml.attribute(XML.namespace, "lang").map(_.text)
 
 	private def fail[T](msg: String): Try[T] = Failure(new Exception(msg) with NoStackTrace)
 

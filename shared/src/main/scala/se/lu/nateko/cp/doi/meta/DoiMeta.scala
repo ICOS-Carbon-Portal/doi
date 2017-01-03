@@ -16,8 +16,16 @@ trait SelfValidating{
 	protected def nonEmpty(s: String)(msg: String): Option[String] =
 		if(s == null || s.length == 0) Some(msg) else None
 
+	protected def eachNonEmpty(ss: Seq[String])(msg: String): Option[String] =
+		joinErrors(ss.map(s => nonEmpty(s)(msg)): _*)
+
 	protected def nonEmpty(items: Seq[SelfValidating])(msg: String): Option[String] =
 		if(items.isEmpty) Some(msg) else allGood(items)
+
+	//TODO Improve this naive URI syntax validation
+	private val uriRegex = """^https?://.+$""".r
+	protected def validUri(uri: String): Option[String] =
+		if(uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
 }
 
@@ -42,6 +50,7 @@ case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends Self
 	def error = joinErrors(
 		nonEmpty(id)("Name identifier must not be empty"),
 		nonNull(scheme)("Name Identifier scheme must be provided"),
+		scheme.error,
 		scheme match {
 			case Orcid =>
 				if(id.matches("""^(\d{4}\-?){3}\d{3}[0-9X]$""")) None
@@ -59,11 +68,21 @@ case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends Self
 	)
 }
 
-case class NameIdentifierScheme(name: String, uri: Option[String])
+object NameIdentifier{
+	def orcid(id: String) = NameIdentifier(id, NameIdentifierScheme.Orcid)
+	def isni(id: String) = NameIdentifier(id, NameIdentifierScheme.Isni)
+}
+
+case class NameIdentifierScheme(name: String, uri: Option[String]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(name)("Name identifier scheme must have a name"),
+		uri.flatMap(validUri)
+	)
+}
 
 object NameIdentifierScheme{
-	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org"))
-	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org"))
+	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
+	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
 	val supported = Seq(Orcid, Isni).map(_.name)
 }
 
@@ -75,7 +94,7 @@ sealed trait Person extends SelfValidating{
 	def error = joinErrors(
 		name.error,
 		allGood(nameIds),
-		joinErrors(affiliations.map(aff => nonEmpty(aff)("Affiliation is not required but must not be empty if provided")): _*)
+		eachNonEmpty(affiliations)("Affiliation is not required but must not be empty if provided")
 	)
 }
 
@@ -109,9 +128,14 @@ case class ResourceType(resourceType: String, resourceTypeGeneral: ResourceTypeG
 	)
 }
 
-case class SubjectScheme(subjectScheme: String, schemeUri: Option[String])
+case class SubjectScheme(subjectScheme: String, schemeUri: Option[String]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(subjectScheme)("Subject scheme must have a name"),
+		schemeUri.flatMap(validUri)
+	)
+}
 object SubjectScheme{
-	val Dewey = SubjectScheme("dewey", Some("http://dewey.info"))
+	val Dewey = SubjectScheme("dewey", Some("http://dewey.info/"))
 }
 
 case class Subject(
@@ -122,9 +146,46 @@ case class Subject(
 ) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(subject)("Subject must not be empty"),
-		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided"))
-		//TODO Add valueUri validation
+		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided")),
+		subjectScheme.flatMap(_.error),
+		valueUri.flatMap(validUri)
 	)
 }
 
-case class Date(date: String, dateType: DateType.Value)
+case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
+	private[this] val dateRegex = """\d{4}-\d\d-\d\d""".r
+
+	def error = joinErrors(
+		nonEmpty(date)("Date must not be empty if specified"),
+		nonNull(dateType)("Date type must be specified for every date"),
+		if(dateRegex.findFirstIn(date).isDefined) None else Some(s"Wrong date '$date', use format YYYY-MM-DD")
+	)
+}
+
+case class Version(major: Int, minor: Int) extends SelfValidating{
+
+	private def versionCorrect(v: Int, msg: String): Option[String] =
+		if(v >= 0 && v < 100) None else Some(msg + " version must be between 0 and 99")
+
+	def error = joinErrors(
+		versionCorrect(major, "Major"),
+		versionCorrect(minor, "Minor")
+	)
+
+	override def toString = major + "." + minor
+}
+
+case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(rights)("License name must be provided"),
+		rightsUri.flatMap(validUri)
+	)
+}
+
+case class Description(description: String, descriptionType: DescriptionType.Value, lang: Option[String]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(description)("Description must not be empty (if supplied)"),
+		lang.flatMap(l => nonEmpty(l)("Description language is not required but must not be empty if provided")),
+		nonNull(descriptionType)("Description type must be specified")
+	)
+}
