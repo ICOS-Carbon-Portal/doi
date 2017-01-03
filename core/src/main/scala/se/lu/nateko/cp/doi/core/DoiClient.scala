@@ -6,6 +6,8 @@ import scala.concurrent.ExecutionContext
 import scala.io.Source
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
+import scala.xml.XML
+import scala.util.Try
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
@@ -13,8 +15,8 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	val metaBase: URL = new URL(config.endpoint, "metadata")
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
-	def doiUrl(doi: Doi) = new URL(doiBase, doi.toString)
-	def metaUrl(doi: Doi) = new URL(metaBase, doi.toString)
+	def doiUrl(doi: Doi) = new URL(doiBase + "/" + doi.toString)
+	def metaUrl(doi: Doi) = new URL(metaBase + "/" + doi.toString)
 
 	def listDois: Future[Seq[String]] = {
 
@@ -31,9 +33,15 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		postMetadata(meta).flatMap(_ => setUrl(meta.id, targetUrl))
 	}
 
-	def getMetadata(doi: Doi): Future[DoiMeta] = ???
+	def getMetadata(doi: Doi): Future[DoiMeta] = http.getXml(metaUrl(doi)).flatMap(response =>
+		analyzeResponse{
+			case 200 =>
+				val metaXmlTry = Try(XML.loadString(response.body))
+				Future.fromTry(metaXmlTry.flatMap(DoiMetaParser.parse))
+		}(response)
+	)
 
-	private def setUrl(doi: Doi, targetUrl: URL): Future[Unit] = {
+	def setUrl(doi: Doi, targetUrl: URL): Future[Unit] = {
 		val payload = s"doi=$doi\nurl=$targetUrl"
 
 		http.postPayload(doiBase, payload, "text/plain;charset=UTF-8").flatMap(analyzeResponse{
@@ -41,7 +49,7 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		})
 	}
 
-	private def postMetadata(meta: DoiMeta): Future[Unit] = {
+	def postMetadata(meta: DoiMeta): Future[Unit] = {
 		val xml = views.xml.doi.DoiMeta(meta)
 
 		http.postPayload(metaBase, xml.body, "application/xml;charset=UTF-8").flatMap(analyzeResponse{

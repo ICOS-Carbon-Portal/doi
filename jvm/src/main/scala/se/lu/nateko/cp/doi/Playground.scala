@@ -16,8 +16,9 @@ object Playground {
 	val http = new PlainJavaDoiHttp(config.symbol, config.password)
 	val client = new DoiClient(config, http)
 
+	val testDoi = client.doi("carbonportal")
 	val example = DoiMeta(
-		id = client.doi("carbonportal"),
+		id = testDoi,
 		creators = Seq(
 			Creator(
 				name = GenericName("ICOS CP"),
@@ -35,4 +36,5 @@ object Playground {
 	)
 
 	def testCreate = client.setDoi(example, new URL("https://www.icos-cp.eu/"))
+	def testMeta = client.getMetadata(testDoi)
 }

@@ -11,6 +11,7 @@ trait DoiHttp {
 	protected val password: String
 
 	def getText(url: URL): Future[DoiResponse]
+	def getXml(url: URL): Future[DoiResponse]
 
 	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse]
 }

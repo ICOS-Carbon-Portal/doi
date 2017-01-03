@@ -14,10 +14,13 @@ class PlainJavaDoiHttp(
 	protected val password: String
 )(implicit ctxt: ExecutionContext) extends DoiHttp{
 
-	def getText(url: URL): Future[DoiResponse] = Future{
+	def getText(url: URL): Future[DoiResponse] = getContent(url, "text/plain;charset=UTF-8")
+	def getXml(url: URL): Future[DoiResponse] = getContent(url, "application/xml")
+
+	private def getContent(url: URL, accept: String): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
-		conn.setRequestProperty("Accept", "text/plain;charset=UTF-8")
+		conn.setRequestProperty("Accept", accept)
 		try{
 			toDoiResponse(conn, conn.getInputStream())
 		} catch{
