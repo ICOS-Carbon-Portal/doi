@@ -42,7 +42,7 @@ object DoiMetaParser {
 
 	private val doiRegex = """^(10\.\d+)/(.+)$""".r
 
-	def parseDoi(xml: Node): Try[Doi] = {
+	private def parseDoi(xml: Node): Try[Doi] = {
 		val idNodes = xml \ "identifier"
 		val doiTxt: String = idNodes.text.trim
 
@@ -52,7 +52,7 @@ object DoiMetaParser {
 		}
 	}
 
-	def parseResourceType(xml: Node): Try[ResourceType] = {
+	private def parseResourceType(xml: Node): Try[ResourceType] = {
 		val resTyp = xml \ "resourceType"
 		val resTypGen = resTyp \@ "resourceTypeGeneral"
 
