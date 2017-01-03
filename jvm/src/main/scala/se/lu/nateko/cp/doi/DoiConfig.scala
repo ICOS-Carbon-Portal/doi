@@ -10,6 +10,7 @@ object DoiConfig {
 	def getAppConfig: Config = {
 		val default = ConfigFactory.load
 		val confFile = new java.io.File("application.conf").getAbsoluteFile
+		println("Looking for config in " + confFile)
 		if(!confFile.exists) default
 		else ConfigFactory.parseFile(confFile).withFallback(default)
 	}

@@ -28,7 +28,7 @@ case class DoiMeta(
 	descriptions: Seq[Description] = Nil
 ) extends SelfValidating{
 
-	def error = joinErrors(
+	def error: Option[String] = joinErrors(
 		id.error,
 		nonEmpty(creators)("At lease one creator is required"),
 		allGood(creators),

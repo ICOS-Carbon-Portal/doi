@@ -15,25 +15,25 @@ lazy val commonJvmSettings = Seq(
 	)
 ) ++ commonSettings
 
-lazy val shared = crossProject
+val common = crossProject
 	.crossType(CrossType.Pure)
-	.in(file("shared"))
+	.in(file("common"))
 	.settings(
-		name := "doi-shared",
+		name := "doi-common",
 		version := "0.1.0-SNAPSHOT",
 		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
 	)
 	.jsSettings(commonSettings: _*)
 	.jvmSettings(commonJvmSettings: _*)
-	.jsSettings(name := "doi-shared-js")
-	.jvmSettings(name := "doi-shared-jvm")
+	.jsSettings(name := "doi-common-js")
+	.jvmSettings(name := "doi-common-jvm")
 
-lazy val sharedJs = shared.js
-lazy val sharedJvm = shared.jvm
+lazy val commonJs = common.js
+lazy val commonJvm = common.jvm
 
 lazy val core = project
 	.in(file("core"))
-	.dependsOn(sharedJvm)
+	.dependsOn(commonJvm)
 	.settings(commonJvmSettings: _*)
 	.enablePlugins(SbtTwirl)
 	.settings(
@@ -51,7 +51,6 @@ lazy val core = project
 	)
 
 lazy val app = crossProject
-	.crossType(CrossType.Dummy)
 	.in(file("."))
 	.settings(
 		name := "doi",
@@ -73,6 +72,9 @@ lazy val app = crossProject
 			"com.typesafe.akka" %% "akka-http" % "10.0.0",
 			"se.lu.nateko.cp" %% "views-core" % "0.2-SNAPSHOT"
 		),
+		baseDirectory in reStart := {
+			baseDirectory.in(reStart).value.getParentFile
+		},
 		assemblyMergeStrategy.in(assembly) := {
 			case PathList(name) if(name.endsWith("-fastopt.js")) =>
 				MergeStrategy.discard
@@ -81,7 +83,7 @@ lazy val app = crossProject
 				originalStrategy(x)
 		}
 	)
-	.jsConfigure(_.dependsOn(sharedJs))
+	.jsConfigure(_.dependsOn(commonJs))
 	.jvmConfigure(_.dependsOn(core).enablePlugins(SbtTwirl))
 
 lazy val appJs = app.js

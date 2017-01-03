@@ -10,6 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import se.lu.nateko.cp.doi.core.PlainJavaDoiHttp
 import se.lu.nateko.cp.doi.core.DoiClient
+import se.lu.nateko.cp.doi.meta.ContributorType
 
 object Main{
 
@@ -25,7 +26,31 @@ object Main{
 		val http = new PlainJavaDoiHttp(config.symbol, config.password)
 		val client = new DoiClient(config, http)
 
+		import Pickling._
+
 		val route = {
+			pathPrefix("api"){
+				get{
+					path("list"){
+						onSuccess(client.listDois) { dois =>
+							complete{
+								upickle.default.write(dois)
+							}
+						}
+					} ~
+					path("metadata" / Segment / Segment){(prefix, suffix) =>
+						val doi = Doi(prefix, suffix)
+						println(doi.prefix + " // " + doi.suffix)
+						println(config)
+						doi.error match{
+							case None => onSuccess(client.getMetadata(doi)){meta =>
+								complete(upickle.default.write(meta))
+							}
+							case Some(err) => complete((StatusCodes.BadRequest, err))
+						}
+					}
+				}
+			} ~
 			get{
 				pathSingleSlash{
 					complete(views.html.doi.DoiPage())
@@ -34,17 +59,9 @@ object Main{
 					complete(views.html.doi.DoiPage(true))
 				} ~
 				getFromResourceDirectory("")
-			} ~
-			get{
-				path("api" / "list"){
-					onSuccess(client.listDois) { dois =>
-						complete{
-							upickle.default.write(dois)
-						}
-					}
-				}
 			}
 		}
+
 		Http().bindAndHandle(route, "127.0.0.1", port = 8099)
 			.onSuccess{
 				case binding =>
