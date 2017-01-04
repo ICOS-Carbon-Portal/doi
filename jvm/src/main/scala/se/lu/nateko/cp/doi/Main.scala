@@ -23,10 +23,20 @@ object Main{
 		implicit val materializer = ActorMaterializer()
 
 		val config = DoiConfig.getClientConfig
+		//TODO Use a dispatcher appropriate for blocking io operations for PlainJavaDoiHttp
 		val http = new PlainJavaDoiHttp(config.symbol, config.password)
 		val client = new DoiClient(config, http)
 
 		import Pickling._
+
+		val DoiPath = (Segment / Segment).tflatMap{
+			case (prefix, suffix) =>
+				val doi = Doi(prefix, suffix)
+				doi.error match{
+					case None => Some(Tuple1(doi))
+					case Some(_) => None
+				}
+		}
 
 		val route = {
 			pathPrefix("api"){
@@ -38,16 +48,21 @@ object Main{
 							}
 						}
 					} ~
-					path("metadata" / Segment / Segment){(prefix, suffix) =>
-						val doi = Doi(prefix, suffix)
-						println(doi.prefix + " // " + doi.suffix)
-						println(config)
-						doi.error match{
-							case None => onSuccess(client.getMetadata(doi)){meta =>
+					pathPrefix(DoiPath){doi =>
+						path("target"){
+							onSuccess(client.getUrl(doi)){url =>
+								complete(upickle.default.write(url.toString))
+							}
+						} ~
+						path("metadata"){
+							onSuccess(client.getMetadata(doi)){meta =>
 								complete(upickle.default.write(meta))
 							}
-							case Some(err) => complete((StatusCodes.BadRequest, err))
-						}
+						} ~
+						complete(StatusCodes.NotFound)
+					} ~
+					pathPrefix(Segment / Segment){(prefix, suffix) =>
+						complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
 					}
 				}
 			} ~

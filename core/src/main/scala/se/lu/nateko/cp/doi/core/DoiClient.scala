@@ -18,12 +18,13 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	def doiUrl(doi: Doi) = new URL(doiBase + "/" + doi.toString)
 	def metaUrl(doi: Doi) = new URL(metaBase + "/" + doi.toString)
 
-	def listDois: Future[Seq[String]] = {
+	def listDois: Future[Seq[Doi]] = {
 
 		http.getText(doiBase).flatMap(response => analyzeResponse{
-			case 200 => Future.successful(
-				Source.fromString(response.body).getLines.toSeq
-			)
+			case 200 =>
+				val doiLines = Source.fromString(response.body).getLines
+				val doiTries = doiLines.map(DoiMetaParser.parseDoi)
+				Future.fromTry(DoiMetaParser.tryAll(doiTries))
 			case 204 =>
 				Future.successful(Seq.empty)
 		}(response))
@@ -38,6 +39,13 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 			case 200 =>
 				val metaXmlTry = Try(XML.loadString(response.body))
 				Future.fromTry(metaXmlTry.flatMap(DoiMetaParser.parse))
+		}(response)
+	)
+
+	def getUrl(doi: Doi): Future[URL] = http.getText(doiUrl(doi)).flatMap(response =>
+		analyzeResponse{
+			case 200 =>
+				Future.fromTry(Try(new URL(response.body)))
 		}(response)
 	)
 

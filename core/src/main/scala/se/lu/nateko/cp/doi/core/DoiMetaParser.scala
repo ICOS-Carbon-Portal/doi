@@ -42,15 +42,12 @@ object DoiMetaParser {
 
 	private val doiRegex = """^(10\.\d+)/(.+)$""".r
 
-	private def parseDoi(xml: Node): Try[Doi] = {
-		val idNodes = xml \ "identifier"
-		val doiTxt: String = idNodes.text.trim
-
-		doiTxt match{
-			case doiRegex(prefix, suffix) => Success(Doi(prefix, suffix))
-			case _ => fail("Wrong DOI ID syntax: " + doiTxt)
-		}
+	def parseDoi(doiTxt: String): Try[Doi] = doiTxt match{
+		case doiRegex(prefix, suffix) => Success(Doi(prefix, suffix))
+		case _ => fail("Wrong DOI ID syntax: " + doiTxt)
 	}
+
+	private def parseDoi(xml: Node): Try[Doi] = parseDoi((xml \ "identifier").text.trim)
 
 	private def parseResourceType(xml: Node): Try[ResourceType] = {
 		val resTyp = xml \ "resourceType"
@@ -163,9 +160,10 @@ object DoiMetaParser {
 		case Some(msg) => fail(msg)
 	}
 
-	private def tryAll[T](all: Seq[Try[T]]): Try[Seq[T]] = {
+	def tryAll[T](all: Seq[Try[T]]): Try[Seq[T]] = tryAll(all.iterator)
+
+	def tryAll[T](iter: Iterator[Try[T]]): Try[Seq[T]] = {
 		var error: Throwable = null
-		val iter = all.iterator
 		val buff = Buffer.empty[T]
 		while(iter.hasNext && error == null){
 			iter.next() match{

@@ -35,6 +35,26 @@ object Playground {
 		resourceType = ResourceType("website", ResourceTypeGeneral.Service)
 	)
 
+	val testDoi2 = client.doi("icosdocs")
+	val example2 = DoiMeta(
+		id = testDoi2,
+		creators = Seq(
+			Creator(
+				name = PersonalName("Oleg", "Mirzov"),
+				nameIds = Seq(NameIdentifier.orcid("0000-0002-4742-958X")),
+				affiliations = Seq("Lund University")
+			)
+		),
+		contributors = Nil,
+		titles = Seq(
+			Title("ICOS Alfresco document handling system", None, None)
+		),
+		publisher = "ICOS Carbon Portal",
+		publicationYear = 2017,
+		resourceType = ResourceType("website", ResourceTypeGeneral.Service)
+	)
+
 	def testCreate = client.setDoi(example, new URL("https://www.icos-cp.eu/"))
+	def testCreate2 = client.setDoi(example2, new URL("https://docs.icos-cp.eu/"))
 	def testMeta = client.getMetadata(testDoi)
 }
