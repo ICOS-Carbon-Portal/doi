@@ -10,8 +10,9 @@ trait DoiHttp {
 	protected val username: String
 	protected val password: String
 
-	def getText(url: URL): Future[DoiResponse]
-	def getXml(url: URL): Future[DoiResponse]
+	def getText(url: URL): Future[DoiResponse] = getContent(url, "text/plain;charset=UTF-8")
+	def getXml(url: URL): Future[DoiResponse] = getContent(url, "application/xml")
 
+	protected def getContent(url: URL, accept: String): Future[DoiResponse]
 	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse]
 }

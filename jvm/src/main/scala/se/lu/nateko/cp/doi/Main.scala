@@ -8,7 +8,6 @@ import akka.stream.ActorMaterializer
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
-import se.lu.nateko.cp.doi.core.PlainJavaDoiHttp
 import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.meta.ContributorType
 
@@ -23,8 +22,7 @@ object Main{
 		implicit val materializer = ActorMaterializer()
 
 		val config = DoiConfig.getClientConfig
-		//TODO Use a dispatcher appropriate for blocking io operations for PlainJavaDoiHttp
-		val http = new PlainJavaDoiHttp(config.symbol, config.password)
+		val http = new AkkaDoiHttp(config.symbol, config.password)
 		val client = new DoiClient(config, http)
 
 		import Pickling._

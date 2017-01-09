@@ -3,7 +3,6 @@ package se.lu.nateko.cp.doi
 import java.net.URL
 
 import akka.actor.ActorSystem
-import se.lu.nateko.cp.doi.core.PlainJavaDoiHttp
 import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.meta._
 
@@ -13,7 +12,7 @@ object Playground {
 	import system.dispatcher
 
 	val config = DoiConfig.getClientConfig
-	val http = new PlainJavaDoiHttp(config.symbol, config.password)
+	val http = new AkkaDoiHttp(config.symbol, config.password)
 	val client = new DoiClient(config, http)
 
 	val testDoi = client.doi("carbonportal")
