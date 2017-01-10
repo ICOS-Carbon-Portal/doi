@@ -1,10 +1,11 @@
-package se.lu.nateko.cp.doi
+package se.lu.nateko.cp.doi.gui
 
 import scala.concurrent.Future
 import org.scalajs.dom.ext.Ajax
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
-
-import Pickling._
+import se.lu.nateko.cp.doi.Pickling._
+import se.lu.nateko.cp.doi.Doi
+import se.lu.nateko.cp.doi.DoiMeta
 
 object Backend {
 
@@ -20,4 +21,9 @@ object Backend {
 		.get(s"/api/$doi/metadata")
 		.map(req => upickle.default.read[DoiMeta](req.responseText))
 
+	def getInfo(doi: Doi): Future[DoiInfo] = Backend.getMeta(doi)
+		.zip(Backend.getTarget(doi))
+		.map{
+			case (meta, target) => DoiInfo(meta, target)
+		}
 }

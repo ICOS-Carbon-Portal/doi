@@ -43,7 +43,7 @@ object DoiMetaParser {
 	private val doiRegex = """^(10\.\d+)/(.+)$""".r
 
 	def parseDoi(doiTxt: String): Try[Doi] = doiTxt match{
-		case doiRegex(prefix, suffix) => Success(Doi(prefix, suffix))
+		case doiRegex(prefix, suffix) => Success(Doi(prefix, suffix.toUpperCase))
 		case _ => fail("Wrong DOI ID syntax: " + doiTxt)
 	}
 
