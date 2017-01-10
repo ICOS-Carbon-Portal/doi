@@ -1,14 +1,14 @@
 package se.lu.nateko.cp.doi
 
 import scala.scalajs.js.JSApp
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.scalajs.dom
+import org.scalajs.dom.Event
 import dom.document
-import org.scalajs.dom.raw.Event
 import org.scalajs.dom.ext.Ajax
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta.Title
 import se.lu.nateko.cp.doi.meta.TitleType
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
@@ -16,31 +16,33 @@ import FrontendViews._
 
 object DoiApp extends JSApp {
 
-	private[this] val doiListId = "doilist"
-	private var currentlySelected: Doi = null
+	case class DoiInfo(meta: DoiMeta, target: Option[String])
+	case class SelectedDoi(doi: Doi, info: Option[DoiInfo] = None)
+
+	private var selected: Option[SelectedDoi] = None
 
 	def main(): Unit = {
 		val mainDiv = document.getElementById("main")
-		mainDiv.parentNode.replaceChild(mainLayout.render, mainDiv)
+		mainDiv.parentNode.replaceChild(mainLayout(refreshDoiList).render, mainDiv)
 
 		refreshDoiList(null)
 	}
 
-	def mainLayout = div(id := "main")(
-		div(cls := "page-header")(
-			h1("Carbon Portal DOI minting service")
-		),
-		basicPanel(
-			button(cls := "btn btn-default", onclick := refreshDoiList)("Refresh DOI list")
-		),
-		ul(cls := "list-unstyled", id := doiListId)
-	)
+	def isSelected(doi: Doi): Boolean = selected.exists(_.doi == doi)
 
-	def getDoiList: Future[Seq[Doi]] = Ajax
-		.get("/api/list")
-		.map(req => upickle.default.read[Seq[Doi]](req.responseText))
+	def getInfo(doi: Doi): Unit = Backend.getMeta(doi)
+		.zip(Backend.getTarget(doi))
+		.map{
+			case (meta, target) => if(isSelected(doi)){
+				val info = DoiInfo(meta, target)
+				selected = Some(SelectedDoi(doi, Some(info)))
+				rerenderDoiElem(doi)
+			}
+		}.failed.foreach{err =>
+			dom.console.log(err.getMessage)
+		}
 
-	val refreshDoiList: dom.Event => Unit = e => getDoiList
+	val refreshDoiList: Event => Unit = e => Backend.getDoiList
 		.map(repopulateDoiList)
 		.failed.foreach{err =>
 			dom.console.log(err.getMessage)
@@ -55,24 +57,29 @@ object DoiApp extends JSApp {
 		}
 	}
 
-	def doiElem(doi: Doi) = div(
-		cls := "panel panel-default",
-		id := doi.toString
-	)(
-		div(cls := "panel-heading", onclick := selectDoi(doi))(
-			doiListIcon(doi),
+	def doiElem(doi: Doi) = {
+		val heading = div(cls := "panel-heading", onclick := selectDoi(doi))(
+			doiListIcon(isSelected(doi)),
 			span(" " + doi.toString)
 		)
-	)
 
-	def selectDoi(doi: Doi): dom.Event => Unit = e => {
-		if(doi == currentlySelected) currentlySelected = null
-		else if(currentlySelected == null) currentlySelected = doi
-		else{
-			val oldSelected = currentlySelected
-			currentlySelected = doi
-			rerenderDoiElem(oldSelected)
+		val body = selected.filter(_.doi == doi).flatMap(_.info).map(doiInfoPanelBody).toList
+		
+		div(
+			cls := "panel panel-default",
+			id := doi.toString
+		)(
+			heading +: body
+		)
+	}
+
+	def selectDoi(doi: Doi): Event => Unit = e => {
+		val oldSelected = selected
+		selected = if(isSelected(doi)) None else {
+			getInfo(doi)
+			Some(SelectedDoi(doi))
 		}
+		oldSelected.map(_.doi).filter(_ != doi).foreach(rerenderDoiElem)
 		rerenderDoiElem(doi)
 	}
 
@@ -82,13 +89,6 @@ object DoiApp extends JSApp {
 		getListElem.replaceChild(newElem, oldElem)
 	}
 
-	def doiListIcon(doi: Doi) = {
-		val iconClass = "glyphicon glyphicon-triangle-" +
-			(if(doi == currentlySelected) "bottom" else "right")
-		span(cls := iconClass)
-	}
-
 	def getListElem = document.getElementById(doiListId)
 }
-
 

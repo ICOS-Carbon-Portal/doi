@@ -49,7 +49,7 @@ object Main{
 					pathPrefix(DoiPath){doi =>
 						path("target"){
 							onSuccess(client.getUrl(doi)){url =>
-								complete(upickle.default.write(url.toString))
+								complete(upickle.default.write(url.map(_.toString)))
 							}
 						} ~
 						path("metadata"){

@@ -22,10 +22,14 @@ object Pickling{
 	implicit val contrTypeReader = enumReader(ContributorType)
 
 	implicit val dateTypeWriter = enumWriter(DateType)
+	implicit val dateTypeReader = enumReader(DateType)
 
 	implicit val descriptionTypeWriter = enumWriter(DescriptionType)
+	implicit val descriptionTypeReader = enumReader(DescriptionType)
 
 	implicit val resourceTypeGeneralWriter = enumWriter(ResourceTypeGeneral)
+	implicit val resourceTypeGeneralReader = enumReader(ResourceTypeGeneral)
 
 	implicit val titleTypeWriter = enumWriter(TitleType)
+	implicit val titleTypeReader = enumReader(TitleType)
 }

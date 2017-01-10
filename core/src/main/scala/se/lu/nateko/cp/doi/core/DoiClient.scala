@@ -42,10 +42,12 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		}(response)
 	)
 
-	def getUrl(doi: Doi): Future[URL] = http.getText(doiUrl(doi)).flatMap(response =>
+	def getUrl(doi: Doi): Future[Option[URL]] = http.getText(doiUrl(doi)).flatMap(response =>
 		analyzeResponse{
 			case 200 =>
-				Future.fromTry(Try(new URL(response.body)))
+				Future.fromTry(Try(Some(new URL(response.body))))
+			case 204 =>
+				Future.successful(None)
 		}(response)
 	)
 
