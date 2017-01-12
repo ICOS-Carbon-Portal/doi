@@ -10,6 +10,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.meta.ContributorType
+import java.net.URL
+import akka.http.scaladsl.server.ExceptionHandler
 
 object Main{
 
@@ -36,7 +38,12 @@ object Main{
 				}
 		}
 
-		val route = {
+		val exceptionHandler = ExceptionHandler{
+			case e: Exception =>
+				complete((StatusCodes.InternalServerError, e.getMessage))
+		}
+
+		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
 				get{
 					path("list"){
@@ -61,6 +68,17 @@ object Main{
 					} ~
 					pathPrefix(Segment / Segment){(prefix, suffix) =>
 						complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
+					}
+				} ~ post{
+					pathPrefix(DoiPath){doi =>
+						path("target"){
+							entity(as[String]){url =>
+								onSuccess(client.setUrl(doi, new URL(url))){
+									complete(StatusCodes.OK)
+								}
+							}
+						} ~
+						complete(StatusCodes.NotFound)
 					}
 				}
 			} ~

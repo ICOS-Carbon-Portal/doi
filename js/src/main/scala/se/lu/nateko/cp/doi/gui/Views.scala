@@ -1,34 +1,34 @@
 package se.lu.nateko.cp.doi.gui
 
+import org.scalajs.dom.console
 import org.scalajs.dom.document
 import org.scalajs.dom.Element
 import org.scalajs.dom.Event
-import org.scalajs.dom.html.Div
+import org.scalajs.dom.html
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
 
+import Views._
+
 class Views(dispatch: DoiAction => Unit) {
 
-	val doiListId = "doilist"
+	val listElem = ul(cls := "list-unstyled").render
 
-	val refreshDoiList: Event => Unit = e => dispatch(DoiListRefreshRequest)
-	def selectDoi(doi: Doi): Event => Unit = e => dispatch(SelectDoi(doi))
+	def mainLayout = {
 
-	def mainLayout = div(id := "main")(
-		div(cls := "page-header")(
-			h1("Carbon Portal DOI minting service")
-		),
-		basicPanel(
-			button(cls := "btn btn-default", onclick := refreshDoiList)("Refresh DOI list")
-		),
-		ul(cls := "list-unstyled", id := doiListId)
-	)
+		val refreshDoiList = (_: Event) => dispatch(DoiListRefreshRequest)
 
-	def basicPanel(body: TypedTag[Element]*): TypedTag[Div] =
-		div(cls := "panel panel-default")(
-			div(cls := "panel-body")(body)
+		div(id := "main")(
+			div(cls := "page-header")(
+				h1("Carbon Portal DOI minting service")
+			),
+			basicPanel(
+				button(cls := "btn btn-default", onclick := refreshDoiList)("Refresh DOI list")
+			),
+			listElem
 		)
+	}
 
 	def doiListIcon(selected: Boolean) = {
 		val iconClass = "glyphicon glyphicon-triangle-" +
@@ -36,23 +36,75 @@ class Views(dispatch: DoiAction => Unit) {
 		span(cls := iconClass)
 	}
 
-	def doiInfoPanelBody(info: DoiInfo) = {
-		val valOrPlaceholder = info.target match{
+
+	def targetUrlEditWidget(doi: Doi, target: Option[String]) = {
+
+		val urlValOrPlaceholder = target match{
 			case None => placeholder := "NOT MINTED"
-			case Some(target) => value := target
+			case Some(url) => value := url
 		}
 
+		val targetUrlInput = input(tpe := "text", cls := "form-control", urlValOrPlaceholder).render
+		val updateTargetButton = button(tpe := "button", disabled := true)("Update").render
+
+		def validateTargetUrl(): Unit = {
+			val candidateUrl = Option(targetUrlInput.value).getOrElse("")
+
+			val isValid = isValidTargetUrl(candidateUrl)
+			val canUpdate = isValid && !target.contains(candidateUrl)
+
+			updateTargetButton.disabled = !canUpdate
+			updateTargetButton.className = "btn btn-" + (if(canUpdate) "primary" else "default")
+			if(!isValid){
+				targetUrlInput.title = "Mush have format https://[<subdomain>.]icos-cp.eu/[<path>]"
+				targetUrlInput.style.backgroundColor = "#ffaaaa"
+			} else {
+				targetUrlInput.title = ""
+				targetUrlInput.style.backgroundColor = ""
+			}
+		}
+		validateTargetUrl()
+
+		targetUrlInput.onkeyup = (_: Event) => validateTargetUrl()
+
+		updateTargetButton.onclick = (_: Event) => {
+			val url = targetUrlInput.value
+			dispatch(TargetUrlUpdateRequest(doi, url))
+		}
+
+		val resetTarget = (_: Event) => {
+			targetUrlInput.value = target.getOrElse("")
+			validateTargetUrl()
+		}
+
+		div(cls := "input-group")(
+			span(cls := "input-group-addon")("Target URL"),
+			targetUrlInput,
+			div(cls := "input-group-btn")(
+				updateTargetButton,
+				button(cls := "btn btn-default", tpe := "button", onclick := resetTarget)("Reset")
+			)
+		)
+	}
+
+	def doiInfoPanelBody(info: DoiInfo) = {
 		div(cls := "panel-body")(
-			div(cls := "input-group")(
-				span(cls := "input-group-addon")("Target URL"),
-				input(tpe := "text", cls := "form-control", valOrPlaceholder)
+			basicPanel(
+				targetUrlEditWidget(info.meta.id, info.target)
 			),
-			basicPanel(textarea(info.meta.toString))
+			div(cls := "input-group")(
+				span(cls := "input-group-addon")("Publication year"),
+				input(tpe := "text", cls := "form-control", value := info.meta.publicationYear)
+			)
+			//basicPanel(textarea(info.meta.toString))
 		)
 	}
 
 	def doiElem(doi: Doi, selected: Option[SelectedDoi]) = {
-		val heading = div(cls := "panel-heading", onclick := selectDoi(doi))(
+
+		val selectDoi: Event => Unit = e => dispatch(SelectDoi(doi))
+
+		val heading = div(cls := "panel-heading", onclick := selectDoi)(
 			doiListIcon(selected.exists(_.doi == doi)),
 			span(" " + doi.toString)
 		)
@@ -67,7 +119,17 @@ class Views(dispatch: DoiAction => Unit) {
 		)
 	}
 
-	def getListElem = document.getElementById(doiListId)
 	def getDoiElem(doi: Doi) = Option(document.getElementById(doi.toString))
 
+}
+
+object Views{
+
+	def basicPanel(body: TypedTag[Element]*): TypedTag[html.Div] =
+		div(cls := "panel panel-default")(
+			div(cls := "panel-body")(body)
+		)
+
+	private val urlRegex = """^https://(\w+\.)?icos-cp\.eu/.*$""".r
+	def isValidTargetUrl(uri: String): Boolean = urlRegex.findFirstIn(uri).isDefined
 }

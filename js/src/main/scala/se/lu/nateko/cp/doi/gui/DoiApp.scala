@@ -19,7 +19,7 @@ object DoiApp extends JSApp {
 		val mainDiv = document.getElementById("main")
 		mainDiv.parentNode.replaceChild(views.mainLayout.render, mainDiv)
 
-		views.refreshDoiList(null)
+		store.dispatch(DoiListRefreshRequest)
 	}
 
 }

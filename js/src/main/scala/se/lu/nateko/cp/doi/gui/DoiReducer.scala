@@ -27,6 +27,16 @@ object DoiReducer {
 				state
 		}
 
-		case DoiListRefreshRequest | ReportError(_) => state
+		case TargetUrlUpdated(doi, url) => state.selected match{
+
+			case Some(SelectedDoi(`doi`, Some(info))) =>
+				val newInfo = Some(info.copy(target = Some(url)))
+				state.copy(selected = Some(SelectedDoi(doi, newInfo)))
+
+			case _ =>
+				state
+		}
+
+		case DoiListRefreshRequest | ReportError(_) | TargetUrlUpdateRequest(_, _) => state
 	}
 }

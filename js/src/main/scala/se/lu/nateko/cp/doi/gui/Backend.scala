@@ -6,6 +6,7 @@ import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import se.lu.nateko.cp.doi.Pickling._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
+import org.scalajs.dom.ext.AjaxException
 
 object Backend {
 
@@ -25,5 +26,16 @@ object Backend {
 		.zip(Backend.getTarget(doi))
 		.map{
 			case (meta, target) => DoiInfo(meta, target)
+		}
+
+	def updateUrl(doi: Doi, url: String) = Ajax
+		.post(s"/api/$doi/target", url)
+		.recoverWith{
+			case AjaxException(xhr) =>
+				val msg = if(xhr.responseText.isEmpty)
+					s"Got HTTP status ${xhr.status} when trying to update the target URL"
+				else xhr.responseText
+
+				Future.failed(new Exception(msg))
 		}
 }

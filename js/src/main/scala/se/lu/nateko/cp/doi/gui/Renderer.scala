@@ -5,12 +5,23 @@ import org.scalajs.dom
 import DoiRedux._
 import scala.concurrent.ExecutionContext
 import se.lu.nateko.cp.doi.Doi
+import scala.util.Success
+import scala.util.Failure
 
 class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extends StateListener {
 
 	val views = new Views(dispatch)
 
-	def notify(action: Action, state: State, oldState: State): Unit = action match {
+	def notify(action: Action, state: State, oldState: State): Unit = {
+
+		def rerenderDoi(doi: Doi): Unit = {
+			for(oldElem <- views.getDoiElem(doi)){
+				val newElem = views.doiElem(doi, state.selected).render
+				views.listElem.replaceChild(newElem, oldElem)
+			}
+		}
+
+		action match {
 
 		case DoiListRefreshRequest =>
 			val listFut = Backend.getDoiList
@@ -18,7 +29,7 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 			listFut.failed.foreach(reportError)
 
 		case FreshDoiList(dois) => if(dois != oldState.dois){
-			val listElem = views.getListElem
+			val listElem = views.listElem
 			listElem.innerHTML = ""
 
 			for(doi <- dois) {
@@ -27,31 +38,33 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 		}
 
 		case SelectDoi(doi) =>
-			val infoFut = Backend.getInfo(doi)
-			infoFut.foreach{info => dispatch(GotDoiInfo(info))}
-			infoFut.failed.foreach(reportError)
+			if(state.isSelected(doi)){
+				Backend.getInfo(doi).onComplete{
+					case Success(info) =>
+						dispatch(GotDoiInfo(info))
+						oldState.selected.map(_.doi).foreach(rerenderDoi)
+					case Failure(err) => reportError(err)
+				}
+			}
+			rerenderDoi(doi)
 
-			val doisToUpdate =
-				state.selected.map(_.doi).toList ++
-				oldState.selected.map(_.doi).toList
+		case GotDoiInfo(info) => rerenderDoi(info.meta.id)
 
-			doisToUpdate.foreach(rerenderDoiElem(_, state.selected))
+		case TargetUrlUpdateRequest(doi, url) =>
+			Backend.updateUrl(doi, url).onComplete{
+				case Success(_) =>
+					dispatch(TargetUrlUpdated(doi, url))
+				case Failure(err) =>
+					reportError(err)
+			}
 
-		case GotDoiInfo(info) =>
-			rerenderDoiElem(info.meta.id, state.selected)
+		case TargetUrlUpdated(doi, url) => rerenderDoi(doi)
 
 		case ReportError(msg) =>
 			dom.console.log(msg)
 	}
+	}
 
 	private def reportError(error: Throwable): Unit = dispatch(ReportError(error.getMessage))
-
-
-	def rerenderDoiElem(doi: Doi, selected: Option[SelectedDoi]): Unit = {
-		for(oldElem <- views.getDoiElem(doi)){
-			val newElem = views.doiElem(doi, selected).render
-			views.getListElem.replaceChild(newElem, oldElem)
-		}
-	}
 
 }
