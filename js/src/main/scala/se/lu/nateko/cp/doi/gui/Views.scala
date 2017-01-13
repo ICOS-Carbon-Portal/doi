@@ -9,7 +9,8 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
 
-import Views._
+import views._
+import se.lu.nateko.cp.doi.meta._
 
 class Views(dispatch: DoiAction => Unit) {
 
@@ -23,7 +24,7 @@ class Views(dispatch: DoiAction => Unit) {
 			div(cls := "page-header")(
 				h1("Carbon Portal DOI minting service")
 			),
-			basicPanel(
+			Bootstrap.basicPanel(
 				button(cls := "btn btn-default", onclick := refreshDoiList)("Refresh DOI list")
 			),
 			listElem
@@ -36,67 +37,21 @@ class Views(dispatch: DoiAction => Unit) {
 		span(cls := iconClass)
 	}
 
-
-	def targetUrlEditWidget(doi: Doi, target: Option[String]) = {
-
-		val urlValOrPlaceholder = target match{
-			case None => placeholder := "NOT MINTED"
-			case Some(url) => value := url
-		}
-
-		val targetUrlInput = input(tpe := "text", cls := "form-control", urlValOrPlaceholder).render
-		val updateTargetButton = button(tpe := "button", disabled := true)("Update").render
-
-		def validateTargetUrl(): Unit = {
-			val candidateUrl = Option(targetUrlInput.value).getOrElse("")
-
-			val isValid = isValidTargetUrl(candidateUrl)
-			val canUpdate = isValid && !target.contains(candidateUrl)
-
-			updateTargetButton.disabled = !canUpdate
-			updateTargetButton.className = "btn btn-" + (if(canUpdate) "primary" else "default")
-			if(!isValid){
-				targetUrlInput.title = "Mush have format https://[<subdomain>.]icos-cp.eu/[<path>]"
-				targetUrlInput.style.backgroundColor = "#ffaaaa"
-			} else {
-				targetUrlInput.title = ""
-				targetUrlInput.style.backgroundColor = ""
-			}
-		}
-		validateTargetUrl()
-
-		targetUrlInput.onkeyup = (_: Event) => validateTargetUrl()
-
-		updateTargetButton.onclick = (_: Event) => {
-			val url = targetUrlInput.value
-			dispatch(TargetUrlUpdateRequest(doi, url))
-		}
-
-		val resetTarget = (_: Event) => {
-			targetUrlInput.value = target.getOrElse("")
-			validateTargetUrl()
-		}
-
-		div(cls := "input-group")(
-			span(cls := "input-group-addon")("Target URL"),
-			targetUrlInput,
-			div(cls := "input-group-btn")(
-				updateTargetButton,
-				button(cls := "btn btn-default", tpe := "button", onclick := resetTarget)("Reset")
-			)
-		)
-	}
-
 	def doiInfoPanelBody(info: DoiInfo) = {
+		val doi = info.meta.id
+		val doiUrl = "http://doi.org/" + doi
+
 		div(cls := "panel-body")(
-			basicPanel(
-				targetUrlEditWidget(info.meta.id, info.target)
+			Bootstrap.defaultPanel("DOI Metadata")(
+				new TitlesEditWidget(info.meta.titles, ts => {console.log(ts.toString)}).element
 			),
-			div(cls := "input-group")(
-				span(cls := "input-group-addon")("Publication year"),
-				input(tpe := "text", cls := "form-control", value := info.meta.publicationYear)
+			Bootstrap.defaultPanel("DOI Target")(
+				Bootstrap.basicPanel(
+					span(strong("Test the DOI: ")),
+					a(href := doiUrl, target := "_blank")(doiUrl)
+				),
+				TargetUrlEditWidget(dispatch, doi, info.target)
 			)
-			//basicPanel(textarea(info.meta.toString))
 		)
 	}
 
@@ -106,7 +61,7 @@ class Views(dispatch: DoiAction => Unit) {
 
 		val heading = div(cls := "panel-heading", onclick := selectDoi)(
 			doiListIcon(selected.exists(_.doi == doi)),
-			span(" " + doi.toString)
+			span(cls := "panel-title")(" " + doi.toString)
 		)
 
 		val body = selected.filter(_.doi == doi).flatMap(_.info).map(doiInfoPanelBody).toList
@@ -121,15 +76,4 @@ class Views(dispatch: DoiAction => Unit) {
 
 	def getDoiElem(doi: Doi) = Option(document.getElementById(doi.toString))
 
-}
-
-object Views{
-
-	def basicPanel(body: TypedTag[Element]*): TypedTag[html.Div] =
-		div(cls := "panel panel-default")(
-			div(cls := "panel-body")(body)
-		)
-
-	private val urlRegex = """^https://(\w+\.)?icos-cp\.eu/.*$""".r
-	def isValidTargetUrl(uri: String): Boolean = urlRegex.findFirstIn(uri).isDefined
 }
