@@ -7,21 +7,24 @@ import org.scalajs.dom.Event
 
 import TitleWidget._
 
-class TitleWidget(init: Title, cb: Title => Unit, remove: () => Unit) {
+class TitleWidget(init: Title, updated: () => Unit, removed: TitleWidget => Unit) extends EntityEditWidget[Title] {
 
-	private[this] var title = init
+	def entityValue = _title
+	private[this] var _title = init
 
 	private[this] val removeButton =
-		button(tpe := "button", cls := "btn btn-warning", onclick := remove)(
+		button(tpe := "button", cls := "btn btn-warning")(
 			span(cls := "glyphicon glyphicon-remove")
 		).render
 
+	removeButton.onclick = (_: Event) => removed(this)
+
 	private[this] val titleInput =
-		input(tpe := "text", cls := "form-control", value := title.title).render
+		input(tpe := "text", cls := "form-control", value := _title.title).render
 
 	titleInput.onkeyup = (_: Event) => {
-		title = title.copy(title = titleInput.value)
-		cb(title)
+		_title = _title.copy(title = titleInput.value)
+		updated()
 	}
 
 	private[this] val titleTypeInput =
@@ -30,8 +33,8 @@ class TitleWidget(init: Title, cb: Title => Unit, remove: () => Unit) {
 	titleTypeInput.onchange = (_: Event) => {
 		val idx = titleTypeInput.selectedIndex
 		val ttype = if(idx > 0) Some(TitleType(idx - 1)) else None
-		title = title.copy(titleType = ttype)
-		cb(title)
+		_title = _title.copy(titleType = ttype)
+		updated()
 	}
 
 	private[this] val languageInput =
@@ -43,8 +46,8 @@ class TitleWidget(init: Title, cb: Title => Unit, remove: () => Unit) {
 
 	languageInput.onchange = (_: Event) => {
 		val langOpt = if(languageInput.selectedIndex > 0) Some(languageInput.value) else None
-		title = title.copy(lang = langOpt)
-		cb(title)
+		_title = _title.copy(lang = langOpt)
+		updated()
 	}
 
 	def setRemovability(removable: Boolean): Unit = {
