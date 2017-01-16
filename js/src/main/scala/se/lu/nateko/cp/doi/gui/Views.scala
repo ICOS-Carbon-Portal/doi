@@ -43,6 +43,7 @@ class Views(dispatch: DoiAction => Unit) {
 
 		div(cls := "panel-body")(
 			Bootstrap.defaultPanel("DOI Metadata")(
+				new NameWidget(info.meta.creators.head.name, n => {}).element,
 				new TitlesEditWidget(info.meta.titles, ts => {console.log(ts.toString)}).element
 			),
 			Bootstrap.defaultPanel("DOI Target")(

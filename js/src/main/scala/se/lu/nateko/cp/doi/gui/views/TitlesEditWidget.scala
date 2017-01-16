@@ -7,8 +7,7 @@ class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends {
 	protected val minAmount = 1
 } with MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb){
 
-	protected def makeWidget(value: Title, updateCb: () => Unit, removeCb: TitleWidget => Unit) =
-		new TitleWidget(value, updateCb, removeCb)
+	protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
 
 	protected def defaultValue = Title("", None, None)
 }

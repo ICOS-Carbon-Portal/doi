@@ -6,20 +6,14 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.html
 import scalatags.JsDom.TypedTag
 
-trait EntityEditWidget[E]{
-	def element: html.Element
-	def entityValue: E
-	def setRemovability(removable: Boolean): Unit
-}
-
-abstract class MultiEntitiesEditWidget[E, W <: EntityEditWidget[E]](initValues: Seq[E], cb: Seq[E] => Unit){
+abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[E], cb: Seq[E] => Unit){
 
 	protected val title: String
-	protected def makeWidget(value: E, updateCb: () => Unit, removeCb: W => Unit): W
+	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
 	protected val minAmount: Int
 
-	private val widgets = Buffer.empty[W]
+	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
 	private def setRemovability(): Unit = widgets.foreach(_.setRemovability(widgets.length > minAmount))
 
@@ -28,7 +22,9 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityEditWidget[E]](initValues: 
 	private val widgetsParent = div(cls := "col-md-10").render
 
 	private def produceWidget(value: E): Unit = {
-		val newWidget = makeWidget(value, notifyUpstream, widget => {
+		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
+
+		val newWidget = new RemovableEntityWidget[E](widgetFactory, _ => notifyUpstream(), widget => {
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()
