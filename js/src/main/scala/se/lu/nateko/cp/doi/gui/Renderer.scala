@@ -7,19 +7,15 @@ import scala.concurrent.ExecutionContext
 import se.lu.nateko.cp.doi.Doi
 import scala.util.Success
 import scala.util.Failure
+import se.lu.nateko.cp.doi.gui.views.DoiView
 
 class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extends StateListener {
 
 	val views = new Views(dispatch)
 
-	def notify(action: Action, state: State, oldState: State): Unit = {
+	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
 
-		def rerenderDoi(doi: Doi): Unit = {
-			for(oldElem <- views.getDoiElem(doi)){
-				val newElem = views.doiElem(doi, state.selected).render
-				views.listElem.replaceChild(newElem, oldElem)
-			}
-		}
+	def notify(action: Action, state: State, oldState: State): Unit = {
 
 		action match {
 
@@ -31,24 +27,27 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 		case FreshDoiList(dois) => if(dois != oldState.dois){
 			val listElem = views.listElem
 			listElem.innerHTML = ""
+			doiViews.clear()
 
 			for(doi <- dois) {
-				listElem.appendChild(views.doiElem(doi, state.selected).render)
+				val doiView = new DoiView(doi, dispatch)
+				doiViews += ((doi, doiView))
+				listElem.appendChild(doiView.element)
 			}
 		}
 
 		case SelectDoi(doi) =>
 			if(state.isSelected(doi)){
+				doiViews(doi).setSelected(true)
 				Backend.getInfo(doi).onComplete{
 					case Success(info) =>
 						dispatch(GotDoiInfo(info))
-						oldState.selected.map(_.doi).foreach(rerenderDoi)
 					case Failure(err) => reportError(err)
 				}
-			}
-			rerenderDoi(doi)
+			}else
+				doiViews(doi).setSelected(false)
 
-		case GotDoiInfo(info) => rerenderDoi(info.meta.id)
+		case GotDoiInfo(info) => doiViews(info.meta.id).supplyInfo(info)
 
 		case TargetUrlUpdateRequest(doi, url) =>
 			Backend.updateUrl(doi, url).onComplete{
@@ -58,7 +57,9 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 					reportError(err)
 			}
 
-		case TargetUrlUpdated(doi, url) => rerenderDoi(doi)
+		case TargetUrlUpdated(doi, url) =>
+
+		case MetaUpdateRequest(meta) =>
 
 		case ReportError(msg) =>
 			dom.console.log(msg)

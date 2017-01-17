@@ -15,16 +15,18 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
-	private def setRemovability(): Unit = widgets.foreach(_.setRemovability(widgets.length > minAmount))
+	private def setRemovability(): Unit = if(minAmount > 0) {
+		widgets.foreach(_.setRemovability(widgets.length > minAmount))
+	}
 
 	private def notifyUpstream(): Unit = cb(widgets.map(_.entityValue))
 
-	private val widgetsParent = div(cls := "col-md-10").render
+	private val widgetsParent = div(cls := "col-md-11").render
 
 	private def produceWidget(value: E): Unit = {
 		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
 
-		val newWidget = new RemovableEntityWidget[E](widgetFactory, _ => notifyUpstream(), widget => {
+		val newWidget = new RemovableEntityWidget[E](widgetFactory, defaultValue, _ => notifyUpstream(), widget => {
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()
@@ -44,9 +46,10 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[
 
 	val element = Bootstrap.basicPanel(
 		div(cls := "row")(
-			div(cls := "col-md-2")(
+			div(cls := "col-md-1")(
 				span(strong(title)),
-				button(tpe := "button", cls := "btn btn-success pull-right", onclick := addWidget)(
+				raw("&nbsp;"),
+				button(tpe := "button", cls := "btn btn-success", onclick := addWidget, marginBottom := 5)(
 					span(cls := "glyphicon glyphicon-plus")
 				)
 			),

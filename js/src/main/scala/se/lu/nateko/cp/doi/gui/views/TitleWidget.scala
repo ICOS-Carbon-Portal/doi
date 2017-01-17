@@ -9,7 +9,6 @@ import TitleWidget._
 
 class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends EntityWidget[Title] {
 
-	def entityValue = _title
 	private[this] var _title = init
 
 	private[this] val titleInput = new TextInputWidget(init.title, v => {

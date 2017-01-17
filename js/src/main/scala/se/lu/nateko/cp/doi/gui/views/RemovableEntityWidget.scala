@@ -4,17 +4,13 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.html
 import scalatags.JsDom.all._
 
-trait EntityWidget[E]{
-	def element: html.Element
-	protected def updateCb: E => Unit
-}
-
 class RemovableEntityWidget[E](
 	widgetFactory: (E => Unit) => EntityWidget[E],
+	init: E,
 	updateCb: E => Unit,
 	removeCb: RemovableEntityWidget[E] => Unit
 ){
-	private[this] var _entityValue: E = _
+	private[this] var _entityValue: E = init
 	def entityValue = _entityValue
 
 	private[this] val widget = widgetFactory((e: E) => {

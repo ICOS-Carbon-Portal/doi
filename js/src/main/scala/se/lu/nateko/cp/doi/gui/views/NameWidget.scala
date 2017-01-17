@@ -44,10 +44,8 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 
 	val element = Bootstrap.basicPanel(
 		Bootstrap.propValueRow(strong("Name type"))(
-			Bootstrap.basicPanel(
-				nameTypeOption(true), " Personal name", br, nameTypeOption(false), " Organizational name"
-			)
-		),
+			nameTypeOption(true), " Personal name", br, nameTypeOption(false), " Organizational name"
+		)(paddingBottom := 15),
 		Bootstrap.propValueRow(strong("Name"))(nameElem)
 	).render
 }

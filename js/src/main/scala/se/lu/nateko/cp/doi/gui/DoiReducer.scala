@@ -37,6 +37,6 @@ object DoiReducer {
 				state
 		}
 
-		case DoiListRefreshRequest | ReportError(_) | TargetUrlUpdateRequest(_, _) => state
+		case DoiListRefreshRequest | ReportError(_) | TargetUrlUpdateRequest(_, _) | MetaUpdateRequest(_) => state
 	}
 }
