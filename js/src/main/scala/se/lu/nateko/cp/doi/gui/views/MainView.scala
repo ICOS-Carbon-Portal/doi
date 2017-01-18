@@ -1,5 +1,6 @@
 package se.lu.nateko.cp.doi.gui.views
 
+import org.scalajs.dom.console
 import org.scalajs.dom.Event
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._
@@ -7,6 +8,7 @@ import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.gui.DoiListRefreshRequest
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiInfo
+import se.lu.nateko.cp.doi.DoiMeta
 
 class MainView(dispatch: DoiAction => Unit) {
 
@@ -44,4 +46,23 @@ class MainView(dispatch: DoiAction => Unit) {
 		doiViews.get(info.meta.id).foreach(_.supplyInfo(info))
 	}
 
+	def onUrlUpdateBegin(doi: Doi): Unit = {
+		//TODO Implement
+	}
+
+	def onUrlUpdated(doi: Doi, url: String): Unit = {
+		//TODO Implement
+	}
+
+	def onMetadataUpdateBegin(doi: Doi): Unit = {
+		//TODO Implement
+	}
+
+	def onMetadataUpdated(meta: DoiMeta): Unit = {
+		//TODO Implement
+	}
+
+	def fail(msg: String): Unit = {
+		console.log(msg)
+	}
 }

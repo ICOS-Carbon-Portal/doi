@@ -30,10 +30,8 @@ case class DoiMeta(
 
 	def error: Option[String] = joinErrors(
 		id.error,
-		nonEmpty(creators)("At lease one creator is required"),
-		allGood(creators),
-		nonEmpty(titles)("At lease one title is required"),
-		allGood(titles),
+		nonEmptyAllGood(creators)("At lease one creator is required"),
+		nonEmptyAllGood(titles)("At lease one title is required"),
 		nonEmpty(publisher)("Publisher is required"),
 		if(publicationYear < 1000 || publicationYear > 3000) Some("Invalid publication year") else None,
 		resourceType.error,

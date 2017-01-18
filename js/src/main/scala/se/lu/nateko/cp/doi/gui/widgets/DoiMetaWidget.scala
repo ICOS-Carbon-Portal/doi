@@ -5,7 +5,6 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.Creator
 import se.lu.nateko.cp.doi.meta.GenericName
 import se.lu.nateko.cp.doi.meta.Title
-import org.scalajs.dom.raw.Text
 import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.MultiEntitiesEditWidget
@@ -25,12 +24,16 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 		validateMeta()
 	})
 
-	private[this] val errorMessages = new Text()
+	private[this] val errorMessages = div(color := "#b00").render
 
 	private[this] def validateMeta(): Unit = {
-		val error = _meta.error
-		errorMessages.data = error.getOrElse("")
-		val canSave = error.isEmpty && _meta != init
+		val errors = _meta.error.toSeq.flatMap(_.split("\n"))
+
+		errorMessages.innerHTML = ""
+		errors.foreach(err => errorMessages.appendChild(p(err).render))
+
+		val canSave = errors.isEmpty && _meta != init
+
 		updateButton.disabled = !canSave
 		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
 	}
@@ -46,7 +49,7 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 	val element = Bootstrap.defaultPanel("DOI Metadata")(
 		creatorsEdit.element,
 		titlesEdit.element,
-		div(color := "#b00")(errorMessages),
+		errorMessages,
 		div(cls := "btn-group")(updateButton, resetButton)
 	).render
 

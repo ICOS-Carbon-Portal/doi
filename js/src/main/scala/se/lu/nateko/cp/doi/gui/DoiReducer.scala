@@ -1,6 +1,9 @@
 package se.lu.nateko.cp.doi.gui
 
 import DoiRedux.Reducer
+import se.lu.nateko.cp.doi.Doi
+
+import DoiStateUpgrades._
 
 object DoiReducer {
 
@@ -9,34 +12,31 @@ object DoiReducer {
 		case FreshDoiList(dois) =>
 			state.copy(dois = dois)
 
-		case SelectDoi(doi) => state.selected match{
-
-			case Some(SelectedDoi(`doi`, _)) =>
+		case SelectDoi(doi) =>
+			if(state.isSelected(doi))
 				state.copy(selected = None)
-
-			case _ =>
-				state.copy(selected = Some(SelectedDoi(doi, None)))
-		}
+			else
+				state.withSelected(SelectedDoi(doi, None))
 
 		case GotDoiInfo(info) => state.selected match{
 
-			case Some(SelectedDoi(doi, _)) if(doi == info.meta.id)=>
-				state.copy(selected = Some(SelectedDoi(doi, Some(info))))
+			case Some(sd @ SelectedDoi(doi, _)) if(doi == info.meta.id)=>
+				state.withSelected(sd.withInfo(info))
 
-			case _ =>
-				state
+			case _ => state
 		}
 
-		case TargetUrlUpdated(doi, url) => state.selected match{
+		case TargetUrlUpdateRequest(doi, _) => state.startUrlUpdate(doi)
 
-			case Some(SelectedDoi(`doi`, Some(info))) =>
-				val newInfo = Some(info.copy(target = Some(url)))
-				state.copy(selected = Some(SelectedDoi(doi, newInfo)))
+		case TargetUrlUpdated(doi, url) => state.updateUrl(doi, url).stopUrlUpdate(doi)
 
-			case _ =>
-				state
-		}
+		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.id)
 
-		case DoiListRefreshRequest | ReportError(_) | TargetUrlUpdateRequest(_, _) | MetaUpdateRequest(_) => state
+		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.id)
+
+		case ReportError(msg) => state.copy(error = Some(msg))
+
+		case DoiListRefreshRequest => state
 	}
+
 }

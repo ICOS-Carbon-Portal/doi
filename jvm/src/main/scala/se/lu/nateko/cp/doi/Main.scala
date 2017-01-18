@@ -70,15 +70,20 @@ object Main{
 						complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
 					}
 				} ~ post{
-					pathPrefix(DoiPath){doi =>
-						path("target"){
-							entity(as[String]){url =>
-								onSuccess(client.setUrl(doi, new URL(url))){
-									complete(StatusCodes.OK)
-								}
+					path(DoiPath / "target"){doi =>
+						entity(as[String]){url =>
+							onSuccess(client.setUrl(doi, new URL(url))){
+								complete(StatusCodes.OK)
 							}
-						} ~
-						complete(StatusCodes.NotFound)
+						}
+					} ~
+					path("metadata"){
+						entity(as[String]){metaStr =>
+							val meta = upickle.default.read[DoiMeta](metaStr)
+							onSuccess(client.postMetadata(meta)){
+								complete(StatusCodes.OK)
+							}
+						}
 					}
 				}
 			} ~

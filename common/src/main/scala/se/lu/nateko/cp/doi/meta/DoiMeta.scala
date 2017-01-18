@@ -19,7 +19,7 @@ trait SelfValidating{
 	protected def eachNonEmpty(ss: Seq[String])(msg: String): Option[String] =
 		joinErrors(ss.map(s => nonEmpty(s)(msg)): _*)
 
-	protected def nonEmpty(items: Seq[SelfValidating])(msg: String): Option[String] =
+	protected def nonEmptyAllGood(items: Seq[SelfValidating])(msg: String): Option[String] =
 		if(items.isEmpty) Some(msg) else allGood(items)
 
 	//TODO Improve this naive URI syntax validation

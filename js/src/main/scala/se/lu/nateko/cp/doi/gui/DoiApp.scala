@@ -6,7 +6,7 @@ import org.scalajs.dom.document
 
 object DoiApp extends JSApp {
 
-	val initState = DoiState(Nil, None)
+	val initState = DoiState(Nil, None, IoState(None, None), None)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 
 	val renderer = new Renderer(store.dispatch)

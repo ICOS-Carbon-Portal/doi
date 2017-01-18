@@ -10,6 +10,8 @@ import org.scalajs.dom
 import DoiRedux._
 import se.lu.nateko.cp.doi.gui.views.MainView
 
+import DoiStateUpgrades._
+
 class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extends StateListener {
 
 	private val mainView = new MainView(dispatch)
@@ -18,7 +20,8 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 
 	def notify(action: Action, state: State, oldState: State): Unit = {
 
-		action match {
+		if(state.error.isDefined) mainView.fail(state.error.get)
+		else action match {
 
 			case DoiListRefreshRequest =>
 				dispatchFut(Backend.getDoiList.map(FreshDoiList(_)))
@@ -30,10 +33,12 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 
 			case SelectDoi(doi) =>
 				if(state.isSelected(doi)){
+
 					mainView.setSelected(doi, true)
-					oldState.selected.foreach{sd =>
-						mainView.setSelected(sd.doi, false)
+					for(selectedDoi <- oldState.selected){
+						mainView.setSelected(selectedDoi.doi, false)
 					}
+
 					dispatchFut(Backend.getInfo(doi).map(GotDoiInfo(_)))
 				}else
 					mainView.setSelected(doi, false)
@@ -41,14 +46,24 @@ class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extend
 			case GotDoiInfo(info) => mainView.supplyInfo(info)
 	
 			case TargetUrlUpdateRequest(doi, url) =>
-				dispatchFut(Backend.updateUrl(doi, url).map(_ => TargetUrlUpdated(doi, url)))
+				if(state.isUpdatingUrl(doi)){
+					mainView.onUrlUpdateBegin(doi)
+					dispatchFut(Backend.updateUrl(doi, url).map(_ => TargetUrlUpdated(doi, url)))
+				}
 
 			case TargetUrlUpdated(doi, url) =>
+				mainView.onUrlUpdated(doi, url)
 
 			case MetaUpdateRequest(meta) =>
+				if(state.isUpdatingMeta(meta.id)){
+					mainView.onMetadataUpdateBegin(meta.id)
+					dispatchFut(Backend.updateMeta(meta).map(_ => MetaUpdated(meta)))
+				}
 
-			case ReportError(msg) =>
-				dom.console.log(msg)
+			case MetaUpdated(meta) =>
+				mainView.onMetadataUpdated(meta)
+
+			case ReportError(_) =>
 		}
 	}
 

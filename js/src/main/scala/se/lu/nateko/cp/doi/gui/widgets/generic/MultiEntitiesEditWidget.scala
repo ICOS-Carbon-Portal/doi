@@ -25,7 +25,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[
 	private def produceWidget(value: E): Unit = {
 		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
 
-		val newWidget = new RemovableEntityWidget[E](widgetFactory, defaultValue, _ => notifyUpstream(), widget => {
+		val newWidget = new RemovableEntityWidget[E](widgetFactory, value, _ => notifyUpstream(), widget => {
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()

@@ -2,6 +2,8 @@ package se.lu.nateko.cp.doi.test.meta
 
 import org.scalatest.FunSpec
 import se.lu.nateko.cp.doi.meta._
+import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.Doi
 
 
 class DoiMetaTests extends FunSpec{
@@ -39,6 +41,42 @@ class DoiMetaTests extends FunSpec{
 
 		it("rejects a dummy string"){
 			assert(error("dummy").isDefined)
+		}
+	}
+
+	describe("Title validation support"){
+		it("rejects an empty title"){
+			assertResult(Some("Title must not be empty"))(Title("", None, None).error)
+		}
+	}
+
+	describe("DoiMeta validation support"){
+
+		val example = DoiMeta(
+			id = Doi("10.5072", "carbonportal"),
+			creators = Seq(
+				Creator(
+					name = GenericName("ICOS CP"),
+					nameIds = Nil,
+					affiliations = Nil
+				)
+			),
+			contributors = Nil,
+			titles = Seq(
+				Title("Carbon Portal home page", None, None)
+			),
+			publisher = "ICOS Carbon Portal",
+			publicationYear = 2016,
+			resourceType = ResourceType("website", ResourceTypeGeneral.Service)
+		)
+
+		it("accepts valid DoiMeta"){
+			assertResult(None)(example.error)
+		}
+
+		it("gives correct error if only title is wrong (empty)"){
+			val wrongExample = example.copy(titles = Seq(Title("", None, None)))
+			assertResult(Some("Title must not be empty"))(wrongExample.error)
 		}
 	}
 }

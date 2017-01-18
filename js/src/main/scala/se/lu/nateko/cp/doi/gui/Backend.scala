@@ -7,6 +7,7 @@ import se.lu.nateko.cp.doi.Pickling._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
 import org.scalajs.dom.ext.AjaxException
+import org.scalajs.dom.raw.XMLHttpRequest
 
 object Backend {
 
@@ -30,12 +31,18 @@ object Backend {
 
 	def updateUrl(doi: Doi, url: String) = Ajax
 		.post(s"/api/$doi/target", url)
-		.recoverWith{
-			case AjaxException(xhr) =>
-				val msg = if(xhr.responseText.isEmpty)
-					s"Got HTTP status ${xhr.status} when trying to update the target URL"
-				else xhr.responseText
+		.recoverWith(recovery)
 
-				Future.failed(new Exception(msg))
-		}
+	def updateMeta(meta: DoiMeta) = Ajax
+		.post("/api/metadata", upickle.default.write(meta))
+		.recoverWith(recovery)
+
+	private val recovery: PartialFunction[Throwable, Future[XMLHttpRequest]] = {
+		case AjaxException(xhr) =>
+			val msg = if(xhr.responseText.isEmpty)
+				s"Got HTTP status ${xhr.status} when trying to update the target URL"
+			else xhr.responseText
+
+			Future.failed(new Exception(msg))
+	}
 }
