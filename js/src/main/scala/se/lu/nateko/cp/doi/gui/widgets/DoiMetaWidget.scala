@@ -1,9 +1,15 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.meta.Creator
+import se.lu.nateko.cp.doi.meta.GenericName
+import se.lu.nateko.cp.doi.meta.Title
 import org.scalajs.dom.raw.Text
 import org.scalajs.dom.Event
+import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
+import se.lu.nateko.cp.doi.gui.widgets.generic.MultiEntitiesEditWidget
+import se.lu.nateko.cp.doi.gui.views.Bootstrap
 
 class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, resetCb: () => Unit) extends EntityWidget[DoiMeta] {
 
@@ -45,4 +51,25 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 	).render
 
 	validateMeta()
+}
+
+
+class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends {
+	protected val title = "Creators"
+	protected val minAmount = 1
+} with MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb){
+
+	protected def makeWidget(value: Creator, updateCb: Creator => Unit) = new CreatorWidget(value, updateCb)
+
+	protected def defaultValue = Creator(GenericName(""), Nil, Nil)
+}
+
+class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends {
+	protected val title = "Titles"
+	protected val minAmount = 1
+} with MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb){
+
+	protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
+
+	protected def defaultValue = Title("", None, None)
 }

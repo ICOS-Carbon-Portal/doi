@@ -1,9 +1,9 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets.generic
 
-import org.scalajs.dom.Event
 import org.scalajs.dom.html
 import scalatags.JsDom.all._
 import org.scalajs.dom.raw.HTMLElement
+import se.lu.nateko.cp.doi.gui.views.Constants
 
 trait EntityWidget[E]{
 	def element: html.Element

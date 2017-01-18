@@ -1,11 +1,10 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets.generic
 
 import org.scalajs.dom.Event
 import scalatags.JsDom.all._
+import SelectWidget._
 
 case class SelectOption[T](value: Option[T], id: String, label: String)
-
-import SelectWidget._
 
 class SelectWidget[T](
 	options: IndexedSeq[SelectOption[T]],

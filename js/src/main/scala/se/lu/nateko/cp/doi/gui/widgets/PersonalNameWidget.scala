@@ -1,7 +1,9 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import se.lu.nateko.cp.doi.meta.PersonalName
 import scalatags.JsDom.all._
+import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
+import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 
 class PersonalNameWidget(init: PersonalName, protected val updateCb: PersonalName => Unit) extends EntityWidget[PersonalName]{
 

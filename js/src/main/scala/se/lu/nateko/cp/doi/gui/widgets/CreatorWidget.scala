@@ -1,8 +1,9 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import se.lu.nateko.cp.doi.meta.Creator
 import se.lu.nateko.cp.doi.meta.NameIdentifier
 import scalatags.JsDom.all._
+import se.lu.nateko.cp.doi.gui.widgets.generic._
 
 class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) extends EntityWidget[Creator]{
 

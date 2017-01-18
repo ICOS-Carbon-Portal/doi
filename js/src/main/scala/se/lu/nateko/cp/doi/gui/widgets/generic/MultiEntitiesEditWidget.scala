@@ -1,10 +1,9 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets.generic
 
 import scalatags.JsDom.all._
 import scala.collection.mutable.Buffer
 import org.scalajs.dom.Event
-import org.scalajs.dom.html
-import scalatags.JsDom.TypedTag
+import se.lu.nateko.cp.doi.gui.views.Bootstrap
 
 abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[E], cb: Seq[E] => Unit){
 

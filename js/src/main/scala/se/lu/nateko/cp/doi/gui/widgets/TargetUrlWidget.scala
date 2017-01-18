@@ -1,9 +1,9 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
 import org.scalajs.dom.Event
-
 import TargetUrlWidget._
+import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 
 class TargetUrlWidget(init: Option[String], protected val updateCb: String => Unit) extends EntityWidget[String] {
 

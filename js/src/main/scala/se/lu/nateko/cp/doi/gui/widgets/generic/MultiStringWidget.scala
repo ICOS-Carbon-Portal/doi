@@ -1,4 +1,4 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets.generic
 
 abstract class MultiStringsWidget(init: Seq[String], cb: Seq[String] => Unit) extends
 	MultiEntitiesEditWidget[String, TextInputWidget](init, cb){

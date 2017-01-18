@@ -1,8 +1,8 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets.generic
 
 import org.scalajs.dom.Event
-import org.scalajs.dom.html
 import scalatags.JsDom.all._
+import se.lu.nateko.cp.doi.gui.views.Bootstrap
 
 class RemovableEntityWidget[E](
 	widgetFactory: (E => Unit) => EntityWidget[E],

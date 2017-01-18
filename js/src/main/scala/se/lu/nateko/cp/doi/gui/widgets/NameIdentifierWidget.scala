@@ -1,10 +1,12 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
+
+import scalatags.JsDom.all._
 
 import se.lu.nateko.cp.doi.meta.NameIdentifier
 import se.lu.nateko.cp.doi.meta.NameIdentifierScheme
-import scalatags.JsDom.all._
+import se.lu.nateko.cp.doi.meta.NameIdentifierScheme._
+import se.lu.nateko.cp.doi.gui.widgets.generic._
 
-import NameIdentifierScheme._
 import NameIdentifierWidget._
 
 class NameIdentifierWidget(

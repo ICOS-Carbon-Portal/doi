@@ -1,4 +1,4 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import se.lu.nateko.cp.doi.meta.Name
 import scalatags.JsDom.all._
@@ -6,7 +6,9 @@ import se.lu.nateko.cp.doi.meta.PersonalName
 import se.lu.nateko.cp.doi.meta.GenericName
 import org.scalajs.dom.Event
 import org.scalajs.dom.Element
-import org.scalajs.dom.console
+import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
+import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
+import se.lu.nateko.cp.doi.gui.views.Bootstrap
 
 class NameWidget(init: Name, protected val updateCb: Name => Unit) extends EntityWidget[Name]{
 

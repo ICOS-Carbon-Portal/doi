@@ -5,6 +5,8 @@ import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.gui.MetaUpdateRequest
 import se.lu.nateko.cp.doi.gui.TargetUrlUpdateRequest
+import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
+import se.lu.nateko.cp.doi.gui.widgets.TargetUrlWidget
 
 class DoiInfoView(init: DoiInfo, dispatch: DoiAction => Unit) {
 

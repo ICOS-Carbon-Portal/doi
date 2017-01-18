@@ -1,71 +1,61 @@
 package se.lu.nateko.cp.doi.gui
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.util.Failure
+import scala.util.Success
+
 import org.scalajs.dom
 
 import DoiRedux._
-import scala.concurrent.ExecutionContext
-import se.lu.nateko.cp.doi.Doi
-import scala.util.Success
-import scala.util.Failure
-import se.lu.nateko.cp.doi.gui.views.DoiView
+import se.lu.nateko.cp.doi.gui.views.MainView
 
 class Renderer(dispatch: Action => Unit)(implicit ctxt: ExecutionContext) extends StateListener {
 
-	val views = new Views(dispatch)
+	private val mainView = new MainView(dispatch)
 
-	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
+	val mainLayout = mainView.element.render
 
 	def notify(action: Action, state: State, oldState: State): Unit = {
 
 		action match {
 
-		case DoiListRefreshRequest =>
-			val listFut = Backend.getDoiList
-			listFut.foreach{list => dispatch(FreshDoiList(list))}
-			listFut.failed.foreach(reportError)
+			case DoiListRefreshRequest =>
+				dispatchFut(Backend.getDoiList.map(FreshDoiList(_)))
 
-		case FreshDoiList(dois) => if(dois != oldState.dois){
-			val listElem = views.listElem
-			listElem.innerHTML = ""
-			doiViews.clear()
-
-			for(doi <- dois) {
-				val doiView = new DoiView(doi, dispatch)
-				doiViews += ((doi, doiView))
-				listElem.appendChild(doiView.element)
-			}
-		}
-
-		case SelectDoi(doi) =>
-			if(state.isSelected(doi)){
-				doiViews(doi).setSelected(true)
-				Backend.getInfo(doi).onComplete{
-					case Success(info) =>
-						dispatch(GotDoiInfo(info))
-					case Failure(err) => reportError(err)
+			case FreshDoiList(dois) =>
+				if(dois != oldState.dois){
+					mainView.supplyDoiList(dois)
 				}
-			}else
-				doiViews(doi).setSelected(false)
 
-		case GotDoiInfo(info) => doiViews(info.meta.id).supplyInfo(info)
+			case SelectDoi(doi) =>
+				if(state.isSelected(doi)){
+					mainView.setSelected(doi, true)
+					oldState.selected.foreach{sd =>
+						mainView.setSelected(sd.doi, false)
+					}
+					dispatchFut(Backend.getInfo(doi).map(GotDoiInfo(_)))
+				}else
+					mainView.setSelected(doi, false)
 
-		case TargetUrlUpdateRequest(doi, url) =>
-			Backend.updateUrl(doi, url).onComplete{
-				case Success(_) =>
-					dispatch(TargetUrlUpdated(doi, url))
-				case Failure(err) =>
-					reportError(err)
-			}
+			case GotDoiInfo(info) => mainView.supplyInfo(info)
+	
+			case TargetUrlUpdateRequest(doi, url) =>
+				dispatchFut(Backend.updateUrl(doi, url).map(_ => TargetUrlUpdated(doi, url)))
 
-		case TargetUrlUpdated(doi, url) =>
+			case TargetUrlUpdated(doi, url) =>
 
-		case MetaUpdateRequest(meta) =>
+			case MetaUpdateRequest(meta) =>
 
-		case ReportError(msg) =>
-			dom.console.log(msg)
+			case ReportError(msg) =>
+				dom.console.log(msg)
+		}
 	}
+
+	private def dispatchFut[A <: Action](result: Future[A]): Unit = {
+		result.onComplete{
+			case Success(a) => dispatch(a)
+			case Failure(err) => dispatch(ReportError(err.getMessage))
+		}
 	}
-
-	private def reportError(error: Throwable): Unit = dispatch(ReportError(error.getMessage))
-
 }

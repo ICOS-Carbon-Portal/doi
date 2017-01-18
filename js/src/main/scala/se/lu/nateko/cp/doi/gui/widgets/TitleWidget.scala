@@ -1,11 +1,10 @@
-package se.lu.nateko.cp.doi.gui.views
+package se.lu.nateko.cp.doi.gui.widgets
 
 import se.lu.nateko.cp.doi.meta.Title
 import se.lu.nateko.cp.doi.meta.TitleType
 import scalatags.JsDom.all._
-import org.scalajs.dom.Event
-
 import TitleWidget._
+import se.lu.nateko.cp.doi.gui.widgets.generic._
 
 class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends EntityWidget[Title] {
 
