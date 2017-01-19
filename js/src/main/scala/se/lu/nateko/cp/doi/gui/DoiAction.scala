@@ -5,8 +5,6 @@ import se.lu.nateko.cp.doi.DoiMeta
 
 sealed trait DoiAction
 
-case object DoiListRefreshRequest extends DoiAction
-
 case class FreshDoiList(dois: Seq[Doi]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction

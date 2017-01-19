@@ -9,6 +9,7 @@ import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.MultiEntitiesEditWidget
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
+import se.lu.nateko.cp.doi.gui.views.Constants
 
 class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, resetCb: () => Unit) extends EntityWidget[DoiMeta] {
 
@@ -24,7 +25,7 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 		validateMeta()
 	})
 
-	private[this] val errorMessages = div(color := "#b00").render
+	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
 
 	private[this] def validateMeta(): Unit = {
 		val errors = _meta.error.toSeq.flatMap(_.split("\n"))

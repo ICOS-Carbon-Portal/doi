@@ -3,12 +3,12 @@ package se.lu.nateko.cp.doi.gui.views
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.gui.DoiInfo
-import se.lu.nateko.cp.doi.gui.MetaUpdateRequest
-import se.lu.nateko.cp.doi.gui.TargetUrlUpdateRequest
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
 import se.lu.nateko.cp.doi.gui.widgets.TargetUrlWidget
+import se.lu.nateko.cp.doi.gui.DoiRedux
+import se.lu.nateko.cp.doi.gui.ThunkActions
 
-class DoiInfoView(init: DoiInfo, dispatch: DoiAction => Unit) {
+class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 
 	private[this] var _info = init
 
@@ -18,7 +18,7 @@ class DoiInfoView(init: DoiInfo, dispatch: DoiAction => Unit) {
 		_info.meta,
 		newMeta => {
 			_info = _info.copy(meta = newMeta)
-			dispatch(MetaUpdateRequest(newMeta))
+			d.dispatch(ThunkActions.requestMetaUpdate(newMeta))
 		},
 		refreshMetaWidget
 	)
@@ -33,7 +33,7 @@ class DoiInfoView(init: DoiInfo, dispatch: DoiAction => Unit) {
 		_info.target,
 		newTarget => {
 			_info = _info.copy(target = Some(newTarget))
-			dispatch(TargetUrlUpdateRequest(_info.meta.id, newTarget))
+			d.dispatch(ThunkActions.requestTargetUrlUpdate(_info.meta.id, newTarget))
 		}
 	)
 

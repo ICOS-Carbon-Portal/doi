@@ -36,7 +36,6 @@ object DoiReducer {
 
 		case ReportError(msg) => state.copy(error = Some(msg))
 
-		case DoiListRefreshRequest => state
 	}
 
 }

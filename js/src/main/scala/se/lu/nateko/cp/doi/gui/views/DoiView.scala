@@ -7,8 +7,10 @@ import se.lu.nateko.cp.doi.gui.DoiAction
 import org.scalajs.dom.Event
 import org.scalajs.dom.console
 import se.lu.nateko.cp.doi.gui.SelectDoi
+import se.lu.nateko.cp.doi.gui.DoiRedux
+import se.lu.nateko.cp.doi.gui.ThunkActions
 
-class DoiView(doi: Doi, dispatch: DoiAction => Unit) {
+class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 
 	private[this] var info: Option[DoiInfo] = None
 	private[this] var isSelected = false
@@ -18,7 +20,7 @@ class DoiView(doi: Doi, dispatch: DoiAction => Unit) {
 	private def doiListIconClass = "glyphicon glyphicon-triangle-" +
 		(if(isSelected) "bottom" else "right")
 
-	private val selectDoi: Event => Unit = e => dispatch(SelectDoi(doi))
+	private val selectDoi: Event => Unit = e => d.dispatch(ThunkActions.selectDoiFetchInfo(doi))
 
 	private val panelBody = div(cls := "panel-body").render
 
@@ -45,7 +47,7 @@ class DoiView(doi: Doi, dispatch: DoiAction => Unit) {
 		info = Some(doiInfo)
 		updateContentVisibility()
 		panelBody.innerHTML = ""
-		val infoView = new DoiInfoView(doiInfo, dispatch)
+		val infoView = new DoiInfoView(doiInfo, d)
 		panelBody.appendChild(infoView.element)
 	}
 	updateContentVisibility()
