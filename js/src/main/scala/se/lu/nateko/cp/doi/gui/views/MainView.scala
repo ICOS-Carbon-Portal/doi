@@ -47,14 +47,6 @@ class MainView(d: DoiRedux.Dispatcher) {
 		doiViews.get(info.meta.id).foreach(_.supplyInfo(info))
 	}
 
-	def onUrlUpdated(doi: Doi, url: String): Unit = {
-		//TODO Implement
-	}
-
-	def onMetadataUpdated(meta: DoiMeta): Unit = {
-		//TODO Implement
-	}
-
 	def appendError(msg: String): Unit = {
 		console.log(msg)
 	}

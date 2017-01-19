@@ -6,7 +6,7 @@ import se.lu.nateko.cp.doi.gui.views.MainView
 
 object DoiApp extends JSApp {
 
-	val initState = DoiState(Nil, None, IoState(None, None), None)
+	val initState = DoiState(Nil, Map.empty, None, IoState(None, None), None)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 
 	val mainView = new MainView(store)

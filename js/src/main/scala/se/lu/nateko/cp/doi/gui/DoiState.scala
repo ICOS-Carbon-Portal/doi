@@ -4,17 +4,22 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 
 case class DoiInfo(meta: DoiMeta, target: Option[String])
-case class SelectedDoi(doi: Doi, info: Option[DoiInfo] = None)
 
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
-case class DoiState(dois: Seq[Doi], selected: Option[SelectedDoi], ioState: IoState, error: Option[String])
+case class DoiState(
+	dois: Seq[Doi],
+	info: Map[Doi, DoiInfo],
+	selected: Option[Doi],
+	ioState: IoState,
+	error: Option[String]
+)
 
 object DoiStateUpgrades{
 
 	implicit class SmartDoiState(val state: DoiState) extends AnyVal{
 
-		def withSelected(sd: SelectedDoi): DoiState = state.copy(selected = Some(sd))
+		def withSelected(doi: Doi): DoiState = state.copy(selected = Some(doi))
 
 		def withUrlUpdate(doi: Doi) = state.copy(ioState = state.ioState.copy(updatingUrl = Some(doi)))
 		def withoutUrlUpdate = state.copy(ioState = state.ioState.copy(updatingUrl = None))
@@ -22,19 +27,20 @@ object DoiStateUpgrades{
 		def withMetaUpdate(doi: Doi) = state.copy(ioState = state.ioState.copy(updatingMeta = Some(doi)))
 		def withoutMetaUpdate(doi: Doi) = state.copy(ioState = state.ioState.copy(updatingMeta = None))
 
+		def withDoiInfo(doiInfo: DoiInfo) = state.copy(info = state.info + ((doiInfo.meta.id, doiInfo)))
 
-		def updateUrl(doi: Doi, url: String) = state.selected match{
+		def updateUrl(doi: Doi, url: String) = state.info.get(doi) match{
 
-			case Some(sd @ SelectedDoi(`doi`, Some(info))) => withSelected(sd.withInfo(info.withUrl(url)))
+			case Some(doiInfo) => state.withDoiInfo(doiInfo.withUrl(url))
+
 			case _ => state
 		}
 
-		def updateMeta(meta: DoiMeta) = state.selected match{
+		def updateMeta(meta: DoiMeta) = state.info.get(meta.id) match{
 
-			case Some(sd @ SelectedDoi(doi, Some(info))) if(doi == meta.id) =>
-				state.withSelected(sd.withInfo(info.withMeta(meta)))
+			case Some(doiInfo) => state.withDoiInfo(doiInfo.withMeta(meta))
 
-			case _ => state
+			case _ => state.withDoiInfo(DoiInfo(meta, None))
 		}
 
 		def startUrlUpdate(doi: Doi) = state.ioState match{
@@ -57,9 +63,11 @@ object DoiStateUpgrades{
 			case _ => state
 		}
 
-		def isSelected(doi: Doi): Boolean = state.selected.exists(_.doi == doi)
+		def isSelected(doi: Doi): Boolean = state.selected.contains(doi)
 		def isUpdatingUrl(doi: Doi): Boolean = state.ioState.updatingUrl.contains(doi)
 		def isUpdatingMeta(doi: Doi): Boolean = state.ioState.updatingMeta.contains(doi)
+
+		def selectedInfo: Option[DoiInfo] = state.selected.flatMap(state.info.get)
 	}
 
 	implicit class SmartDoiInfo(val info: DoiInfo) extends AnyVal{
@@ -68,10 +76,5 @@ object DoiStateUpgrades{
 		def withMeta(meta: DoiMeta) = info.copy(meta = meta)
 	}
 
-
-	implicit class SmartSelectedDoi(val selected: SelectedDoi) extends AnyVal{
-
-		def withInfo(info: DoiInfo) = selected.copy(info = Some(info))
-	}
 
 }

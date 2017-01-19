@@ -1,9 +1,5 @@
 package se.lu.nateko.cp.doi.gui
 
-import scala.concurrent.Future
-import scala.util.Failure
-import scala.util.Success
-
 import DoiRedux._
 import se.lu.nateko.cp.doi.gui.views.MainView
 
@@ -11,7 +7,7 @@ import DoiStateUpgrades._
 
 class Renderer(mainView: MainView) extends StateListener {
 
-	def notify(action: Action, state: State, oldState: State): Unit = {
+	def notify(state: State, oldState: State): Unit = {
 
 		if(state.error.isDefined){
 			if(oldState.error != state.error) mainView.appendError(state.error.get)
@@ -22,26 +18,19 @@ class Renderer(mainView: MainView) extends StateListener {
 			mainView.supplyDoiList(state.dois)
 		}
 
-		if(state.selected.map(_.doi) != oldState.selected.map(_.doi)){
-			for(selectedDoi <- state.selected){
-				mainView.setSelected(selectedDoi.doi, true)
-			}
-			for(selectedDoi <- oldState.selected){
-				mainView.setSelected(selectedDoi.doi, false)
-			}
-		}
+		val selectedInfo = state.selectedInfo
 
-		action match {
+		if(state.selected != oldState.selected){
+			selectedInfo.foreach(mainView.supplyInfo)
 
-			case GotDoiInfo(info) => mainView.supplyInfo(info)
-	
-			case TargetUrlUpdated(doi, url) =>
-				mainView.onUrlUpdated(doi, url)
+			state.selected.foreach(mainView.setSelected(_, true))
 
-			case MetaUpdated(meta) =>
-				mainView.onMetadataUpdated(meta)
+			oldState.selected.foreach(mainView.setSelected(_, false))
 
-			case _ =>
+		}else if(selectedInfo != oldState.selectedInfo){
+
+			selectedInfo.foreach(mainView.supplyInfo)
+
 		}
 	}
 

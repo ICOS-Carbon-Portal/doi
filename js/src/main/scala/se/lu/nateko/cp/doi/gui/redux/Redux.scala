@@ -9,7 +9,7 @@ trait Redux{
 	type Reducer = Function2[Action, State, State]
 
 	trait StateListener{
-		def notify(action: Action, newState: State, oldState: State): Unit
+		def notify(newState: State, oldState: State): Unit
 	}
 
 	trait Dispatcher{
@@ -45,7 +45,7 @@ trait Redux{
 		def dispatch(action: Action): Unit = schedule{
 			val oldState = state
 			state = reducer(action, oldState)
-			subscribers.foreach(s => schedule(s.notify(action, state, oldState)))
+			subscribers.foreach(s => schedule(s.notify(state, oldState)))
 		}
 
 		def dispatch(thunk: ThunkAction): Unit = schedule(thunk(this))

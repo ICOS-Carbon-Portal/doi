@@ -16,15 +16,9 @@ object DoiReducer {
 			if(state.isSelected(doi))
 				state.copy(selected = None)
 			else
-				state.withSelected(SelectedDoi(doi, None))
+				state.withSelected(doi)
 
-		case GotDoiInfo(info) => state.selected match{
-
-			case Some(sd @ SelectedDoi(doi, _)) if(doi == info.meta.id)=>
-				state.withSelected(sd.withInfo(info))
-
-			case _ => state
-		}
+		case GotDoiInfo(info) => state.withDoiInfo(info)
 
 		case TargetUrlUpdateRequest(doi, _) => state.startUrlUpdate(doi)
 
