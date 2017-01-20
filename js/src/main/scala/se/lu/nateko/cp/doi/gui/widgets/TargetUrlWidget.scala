@@ -28,6 +28,7 @@ class TargetUrlWidget(init: Option[String], protected val updateCb: String => Un
 	urlInput.onkeyup = (_: Event) => validateTargetUrl()
 
 	updateButton.onclick = (_: Event) => {
+		updateButton.disabled = true
 		updateCb(urlInput.value)
 	}
 

@@ -41,6 +41,7 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 
 	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
 	updateButton.onclick = (_: Event) => {
+		updateButton.disabled = true
 		updateCb(_meta)
 	}
 

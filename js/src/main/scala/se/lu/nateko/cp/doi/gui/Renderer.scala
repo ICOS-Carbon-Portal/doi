@@ -9,6 +9,8 @@ class Renderer(mainView: MainView) extends StateListener {
 
 	def notify(state: State, oldState: State): Unit = {
 
+		if(state.prefix != oldState.prefix || state.alreadyExists != oldState.alreadyExists) mainView.refreshDoiAdder()
+
 		if(state.error.isDefined){
 			if(oldState.error != state.error) mainView.appendError(state.error.get)
 		} else
@@ -16,6 +18,7 @@ class Renderer(mainView: MainView) extends StateListener {
 
 		if(state.dois != oldState.dois){
 			mainView.supplyDoiList(state.dois)
+			mainView.resetDoiAdder()
 		}
 
 		val selectedInfo = state.selectedInfo

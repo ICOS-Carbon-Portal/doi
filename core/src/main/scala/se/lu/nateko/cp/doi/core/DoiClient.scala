@@ -42,6 +42,13 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		}(response)
 	)
 
+	def checkIfKnown(doi: Doi): Future[Boolean] = http.getText(doiUrl(doi)).flatMap(
+		analyzeResponse{
+			case 200 | 204 => Future.successful(true)
+			case 404 => Future.successful(false)
+		}
+	)
+
 	def getUrl(doi: Doi): Future[Option[URL]] = http.getText(doiUrl(doi)).flatMap(response =>
 		analyzeResponse{
 			case 200 =>

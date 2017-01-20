@@ -8,10 +8,12 @@ case class DoiInfo(meta: DoiMeta, target: Option[String])
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
 case class DoiState(
+	prefix: String,
 	dois: Seq[Doi],
 	info: Map[Doi, DoiInfo],
 	selected: Option[Doi],
 	ioState: IoState,
+	alreadyExists: Option[Doi],
 	error: Option[String]
 )
 

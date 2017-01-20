@@ -46,6 +46,9 @@ object Main{
 		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
 				get{
+					path("doiprefix"){
+						complete(config.doiPrefix)
+					} ~
 					path("list"){
 						onSuccess(client.listDois) { dois =>
 							complete{
@@ -54,6 +57,11 @@ object Main{
 						}
 					} ~
 					pathPrefix(DoiPath){doi =>
+						path("exists"){
+							onSuccess(client.checkIfKnown(doi)){isKnown =>
+								complete(isKnown.toString)
+							}
+						} ~
 						path("target"){
 							onSuccess(client.getUrl(doi)){url =>
 								complete(upickle.default.write(url.map(_.toString)))

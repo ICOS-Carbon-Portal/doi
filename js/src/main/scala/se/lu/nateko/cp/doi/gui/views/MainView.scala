@@ -1,7 +1,6 @@
 package se.lu.nateko.cp.doi.gui.views
 
 import org.scalajs.dom.console
-import org.scalajs.dom.Event
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.gui.DoiAction
@@ -9,21 +8,43 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
-import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.ThunkActions.requestNewDoi
 
 class MainView(d: DoiRedux.Dispatcher) {
 
 	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
 
 	private val listElem = ul(cls := "list-unstyled").render
-	private val refreshDoiList = (_: Event) => d.dispatch(ThunkActions.DoiListRefreshRequest)
+
+	private val prefixSpan = span(cls := "input-group-addon")(d.getState.prefix + "/").render
+
+	private val suffixInput = input(
+		tpe := "text", cls := "form-control",
+		onkeyup := (refreshDoiAdder _),
+		placeholder := "New DOI suffix"
+	).render
+
+	private def addDoi(): Unit = {
+		addDoiButton.disabled = true
+		d.dispatch(requestNewDoi(suffixInput.value))
+	}
+
+	private val addDoiButton = button(
+		cls := "btn btn-default",
+		tpe := "button",
+		onclick := (addDoi _)
+	)("Add new DOI").render
 
 	val element = div(id := "main")(
 		div(cls := "page-header")(
 			h1("Carbon Portal DOI minting service")
 		),
 		Bootstrap.basicPanel(
-			button(cls := "btn btn-default", onclick := refreshDoiList)("Refresh DOI list")
+			div(cls := "input-group")(
+				prefixSpan,
+				suffixInput,
+				span(cls := "input-group-btn")(addDoiButton)
+			)
 		),
 		listElem
 	)
@@ -52,4 +73,38 @@ class MainView(d: DoiRedux.Dispatcher) {
 	}
 
 	def clearErrors(): Unit = {}
+
+	def refreshDoiAdder(): Unit = {
+		val state = d.getState
+
+		prefixSpan.textContent = state.prefix
+		suffixInput.value = suffixInput.value.toUpperCase
+
+		if(suffixInput.value.isEmpty){
+			setError(None)
+			addDoiButton.disabled = true
+		}else{
+			val doi = Doi(state.prefix, suffixInput.value)
+			val error = doi.error.orElse{
+				if(state.dois.contains(doi) || state.alreadyExists.contains(doi))
+					Some("This DOI exists already!")
+				else None
+			}
+			setError(error)
+			addDoiButton.disabled = error.isDefined
+		}
+
+	}
+
+	private def setError(err: Option[String]): Unit = {
+		suffixInput.style.background = err.map(_ => Constants.errorInputBackground).getOrElse("")
+		suffixInput.title = err.getOrElse("")
+	}
+
+	def resetDoiAdder(): Unit = {
+		suffixInput.value = ""
+		refreshDoiAdder()
+	}
+
+	refreshDoiAdder()
 }

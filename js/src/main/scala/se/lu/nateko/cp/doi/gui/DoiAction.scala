@@ -5,6 +5,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 
 sealed trait DoiAction
 
+case class GotDoiPrefix(prefix: String) extends DoiAction
+
 case class FreshDoiList(dois: Seq[Doi]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction
@@ -17,5 +19,7 @@ case class TargetUrlUpdated(doi: Doi, url: String) extends DoiAction
 case class MetaUpdateRequest(meta: DoiMeta) extends DoiAction
 case class MetaUpdated(meta: DoiMeta) extends DoiAction
 
+case class RefuseDoiCreation(doi: Doi) extends DoiAction
+case class PermitDoiCreation(doi: Doi) extends DoiAction
 
 case class ReportError(msg: String) extends DoiAction

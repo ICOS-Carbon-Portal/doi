@@ -7,9 +7,15 @@ case class Doi(prefix: String, suffix: String) extends SelfValidating{
 
 	def error: Option[String] = joinErrors(
 		nonEmpty(prefix)("DOI prefix is required"),
-		nonEmpty(suffix)("DOI suffix is required"),
+		Doi.suffixError(suffix),
 		if(prefix.startsWith("10.")) None else Some("Prefix must start with \"10.\"")
 	)
+}
+
+object Doi{
+	private val suffixRegex = """^[\d\w\.\-]+$""".r
+	def suffixError(suffix: String) =
+		if(suffixRegex.findFirstIn(suffix).isDefined) None else Some("Invalid DOI suffix")
 }
 
 case class DoiMeta(
