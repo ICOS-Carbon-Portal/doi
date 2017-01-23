@@ -4,7 +4,7 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
-import se.lu.nateko.cp.doi.gui.widgets.TargetUrlWidget
+import se.lu.nateko.cp.doi.gui.widgets.DoiTargetWidget
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
 
@@ -29,30 +29,16 @@ class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 		oldWidget.parentElement.replaceChild(_metaWidget.element, oldWidget)
 	}
 
-	private[this] val urlWidget = new TargetUrlWidget(
-		_info.target,
-		newTarget => {
-			_info = _info.copy(target = Some(newTarget))
-			d.dispatch(ThunkActions.requestTargetUrlUpdate(_info.meta.id, newTarget))
-		}
-	)
+	private[this] val targetWidget = if(_info.hasBeenSaved){
+		new DoiTargetWidget(
+			_info.target,
+			init.meta.id,
+			newTarget => {
+				_info = _info.copy(target = Some(newTarget))
+				d.dispatch(ThunkActions.requestTargetUrlUpdate(init.meta.id, newTarget))
+			}
+		).element
+	} else div.render
 
-	def onUrlHasUpdated(): Unit = {
-		urlWidget.refreshUrl(_info.target.getOrElse(""))
-	}
-
-	def onMetaHasUpdated(): Unit = refreshMetaWidget()
-
-	val doiUrl = "http://doi.org/" + init.meta.id
-
-	val element = div(
-		_metaWidget.element,
-		Bootstrap.defaultPanel("DOI Target")(
-			Bootstrap.basicPanel(
-				span(strong("Test the DOI: ")),
-				a(href := doiUrl, target := "_blank")(doiUrl)
-			),
-			urlWidget.element
-		)
-	).render
+	val element = div(_metaWidget.element, targetWidget).render
 }

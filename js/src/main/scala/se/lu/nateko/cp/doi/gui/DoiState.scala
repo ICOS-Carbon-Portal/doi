@@ -3,7 +3,7 @@ package se.lu.nateko.cp.doi.gui
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 
-case class DoiInfo(meta: DoiMeta, target: Option[String])
+case class DoiInfo(meta: DoiMeta, target: Option[String], hasBeenSaved: Boolean)
 
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
@@ -40,9 +40,9 @@ object DoiStateUpgrades{
 
 		def updateMeta(meta: DoiMeta) = state.info.get(meta.id) match{
 
-			case Some(doiInfo) => state.withDoiInfo(doiInfo.withMeta(meta))
+			case Some(doiInfo) => state.withDoiInfo(doiInfo.withSavedMeta(meta))
 
-			case _ => state.withDoiInfo(DoiInfo(meta, None))
+			case _ => state.withDoiInfo(DoiInfo(meta, None, false))
 		}
 
 		def startUrlUpdate(doi: Doi) = state.ioState match{
@@ -75,7 +75,7 @@ object DoiStateUpgrades{
 	implicit class SmartDoiInfo(val info: DoiInfo) extends AnyVal{
 
 		def withUrl(url: String) = info.copy(target = Some(url))
-		def withMeta(meta: DoiMeta) = info.copy(meta = meta)
+		def withSavedMeta(meta: DoiMeta) = info.copy(meta = meta, hasBeenSaved = true)
 	}
 
 

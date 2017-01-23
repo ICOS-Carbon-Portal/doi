@@ -24,7 +24,10 @@ object ThunkActions {
 	}
 
 	private def fetchInfo(doi: Doi): ThunkAction = implicit d => {
-		if(d.getState.isSelected(doi)){
+		val state = d.getState
+		if(state.isSelected(doi) && state.info.get(doi).map(_.hasBeenSaved).getOrElse(true)){
+			//fetching info only if the doi is selected and is now new
+			//if the info is absent then the doi is not new (otherwise an incomplete DoiInfo would be there)
 			dispatchFut(Backend.getInfo(doi).map(GotDoiInfo(_)))
 		}
 	}

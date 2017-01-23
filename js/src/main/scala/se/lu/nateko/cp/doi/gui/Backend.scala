@@ -34,7 +34,7 @@ object Backend {
 	def getInfo(doi: Doi): Future[DoiInfo] = Backend.getMeta(doi)
 		.zip(Backend.getTarget(doi))
 		.map{
-			case (meta, target) => DoiInfo(meta, target)
+			case (meta, target) => DoiInfo(meta, target, true)
 		}
 
 	def updateUrl(doi: Doi, url: String) = Ajax

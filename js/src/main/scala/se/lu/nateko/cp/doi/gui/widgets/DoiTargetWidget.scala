@@ -2,10 +2,12 @@ package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
 import org.scalajs.dom.Event
-import TargetUrlWidget._
+import DoiTargetWidget._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
+import se.lu.nateko.cp.doi.gui.views.Bootstrap
+import se.lu.nateko.cp.doi.Doi
 
-class TargetUrlWidget(init: Option[String], protected val updateCb: String => Unit) extends EntityWidget[String] {
+class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: String => Unit) extends EntityWidget[String] {
 
 	private[this] var _target = init.getOrElse("")
 
@@ -37,12 +39,21 @@ class TargetUrlWidget(init: Option[String], protected val updateCb: String => Un
 		validateTargetUrl()
 	}
 
-	val element = div(cls := "input-group")(
-		span(cls := "input-group-addon")("Target URL"),
-		urlInput,
-		div(cls := "input-group-btn")(
-			updateButton,
-			button(cls := "btn btn-default", tpe := "button", onclick := resetTarget)("Reset")
+	private val doiUrl = "http://doi.org/" + doi
+
+
+	val element = Bootstrap.defaultPanel("DOI Target")(
+		Bootstrap.basicPanel(
+			span(strong("Test the DOI: ")),
+			a(href := doiUrl, target := "_blank")(doiUrl)
+		),
+		div(cls := "input-group")(
+			span(cls := "input-group-addon")("Target URL"),
+			urlInput,
+			div(cls := "input-group-btn")(
+				updateButton,
+				button(cls := "btn btn-default", tpe := "button", onclick := resetTarget)("Reset")
+			)
 		)
 	).render
 
@@ -52,7 +63,7 @@ class TargetUrlWidget(init: Option[String], protected val updateCb: String => Un
 	}
 }
 
-object TargetUrlWidget{
+object DoiTargetWidget{
 	private val urlRegex = """^https://(\w+\.)?icos-cp\.eu/.*$""".r
 
 	def targetUrlError(uri: String): Option[String] =
