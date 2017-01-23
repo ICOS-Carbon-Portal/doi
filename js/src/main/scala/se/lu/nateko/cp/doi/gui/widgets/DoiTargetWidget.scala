@@ -41,7 +41,6 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 
 	private val doiUrl = "http://doi.org/" + doi
 
-
 	val element = Bootstrap.defaultPanel("DOI Target")(
 		Bootstrap.basicPanel(
 			span(strong("Test the DOI: ")),

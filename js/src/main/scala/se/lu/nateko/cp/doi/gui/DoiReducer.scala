@@ -51,8 +51,8 @@ object DoiReducer {
 			creators = Nil,
 			titles = Nil,
 			publisher = "",
-			publicationYear = 2017,
-			resourceType = ResourceType("", ResourceTypeGeneral.Text)
+			publicationYear = 0,
+			resourceType = ResourceType("", null)
 		),
 		target = None,
 		hasBeenSaved = false

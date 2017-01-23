@@ -6,24 +6,44 @@ import se.lu.nateko.cp.doi.meta.Creator
 import se.lu.nateko.cp.doi.meta.GenericName
 import se.lu.nateko.cp.doi.meta.Title
 import org.scalajs.dom.Event
+import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.MultiEntitiesEditWidget
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.gui.views.Constants
+import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
+import se.lu.nateko.cp.doi.gui.widgets.generic.IntInputWidget
+import se.lu.nateko.cp.doi.meta.Subject
 
-class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, resetCb: () => Unit) extends EntityWidget[DoiMeta] {
+class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit) extends EntityWidget[DoiMeta] {
 
 	private[this] var _meta = init
 
-	private[this] val creatorsEdit = new CreatorsEditWidget(init.creators, cs => {
-		_meta = _meta.copy(creators = cs)
-		validateMeta()
-	})
+	private def formElements: Seq[Div] = Seq(
 
-	private[this] val titlesEdit = new TitlesEditWidget(init.titles, ts => {
-		_meta = _meta.copy(titles = ts)
+		new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element.render,
+
+		new TitlesEditWidget(init.titles, cb(ts => _.copy(titles = ts))).element.render,
+
+		Bootstrap.basicPropValueWidget("Publisher")(
+			new TextInputWidget(init.publisher, cb(pub => _.copy(publisher = pub))).element
+		).render,
+
+		Bootstrap.basicPropValueWidget("Publication year")(
+			new IntInputWidget(init.publicationYear, cb(pub => _.copy(publicationYear = pub))).element
+		).render,
+
+		Bootstrap.basicPropValueWidget("Resource type")(
+			new ResourceTypeWidget(init.resourceType, cb(rt => _.copy(resourceType = rt))).element
+		).render,
+
+		new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element.render
+	)
+
+	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
+		_meta = upd(prop)(_meta)
 		validateMeta()
-	})
+	}
 
 	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
 
@@ -39,6 +59,13 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
 	}
 
+	private[this] def resetForms(): Unit = {
+		_meta = init
+		formElems.innerHTML = ""
+		formElements.foreach(formElems.appendChild)
+		validateMeta()
+	}
+
 	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
 	updateButton.onclick = (_: Event) => {
 		updateButton.disabled = true
@@ -46,16 +73,17 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit, rese
 	}
 
 	private[this] val resetButton = button(tpe := "button", cls := "btn btn-default")("Reset").render
-	resetButton.onclick = (_: Event) => resetCb()
+	resetButton.onclick = (_: Event) => resetForms()
+
+	private[this] val formElems = div.render
 
 	val element = Bootstrap.defaultPanel("DOI Metadata")(
-		creatorsEdit.element,
-		titlesEdit.element,
+		formElems,
 		errorMessages,
 		div(cls := "btn-group")(updateButton, resetButton)
 	).render
 
-	validateMeta()
+	resetForms()
 }
 
 
@@ -77,4 +105,14 @@ class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends {
 	protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
 
 	protected def defaultValue = Title("", None, None)
+}
+
+class SubjectsEditWidget(init: Seq[Subject], cb: Seq[Subject] => Unit) extends {
+	protected val title = "Subjects"
+	protected val minAmount = 0
+} with MultiEntitiesEditWidget[Subject, SubjectWidget](init, cb){
+
+	protected def makeWidget(value: Subject, updateCb: Subject => Unit) = new SubjectWidget(value, updateCb)
+
+	protected def defaultValue = Subject("", None, None)
 }

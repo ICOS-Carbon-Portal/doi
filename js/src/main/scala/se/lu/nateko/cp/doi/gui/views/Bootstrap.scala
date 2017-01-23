@@ -23,7 +23,11 @@ object Bootstrap {
 
 	def propValueRow(propHtml: Modifier*)(valHtml: Modifier*) =
 		div(cls := "row")(
-			div(cls := "col-md-2")(propHtml),
-			div(cls := "col-md-10")(valHtml)
+			div(cls := "col-md-1")(propHtml),
+			div(cls := "col-md-11")(valHtml)
 		)
+
+	def basicPropValueWidget(name: String)(valHtml: Modifier*) = basicPanel{
+		propValueRow(strong(name))(valHtml)
+	}
 }
