@@ -13,12 +13,16 @@ class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends En
 	private[this] val titleInput = new TextInputWidget(init.title, v => {
 		_title = _title.copy(title = v)
 		updateCb(_title)
-	})
+	}, "Title")
 
-	private[this] val titleTypeInput = new SelectWidget[TitleType.Value](titleTypeOptions, init.titleType, ttOpt => {
-		_title = _title.copy(titleType = ttOpt)
-		updateCb(_title)
-	})
+	private[this] val titleTypeInput = new SelectWidget[TitleType.Value](
+		SelectWidget.selectOptions(TitleType, Some("Title type")),
+		init.titleType,
+		ttOpt => {
+			_title = _title.copy(titleType = ttOpt)
+			updateCb(_title)
+		}
+	)
 
 	private[this] val languageInput = new SelectWidget[String](languageOptions, init.lang, langOpt => {
 		_title = _title.copy(lang = langOpt)
@@ -26,23 +30,16 @@ class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends En
 	})
 
 	val element = div(cls := "row")(
-		div(cls := "col-md-8")(titleInput.element),
-		div(cls := "col-md-2")(titleTypeInput.element),
-		div(cls := "col-md-2")(languageInput.element)
+		div(cls := "col-md-8 spacyrow")(titleInput.element),
+		div(cls := "col-md-2 spacyrow")(titleTypeInput.element),
+		div(cls := "col-md-2 spacyrow")(languageInput.element)
 	).render
 }
 
 
 object TitleWidget{
 
-	private val titleTypeOptions =
-		SelectOption[TitleType.Value](None, "", "Title type") +:
-		TitleType.values.toIndexedSeq.map{tt =>
-			val ttName = tt.toString
-			SelectOption(Some(tt), ttName, ttName)
-		}
-
-	private val languageOptions = IndexedSeq(
+	val languageOptions = IndexedSeq(
 		SelectOption[String](None, "", "Language"),
 		SelectOption(Some("en-uk"), "en-uk", "English (UK)"),
 		SelectOption(Some("en-us"), "en-us", "English (US)")

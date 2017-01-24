@@ -7,8 +7,6 @@ import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral
 import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral.ResourceTypeGeneral
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 
-import ResourceTypeWidget._
-
 class ResourceTypeWidget(
 	init: ResourceType,
 	protected val updateCb: ResourceType => Unit
@@ -19,14 +17,17 @@ class ResourceTypeWidget(
 	private[this] val rtInput = new TextInputWidget(init.resourceType, rt => {
 		_resType = _resType.copy(resourceType = rt)
 		updateCb(_resType)
-	})
+	}, "Specific resource type")
 
-	private[this] val rtGenInput = new SelectWidget[ResourceTypeGeneral](resourceOptions, Option(init.resourceTypeGeneral), rtGenOpt => {
-		rtGenOpt.foreach{rtGen =>
+	private[this] val rtGenInput = new SelectWidget[ResourceTypeGeneral](
+		SelectWidget.selectOptions(ResourceTypeGeneral, Some("General resource type")),
+		Option(init.resourceTypeGeneral),
+		rtGenOpt => {
+			val rtGen = rtGenOpt.getOrElse(null)
 			_resType = _resType.copy(resourceTypeGeneral = rtGen)
 			updateCb(_resType)
 		}
-	})
+	)
 
 	val element = div(cls := "row")(
 		div(cls := "col-md-4")(rtGenInput.element),
@@ -34,12 +35,4 @@ class ResourceTypeWidget(
 		div(cls := "col-md-4")(rtInput.element)
 	).render
 
-}
-
-object ResourceTypeWidget{
-	private val resourceOptions =
-		SelectOption[ResourceTypeGeneral](None, "", "General resource type") +:
-		ResourceTypeGeneral.values.toIndexedSeq.map(v =>
-			SelectOption(Some(v), v.toString, v.toString)
-		)
 }

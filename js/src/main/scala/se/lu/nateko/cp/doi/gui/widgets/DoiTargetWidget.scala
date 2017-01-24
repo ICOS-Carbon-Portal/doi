@@ -44,7 +44,8 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 	val element = Bootstrap.defaultPanel("DOI Target")(
 		Bootstrap.basicPanel(
 			span(strong("Test the DOI: ")),
-			a(href := doiUrl, target := "_blank")(doiUrl)
+			a(href := doiUrl, target := "_blank")(doiUrl),
+			span(" (allow up to 1 hour synchronization time after Target URL update)")
 		),
 		div(cls := "input-group")(
 			span(cls := "input-group-addon")("Target URL"),

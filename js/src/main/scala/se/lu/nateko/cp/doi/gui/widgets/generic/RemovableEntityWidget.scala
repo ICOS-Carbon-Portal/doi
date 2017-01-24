@@ -32,7 +32,7 @@ class RemovableEntityWidget[E](
 	val element = Bootstrap.basicPanel(
 		div(cls := "row")(
 			div(cls := "col-md-11")(widget.element),
-			div(cls := "col-md-1")(removeButton)
+			div(cls := "col-md-1 spacyrow")(removeButton)
 		)
 	).render
 }

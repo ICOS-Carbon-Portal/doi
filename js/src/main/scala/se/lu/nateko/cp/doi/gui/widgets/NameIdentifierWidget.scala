@@ -7,8 +7,6 @@ import se.lu.nateko.cp.doi.meta.NameIdentifierScheme
 import se.lu.nateko.cp.doi.meta.NameIdentifierScheme._
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 
-import NameIdentifierWidget._
-
 class NameIdentifierWidget(
 	init: NameIdentifier,
 	protected val updateCb: NameIdentifier => Unit
@@ -24,13 +22,17 @@ class NameIdentifierWidget(
 		updateCb(_nameId)
 	})
 
-	private[this] val schemeInput = new SelectWidget[NameIdentifierScheme](schemeOptions, Some(init.scheme), schemeOpt => {
-		schemeOpt.foreach{scheme =>
-			_nameId = _nameId.copy(scheme = scheme)
-			validate()
-			updateCb(_nameId)
+	private[this] val schemeInput = new SelectWidget[NameIdentifierScheme](
+		SelectWidget.selectOptions(None)(Orcid, Isni),
+		Some(init.scheme),
+		schemeOpt => {
+			schemeOpt.foreach{scheme =>
+				_nameId = _nameId.copy(scheme = scheme)
+				validate()
+				updateCb(_nameId)
+			}
 		}
-	})
+	)
 
 	val element = div(cls := "row")(
 		div(cls := "col-md-6")(idInput.element),
@@ -38,11 +40,4 @@ class NameIdentifierWidget(
 	).render
 
 	validate()
-}
-
-object NameIdentifierWidget{
-	private val schemeOptions = IndexedSeq(
-		SelectOption(Some(Orcid), Orcid.toString, "ORCID"),
-		SelectOption(Some(Isni), Isni.toString, "ISNI")
-	)
 }

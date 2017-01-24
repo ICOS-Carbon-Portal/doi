@@ -78,6 +78,7 @@ case class NameIdentifierScheme(name: String, uri: Option[String]) extends SelfV
 		nonEmpty(name)("Name identifier scheme must have a name"),
 		uri.flatMap(validUri)
 	)
+	override def toString = name
 }
 
 object NameIdentifierScheme{
@@ -153,13 +154,23 @@ case class Subject(
 }
 
 case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
-	private[this] val dateRegex = """\d{4}-\d\d-\d\d""".r
+	private[this] val dateRegex = """(\d{4})-(\d\d)-(\d\d)""".r
 
 	def error = joinErrors(
 		nonEmpty(date)("Date must not be empty if specified"),
 		nonNull(dateType)("Date type must be specified for every date"),
-		if(dateRegex.findFirstIn(date).isDefined) None else Some(s"Wrong date '$date', use format YYYY-MM-DD")
+		if(date == null || date.isEmpty || !dateIsWrong(date)) None
+		else Some(s"Wrong date '$date', use format YYYY-MM-DD")
 	)
+
+	private def dateIsWrong(date: String): Boolean = date match {
+		case dateRegex(yearStr, monthStr, dayStr) =>
+			val year = yearStr.toInt
+			val month = monthStr.toInt
+			val day = dayStr.toInt
+			year < 1900 || year > 3000 || month < 1 || month > 12 || day < 1 || day > 31
+		case _ => true
+	}
 }
 
 case class Version(major: Int, minor: Int) extends SelfValidating{
