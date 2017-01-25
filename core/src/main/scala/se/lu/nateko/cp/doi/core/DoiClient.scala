@@ -74,6 +74,10 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		})
 	}
 
+	def deactivate(doi: Doi): Future[Unit] = http.delete(metaUrl(doi)).flatMap(
+		analyzeResponse{case 200 => Future.successful(())}
+	)
+
 	private def makeFailure[T](response: http.DoiResponse): Future[T] = {
 		val msg = response.message + ": " + response.body
 		Future.failed(new Exception(msg))

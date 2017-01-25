@@ -134,9 +134,10 @@ case class SubjectScheme(subjectScheme: String, schemeUri: Option[String]) exten
 		nonEmpty(subjectScheme)("Subject scheme must have a name"),
 		schemeUri.flatMap(validUri)
 	)
+	override def toString = subjectScheme
 }
 object SubjectScheme{
-	val Dewey = SubjectScheme("dewey", Some("http://dewey.info/"))
+	val Dewey = SubjectScheme("Dewey", Some("http://dewey.info/"))
 }
 
 case class Subject(

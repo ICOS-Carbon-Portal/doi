@@ -45,6 +45,18 @@ class PlainJavaDoiHttp(
 		}
 	}
 
+	def delete(url: URL): Future[DoiResponse] = Future{
+
+		val conn = getConnection(url)
+		conn.setRequestMethod("DELETE")
+		try{
+			toDoiResponse(conn, conn.getInputStream())
+		} catch{
+			case _: IOException =>
+				toDoiResponse(conn, conn.getErrorStream())
+		}
+	}
+
 	private def getConnection(url: URL): HttpURLConnection = {
 		val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 		val encoder = Base64.getEncoder()

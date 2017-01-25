@@ -37,10 +37,7 @@ class AkkaDoiHttp(
 			throw new Exception("Invalid accept header value: " + accept)
 		)
 
-		val request = HttpRequest(
-			uri = Uri(url.toString),
-			headers = List(acceptHeader, authHeader)
-		)
+		val request = basicRequest(url).addHeader(acceptHeader)
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
@@ -52,15 +49,19 @@ class AkkaDoiHttp(
 		val content = ByteString.apply(payload, "UTF-8")
 		val entity = HttpEntity(cType, content)
 
-		val request = HttpRequest(
-			uri = Uri(url.toString),
-			method = HttpMethods.POST,
-			headers = List(authHeader),
-			entity = entity
-		)
+		val request = basicRequest(url).withMethod(HttpMethods.POST).withEntity(entity)
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
+	def delete(url: URL): Future[DoiResponse] = {
+		val request = basicRequest(url).withMethod(HttpMethods.DELETE)
+		http.singleRequest(request).flatMap(responseToDoi)
+	}
+
+	private def basicRequest(url: URL) = HttpRequest(
+		uri = Uri(url.toString),
+		headers = List(authHeader)
+	)
 
 	private def responseToDoi(resp: HttpResponse): Future[DoiResponse] = {
 

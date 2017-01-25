@@ -15,4 +15,5 @@ trait DoiHttp {
 
 	protected def getContent(url: URL, accept: String): Future[DoiResponse]
 	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse]
+	def delete(url: URL): Future[DoiResponse]
 }
