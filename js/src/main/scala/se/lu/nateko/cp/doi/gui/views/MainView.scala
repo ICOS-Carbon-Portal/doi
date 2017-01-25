@@ -68,11 +68,11 @@ class MainView(d: DoiRedux.Dispatcher) {
 		doiViews.get(info.meta.id).foreach(_.supplyInfo(info))
 	}
 
-	def appendError(msg: String): Unit = {
-		console.log(msg)
-	}
+	private[this] val errorView = new ErrorView(400, 300, d)
 
-	def clearErrors(): Unit = {}
+	def appendError(msg: String): Unit = errorView.appendError(msg)
+
+	def clearErrors(): Unit = errorView.clearErrors()
 
 	def refreshDoiAdder(): Unit = {
 		val state = d.getState

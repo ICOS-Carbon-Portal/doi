@@ -23,3 +23,4 @@ case class RefuseDoiCreation(doi: Doi) extends DoiAction
 case class PermitDoiCreation(doi: Doi) extends DoiAction
 
 case class ReportError(msg: String) extends DoiAction
+case object ResetErrors extends DoiAction

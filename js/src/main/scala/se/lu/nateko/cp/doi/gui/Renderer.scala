@@ -11,10 +11,12 @@ class Renderer(mainView: MainView) extends StateListener {
 
 		if(state.prefix != oldState.prefix || state.alreadyExists != oldState.alreadyExists) mainView.refreshDoiAdder()
 
-		if(state.error.isDefined){
-			if(oldState.error != state.error) mainView.appendError(state.error.get)
-		} else
-			mainView.clearErrors()
+		if(oldState.error != state.error){
+			if(state.error.isDefined)
+				mainView.appendError(state.error.get)
+			else
+				mainView.clearErrors()
+		}
 
 		if(state.dois != oldState.dois){
 			mainView.supplyDoiList(state.dois)

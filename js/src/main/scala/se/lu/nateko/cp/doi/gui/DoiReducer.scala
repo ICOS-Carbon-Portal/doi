@@ -43,6 +43,8 @@ object DoiReducer {
 
 		case ReportError(msg) => state.copy(error = Some(msg))
 
+		case ResetErrors => state.copy(error = None)
+
 	}
 
 	private def emptyInfo(doi: Doi) = DoiInfo(

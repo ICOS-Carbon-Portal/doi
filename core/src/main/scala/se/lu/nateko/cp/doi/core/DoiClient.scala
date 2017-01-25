@@ -84,7 +84,16 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	}
 
 	private def analyzeResponse[T](pf: PartialFunction[Int, Future[T]])(resp: http.DoiResponse): Future[T] = {
-		pf.applyOrElse(resp.status, (status: Int) => Future.failed(new Exception(resp.message + ": " + resp.body)))
+		pf.applyOrElse(
+			resp.status,
+			(status: Int) => {
+				val msg = s"""Problem communicating with DateCite:
+					|HTTP status code: $status
+					|Response message: ${resp.message}
+					|Response content: ${resp.body}""".stripMargin
+				Future.failed(new Exception(msg))
+			}
+		)
 	}
 }
 
