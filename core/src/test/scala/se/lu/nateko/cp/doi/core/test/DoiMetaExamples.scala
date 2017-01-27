@@ -6,7 +6,7 @@ import se.lu.nateko.cp.doi.{Doi, DoiMeta}
 object DoiMetaExamples {
 
 	def full = DoiMeta(
-		id = Doi("10.5072", "example-full"),
+		id = Doi("10.5072", "EXAMPLE-FULL"),
 		creators = Seq(
 			Creator(
 				PersonalName("Elizabeth", "Miller"),

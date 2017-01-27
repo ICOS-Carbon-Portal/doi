@@ -17,7 +17,7 @@
   <publisher>DataCite</publisher>
   <publicationYear>2014</publicationYear>
   <subjects>
-    <subject xml:lang="en-us" schemeURI="http://dewey.info/" subjectScheme="dewey">000 computer science</subject>
+    <subject xml:lang="en-us" schemeURI="http://dewey.info/" subjectScheme="Dewey">000 computer science</subject>
   </subjects>
   <contributors>
     <contributor contributorType="ProjectLeader">

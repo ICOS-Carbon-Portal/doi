@@ -66,7 +66,7 @@ object Main{
 			}
 		}
 
-		Http().bindAndHandle(route, "127.0.0.1", port = 8099)
+		Http().bindAndHandle(route, "127.0.0.1", port = 8079)
 			.onSuccess{
 				case binding =>
 					sys.addShutdownHook{
