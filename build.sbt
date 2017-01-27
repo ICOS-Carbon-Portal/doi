@@ -69,8 +69,9 @@ lazy val app = crossProject
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http" % "10.0.0",
-			"se.lu.nateko.cp" %% "views-core" % "0.2-SNAPSHOT"
+			"com.typesafe.akka" %% "akka-http"   % "10.0.3",
+			"se.lu.nateko.cp"   %% "views-core"  % "0.2-SNAPSHOT",
+			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
 			baseDirectory.in(reStart).value.getParentFile

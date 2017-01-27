@@ -36,9 +36,6 @@ class MainView(d: DoiRedux.Dispatcher) {
 	)("Add new DOI").render
 
 	val element = div(id := "main")(
-		div(cls := "page-header")(
-			h1("Carbon Portal DOI minting service")
-		),
 		Bootstrap.basicPanel(
 			div(cls := "input-group")(
 				prefixSpan,

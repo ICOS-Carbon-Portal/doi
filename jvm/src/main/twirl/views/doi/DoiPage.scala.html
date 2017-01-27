@@ -1,6 +1,7 @@
 @import views.html.CpCommonPage
+@import se.lu.nateko.cp.cpauth.core.UserId
 
-@(jsFastOpt: Boolean = false)
+@(uid: Option[UserId], jsFastOpt: Boolean = false)
 @CpCommonPage("Carbon Portal's DOI minting service"){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
@@ -11,6 +12,20 @@
 		}
 	</style>
 }{
+	<div class = "page-header">
+		<div class="pull-right">
+			@uid match {
+				case None => {
+					<a href="https://cpauth.icos-cp.eu/login/?targetUrl=https://doi.icos-cp.eu/">Log in</a>
+				}
+				case Some(userId) => {
+					<span>Logged in as @(userId.email)</span>
+				}
+			}
+		</div>
+		<h1>Carbon Portal DOI minting service</h1>
+	</div>
+
 	<div id="main">
 	</div>
 	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>

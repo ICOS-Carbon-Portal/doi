@@ -11,7 +11,7 @@ object Playground {
 	implicit val system = ActorSystem("doi-playground")
 	import system.dispatcher
 
-	val config = DoiConfig.getClientConfig
+	val config = DoiConfig.getConfig.client
 	val http = new AkkaDoiHttp(config.symbol, config.password)
 	val client = new DoiClient(config, http)
 

@@ -23,85 +23,45 @@ object Main{
 		import system.dispatcher
 		implicit val materializer = ActorMaterializer()
 
-		val config = DoiConfig.getClientConfig
-		val http = new AkkaDoiHttp(config.symbol, config.password)
-		val client = new DoiClient(config, http)
+		val DoiConfig(clientConf, authConf) = DoiConfig.getConfig
 
-		import Pickling._
+		val authRouting = new AuthRouting(authConf)
 
-		val DoiPath = (Segment / Segment).tflatMap{
-			case (prefix, suffix) =>
-				val doi = Doi(prefix, suffix)
-				doi.error match{
-					case None => Some(Tuple1(doi))
-					case Some(_) => None
-				}
+		val doiRouting = {
+			val http = new AkkaDoiHttp(clientConf.symbol, clientConf.password)
+			val client = new DoiClient(clientConf, http)
+			new DoiClientRouting(client)
 		}
+
 
 		val exceptionHandler = ExceptionHandler{
 			case e: Exception =>
 				complete((StatusCodes.InternalServerError, e.getMessage))
 		}
 
+		def mainPage(development: Boolean) = {
+			authRouting.user{uid =>
+				complete(views.html.doi.DoiPage(Some(uid), development))
+			} ~
+			complete(views.html.doi.DoiPage(None, development))
+		}
+
 		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
-				get{
-					path("doiprefix"){
-						complete(config.doiPrefix)
+				doiRouting.publicRoute ~
+				post{
+					authRouting.user{uid =>
+						doiRouting.writingRoute
 					} ~
-					path("list"){
-						onSuccess(client.listDois) { dois =>
-							complete{
-								upickle.default.write(dois)
-							}
-						}
-					} ~
-					pathPrefix(DoiPath){doi =>
-						path("exists"){
-							onSuccess(client.checkIfKnown(doi)){isKnown =>
-								complete(isKnown.toString)
-							}
-						} ~
-						path("target"){
-							onSuccess(client.getUrl(doi)){url =>
-								complete(upickle.default.write(url.map(_.toString)))
-							}
-						} ~
-						path("metadata"){
-							onSuccess(client.getMetadata(doi)){meta =>
-								complete(upickle.default.write(meta))
-							}
-						} ~
-						complete(StatusCodes.NotFound)
-					} ~
-					pathPrefix(Segment / Segment){(prefix, suffix) =>
-						complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
-					}
-				} ~ post{
-					path(DoiPath / "target"){doi =>
-						entity(as[String]){url =>
-							onSuccess(client.setUrl(doi, new URL(url))){
-								complete(StatusCodes.OK)
-							}
-						}
-					} ~
-					path("metadata"){
-						entity(as[String]){metaStr =>
-							val meta = upickle.default.read[DoiMeta](metaStr)
-							onSuccess(client.postMetadata(meta)){
-								complete(StatusCodes.OK)
-							}
-						}
-					}
+					complete((StatusCodes.Unauthorized, "Must be logged in"))
+				} ~
+				path("doiprefix"){
+					get{complete(clientConf.doiPrefix)}
 				}
 			} ~
 			get{
-				pathSingleSlash{
-					complete(views.html.doi.DoiPage())
-				} ~
-				path("develop"){
-					complete(views.html.doi.DoiPage(true))
-				} ~
+				pathSingleSlash(mainPage(false)) ~
+				path("develop")(mainPage(true)) ~
 				getFromResourceDirectory("")
 			}
 		}

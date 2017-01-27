@@ -76,7 +76,7 @@ object ThunkActions {
 		}
 	}
 
-	private def dispatchFut[A <: Action](result: Future[A])(implicit d: Dispatcher): Unit = {
+	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {
 		result.onComplete{
 			case Success(a) => d.dispatch(a)
 			case Failure(err) => d.dispatch(ReportError(err.getMessage))
