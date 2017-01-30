@@ -10,6 +10,7 @@ import scala.util.Success
 import scala.util.Failure
 import se.lu.nateko.cp.cpauth.core.CookieToToken
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.javadsl.server.CustomRejection
 
 class AuthRouting(authConfig: PublicAuthConfig) {
 
@@ -23,15 +24,14 @@ class AuthRouting(authConfig: PublicAuthConfig) {
 
 		tokenTry match {
 			case Success(token) => inner(token.userId)
-			case Failure(err) =>
-				forbid(toMessage(err))
+			case Failure(err) => reject(new CpauthAuthenticationFailedRejection(toMessage(err)))
 		}
 	})
-
-	def forbid(msg: String): StandardRoute = complete((StatusCodes.Forbidden, msg))
 
 	private def toMessage(err: Throwable): String = {
 		val msg = err.getMessage
 		if(msg == null || msg.isEmpty) err.getClass.getName else msg
 	}
 }
+
+class CpauthAuthenticationFailedRejection(val msg: String) extends CustomRejection
