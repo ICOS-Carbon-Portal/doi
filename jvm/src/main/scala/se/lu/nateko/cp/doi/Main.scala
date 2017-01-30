@@ -62,6 +62,9 @@ object Main{
 			get{
 				pathSingleSlash(mainPage(false)) ~
 				path("develop")(mainPage(true)) ~
+				path("buildInfo"){
+					complete(BuildInfo.toString)
+				} ~
 				getFromResourceDirectory("")
 			}
 		}

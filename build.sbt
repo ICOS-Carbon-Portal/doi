@@ -50,6 +50,8 @@ lazy val core = project
 		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
+lazy val deploy = inputKey[Unit]("Deploys to production using Ansible (depends on 'infrastructure' project)")
+
 lazy val app = crossProject
 	.in(file("."))
 	.settings(
@@ -82,6 +84,22 @@ lazy val app = crossProject
 			case x =>
 				val originalStrategy = assemblyMergeStrategy.in(assembly).value
 				originalStrategy(x)
+		},
+		deploy := {
+			val args: Seq[String] = sbt.Def.spaceDelimited().parsed
+			val check = args.toList match{
+				case "to" :: "production" :: Nil =>
+					println("Performing a real deployment to production")
+					""
+				case _ =>
+					println("Performing a test deployment, use 'deploy to production' for a real one")
+					"--check"
+			}
+			val jarPath = assembly.value.getCanonicalPath
+			val confPath = new java.io.File("./application.conf").getCanonicalPath
+			val ymlPath = new java.io.File("../infrastructure/devops/doi/setup_doi.yml").getCanonicalPath
+			sbt.Process(s"""ansible-playbook $check -i fsicos.lunarc.lu.se, $ymlPath """ +
+				s"""--ask-sudo -e doi_app_conf=$confPath -e doi_jar_file=$jarPath""").run(true).exitValue()
 		}
 	)
 	.jsConfigure(_.dependsOn(commonJs))
@@ -89,7 +107,19 @@ lazy val app = crossProject
 
 lazy val appJs = app.js
 lazy val appJvm = app.jvm
+	.enablePlugins(BuildInfoPlugin)
 	.settings(
+		buildInfoKeys := Seq[BuildInfoKey](name, version),
+		buildInfoPackage := "se.lu.nateko.cp.doi",
+		buildInfoKeys ++= Seq(
+			BuildInfoKey.action("buildTime") {java.time.Instant.now()},
+			BuildInfoKey.action("gitOriginRemote") {
+				sbt.Process("git config --get remote.origin.url").lines.mkString("")
+			},
+			BuildInfoKey.action("gitHash") {
+				sbt.Process("git rev-parse HEAD").lines.mkString("")
+			}
+		),
 		resources.in(Compile) += fastOptJS.in(appJs, Compile).value.data,
 		watchSources ++= watchSources.in(appJs, Compile).value,
 		assembledMappings.in(assembly) := {
