@@ -86,8 +86,12 @@ lazy val app = crossProject
 				originalStrategy(x)
 		},
 		deploy := {
-			val args: Seq[String] = sbt.Def.spaceDelimited().parsed
+			val gitStatus = sbt.Process("git status -s").lines.mkString("").trim
+			if(!gitStatus.isEmpty) sys.error("Please commit before deploying!")
+
 			val log = streams.value.log
+			val args: Seq[String] = sbt.Def.spaceDelimited().parsed
+
 			val check = args.toList match{
 				case "to" :: "production" :: Nil =>
 					log.info("Performing a REAL deployment to production")
