@@ -87,12 +87,13 @@ lazy val app = crossProject
 		},
 		deploy := {
 			val args: Seq[String] = sbt.Def.spaceDelimited().parsed
+			val log = streams.value.log
 			val check = args.toList match{
 				case "to" :: "production" :: Nil =>
-					println("Performing a real deployment to production")
+					log.info("Performing a REAL deployment to production")
 					""
 				case _ =>
-					println("Performing a test deployment, use 'deploy to production' for a real one")
+					log.warn("Performing a TEST deployment, use 'deploy to production' for a real one")
 					"--check"
 			}
 			val jarPath = assembly.value.getCanonicalPath
