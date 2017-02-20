@@ -9,6 +9,7 @@ import se.lu.nateko.cp.doi.meta.ContributorType
 import java.io.FileOutputStream
 import java.io.File
 import java.nio.charset.Charset
+import se.lu.nateko.cp.doi.Doi
 
 /**
  * Just a playground. Is put here in the test code area because it is not needed in the deployment artifacts.
@@ -37,7 +38,7 @@ object DoiTransform{
 	}
 
 	def transform(oldMeta: DoiMeta): DoiMeta = {
-		val doi = oldMeta.id.copy(prefix = "10.18160")
+		val doi = Doi(prefix = "10.18160", suffix = "VNX5-QXCB")
 
 		val oldContr = oldMeta.contributors.head
 		val creator = Creator(
