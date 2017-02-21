@@ -7,6 +7,7 @@ class CoolDoiTests extends FunSuite{
 
 	test("decodes a valid cool DOI successfully"){
 		assert(CoolDoi.validate("VNX5-QXCB").isSuccess)
+		assert(CoolDoi.validate("KVTD-VPWM").isSuccess)
 	}
 
 	test("completes a round trip successfully"){
