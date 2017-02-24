@@ -71,7 +71,7 @@ lazy val app = crossProject
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"   % "10.0.3",
+			"com.typesafe.akka" %% "akka-http"   % "10.0.4",
 			"se.lu.nateko.cp"   %% "views-core"  % "0.2-SNAPSHOT",
 			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5-SNAPSHOT"
 		),
