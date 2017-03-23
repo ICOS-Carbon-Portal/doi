@@ -18,12 +18,8 @@ object DoiTransform{
 
 	val folder = "/home/maintenance/Documents/CP/IngosMetadata/"
 
-	def transformIngosMeta(): Unit = {
-		saveXml(transform(getOldMeta), "IngosDataCiteMetaUpdated.xml")
-	}
-
 	def printPeopleAffiliations(): Unit = {
-		transform(getOldMeta).contributors
+		getMeta.contributors
 			.flatMap{c => c.affiliations.map(a => (c, a))}
 			.map{case (c, a) =>
 				s"${c.name.toString}: $a"
@@ -32,9 +28,9 @@ object DoiTransform{
 			.foreach(println)
 	}
 
-	def getOldMeta: DoiMeta = {
-		val oldXml = XML.loadFile(folder + "IngosDataCiteMeta.xml")
-		DoiMetaParser.parse(oldXml).get
+	def getMeta: DoiMeta = {
+		val xml = XML.loadFile(folder + "IngosDataCiteMeta.xml")
+		DoiMetaParser.parse(xml).get
 	}
 
 	def transform(oldMeta: DoiMeta): DoiMeta = {
