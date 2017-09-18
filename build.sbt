@@ -81,27 +81,6 @@ lazy val app = crossProject
 			case x =>
 				val originalStrategy = assemblyMergeStrategy.in(assembly).value
 				originalStrategy(x)
-		},
-		deploy := {
-			val gitStatus = sbt.Process("git status -s").lines.mkString("").trim
-			if(!gitStatus.isEmpty) sys.error("Please commit before deploying!")
-
-			val log = streams.value.log
-			val args: Seq[String] = sbt.Def.spaceDelimited().parsed
-
-			val check = args.toList match{
-				case "to" :: "production" :: Nil =>
-					log.info("Performing a REAL deployment to production")
-					""
-				case _ =>
-					log.warn("Performing a TEST deployment, use 'deploy to production' for a real one")
-					"--check"
-			}
-			val jarPath = assembly.value.getCanonicalPath
-			val confPath = new java.io.File("./application.conf").getCanonicalPath
-			val ymlPath = new java.io.File("../infrastructure/devops/doi/setup_doi.yml").getCanonicalPath
-			sbt.Process(s"""ansible-playbook $check -i fsicos.lunarc.lu.se, $ymlPath """ +
-				s"""--ask-sudo -e doi_app_conf=$confPath -e doi_jar_file=$jarPath""").run(true).exitValue()
 		}
 	)
 	.jsConfigure(_.dependsOn(commonJs))
@@ -109,8 +88,11 @@ lazy val app = crossProject
 
 lazy val appJs = app.js
 lazy val appJvm = app.jvm
-	.enablePlugins(BuildInfoPlugin)
+	.enablePlugins(IcosCpSbtDeployPlugin)
 	.settings(
+		cpDeployTarget := "doi",
+		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
+
 		buildInfoKeys := Seq[BuildInfoKey](name, version),
 		buildInfoPackage := "se.lu.nateko.cp.doi",
 		buildInfoKeys ++= Seq(
