@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
 	organization := "se.lu.nateko.cp",
-	scalaVersion := "2.11.8"
+	scalaVersion := "2.12.3"
 )
 
 lazy val commonJvmSettings = Seq(
@@ -20,7 +20,7 @@ val common = crossProject
 	.in(file("common"))
 	.settings(
 		name := "doi-common",
-		version := "0.1.0-SNAPSHOT",
+		version := "0.1.1-SNAPSHOT",
 		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
 	)
 	.jsSettings(commonSettings: _*)
@@ -38,7 +38,7 @@ lazy val core = project
 	.enablePlugins(SbtTwirl)
 	.settings(
 		name := "doi-core",
-		version := "0.1.0-SNAPSHOT",
+		version := "0.1.1-SNAPSHOT",
 		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
 		publishTo := {
 			val nexus = "https://repo.icos-cp.eu/content/repositories/"
@@ -72,7 +72,7 @@ lazy val app = crossProject
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
 			"com.typesafe.akka" %% "akka-http"   % "10.0.4",
-			"se.lu.nateko.cp"   %% "views-core"  % "0.2-SNAPSHOT",
+			"se.lu.nateko.cp"   %% "views-core"  % "0.3.1-SNAPSHOT",
 			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
@@ -132,4 +132,3 @@ lazy val appJvm = app.jvm
 			assembledMappings.in(assembly).value :+ sbtassembly.MappingSet(None, Vector((finalJsFile, finalJsFile.getName)))
 		}
 	)
-
