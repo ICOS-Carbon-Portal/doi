@@ -78,11 +78,6 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		analyzeResponse{case 200 => Future.successful(())}
 	)
 
-	private def makeFailure[T](response: http.DoiResponse): Future[T] = {
-		val msg = response.message + ": " + response.body
-		Future.failed(new Exception(msg))
-	}
-
 	private def analyzeResponse[T](pf: PartialFunction[Int, Future[T]])(resp: http.DoiResponse): Future[T] = {
 		pf.applyOrElse(
 			resp.status,
@@ -96,4 +91,3 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		)
 	}
 }
-

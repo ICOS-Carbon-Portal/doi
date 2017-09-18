@@ -9,8 +9,6 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import se.lu.nateko.cp.doi.core.DoiClient
-import se.lu.nateko.cp.doi.meta.ContributorType
-import java.net.URL
 import akka.http.scaladsl.server.ExceptionHandler
 
 object Main{
@@ -81,4 +79,3 @@ object Main{
 			}
 	}
 }
-

@@ -1,10 +1,9 @@
 package se.lu.nateko.cp.doi.gui
 
-import scala.scalajs.js.JSApp
 import org.scalajs.dom.document
 import se.lu.nateko.cp.doi.gui.views.MainView
 
-object DoiApp extends JSApp {
+object DoiApp extends App {
 
 	val initState = DoiState(
 		prefix = "10.5072",//test value; the actual one is fetched from backend

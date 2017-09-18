@@ -104,7 +104,6 @@ object DoiMetaParser {
 	}
 
 	private def parseSubject(xml: Node): Subject = {
-		val subject = xml.text.trim
 		val lang = parseLang(xml)
 		val scheme = parseSubjectScheme(xml)
 		val valueUri = xml.attribute("valueURI").map(_.text)

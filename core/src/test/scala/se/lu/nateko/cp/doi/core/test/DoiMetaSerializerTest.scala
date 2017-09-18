@@ -1,7 +1,6 @@
 package se.lu.nateko.cp.doi.core.test
 
 import org.scalatest.FunSuite
-import views.xml.doi.DoiMeta
 import scala.xml.XML
 import se.lu.nateko.cp.doi.core.DoiMetaParser
 import javax.xml.validation.SchemaFactory
