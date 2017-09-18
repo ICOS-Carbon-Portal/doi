@@ -1,7 +1,6 @@
-lazy val commonSettings = Seq(
-	organization := "se.lu.nateko.cp",
-	scalaVersion := "2.12.3"
-)
+scalaVersion in ThisBuild := "2.12.3"
+organization in ThisBuild := "se.lu.nateko.cp"
+
 
 lazy val commonJvmSettings = Seq(
 	scalacOptions ++= Seq(
@@ -13,7 +12,7 @@ lazy val commonJvmSettings = Seq(
 		"-target:jvm-1.8",
 		"-encoding", "UTF-8"
 	)
-) ++ commonSettings
+)
 
 val common = crossProject
 	.crossType(CrossType.Pure)
@@ -23,7 +22,6 @@ val common = crossProject
 		version := "0.1.1-SNAPSHOT",
 		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
 	)
-	.jsSettings(commonSettings: _*)
 	.jvmSettings(commonJvmSettings: _*)
 	.jsSettings(name := "doi-common-js")
 	.jvmSettings(name := "doi-common-jvm")
@@ -60,7 +58,6 @@ lazy val app = crossProject
 			"com.lihaoyi" %%% "upickle" % "0.4.4"
 		)
 	)
-	.jsSettings(commonSettings: _*)
 	.jvmSettings(commonJvmSettings: _*)
 	.jsSettings(
 		name := "doi-js",
