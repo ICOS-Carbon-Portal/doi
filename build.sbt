@@ -1,7 +1,6 @@
 scalaVersion in ThisBuild := "2.12.3"
 organization in ThisBuild := "se.lu.nateko.cp"
 
-
 lazy val commonJvmSettings = Seq(
 	scalacOptions ++= Seq(
 		"-unchecked",
@@ -20,7 +19,10 @@ val common = crossProject
 	.settings(
 		name := "doi-common",
 		version := "0.1.1-SNAPSHOT",
-		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
+		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test",
+		cpDeploy := {
+			sys.error("Please switch to project appJVM for deployment")
+		}
 	)
 	.jvmSettings(commonJvmSettings: _*)
 	.jsSettings(name := "doi-common-js")
@@ -48,8 +50,6 @@ lazy val core = project
 		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
-lazy val deploy = inputKey[Unit]("Deploys to production using Ansible (depends on 'infrastructure' project)")
-
 lazy val app = crossProject
 	.in(file("."))
 	.settings(
@@ -63,7 +63,8 @@ lazy val app = crossProject
 		name := "doi-js",
 		libraryDependencies ++= Seq(
 			"com.lihaoyi" %%% "scalatags" % "0.6.2"
-		)
+		),
+		scalaJSUseMainModuleInitializer := true
 	)
 	.jvmSettings(
 		name := "doi-jvm",
@@ -93,17 +94,6 @@ lazy val appJvm = app.jvm
 		cpDeployTarget := "doi",
 		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
 
-		buildInfoKeys := Seq[BuildInfoKey](name, version),
-		buildInfoPackage := "se.lu.nateko.cp.doi",
-		buildInfoKeys ++= Seq(
-			BuildInfoKey.action("buildTime") {java.time.Instant.now()},
-			BuildInfoKey.action("gitOriginRemote") {
-				sbt.Process("git config --get remote.origin.url").lines.mkString("")
-			},
-			BuildInfoKey.action("gitHash") {
-				sbt.Process("git rev-parse HEAD").lines.mkString("")
-			}
-		),
 		resources.in(Compile) += fastOptJS.in(appJs, Compile).value.data,
 		watchSources ++= watchSources.in(appJs, Compile).value,
 		assembledMappings.in(assembly) := {
@@ -111,3 +101,4 @@ lazy val appJvm = app.jvm
 			assembledMappings.in(assembly).value :+ sbtassembly.MappingSet(None, Vector((finalJsFile, finalJsFile.getName)))
 		}
 	)
+

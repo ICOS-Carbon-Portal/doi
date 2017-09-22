@@ -3,7 +3,7 @@ package se.lu.nateko.cp.doi.gui
 import org.scalajs.dom.document
 import se.lu.nateko.cp.doi.gui.views.MainView
 
-object DoiApp extends App {
+object DoiApp {
 
 	val initState = DoiState(
 		prefix = "10.5072",//test value; the actual one is fetched from backend
@@ -20,7 +20,8 @@ object DoiApp extends App {
 	val renderer = new Renderer(mainView)
 	store.subscribe(renderer)
 
-	def main(): Unit = {
+	def main(args: Array[String]): Unit = {
+
 		val mainDiv = document.getElementById("main")
 		mainDiv.parentNode.replaceChild(mainView.element.render, mainDiv)
 
