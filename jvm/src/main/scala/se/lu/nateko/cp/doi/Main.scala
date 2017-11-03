@@ -10,6 +10,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import se.lu.nateko.cp.doi.core.DoiClient
 import akka.http.scaladsl.server.ExceptionHandler
+import scala.util.{Success, Failure}
+import se.lu.nateko.cp.cpauth.core.UserId
 
 object Main{
 
@@ -21,7 +23,7 @@ object Main{
 		import system.dispatcher
 		implicit val materializer = ActorMaterializer()
 
-		val DoiConfig(clientConf, authConf) = DoiConfig.getConfig
+		val DoiConfig(clientConf, authConf, admins) = DoiConfig.getConfig
 
 		val authRouting = new AuthRouting(authConf)
 
@@ -37,11 +39,10 @@ object Main{
 				complete((StatusCodes.InternalServerError, e.getMessage))
 		}
 
-		def mainPage(development: Boolean) = {
-			authRouting.user{uid =>
-				complete(views.html.doi.DoiPage(Some(uid), development))
-			} ~
-			complete(views.html.doi.DoiPage(None, development))
+		def isAdmin(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
+
+		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
+			complete(views.html.doi.DoiPage(isAdmin(uidOpt), development, authConf.cpauthHost))
 		}
 
 		val route = handleExceptions(exceptionHandler){
@@ -49,7 +50,9 @@ object Main{
 				doiRouting.publicRoute ~
 				post{
 					authRouting.user{uid =>
-						doiRouting.writingRoute
+						doiRouting.writingRoute{doi =>
+							doi.prefix == clientConf.doiPrefix || admins.contains(uid)
+						}
 					} ~
 					complete((StatusCodes.Unauthorized, "Must be logged in"))
 				} ~
@@ -63,19 +66,33 @@ object Main{
 				path("buildInfo"){
 					complete(BuildInfo.toString)
 				} ~
+				path("whoami"){
+					authRouting.userOpt{uidOpt =>
+						val email = uidOpt.map(uid => "\"" + uid.email + "\"").getOrElse("null")
+						complete(s"""{"email": $email, "isAdmin": ${isAdmin(uidOpt)}}""")
+					}
+				} ~
+				path("logout"){
+					deleteCookie(authConf.authCookieName, domain = authConf.authCookieDomain, path = "/"){
+						complete(StatusCodes.OK)
+					}
+				} ~
 				getFromResourceDirectory("")
 			}
 		}
 
 		Http().bindAndHandle(route, "127.0.0.1", port = 8079)
-			.onSuccess{
-				case binding =>
+			.onComplete{
+				case Success(binding) =>
 					sys.addShutdownHook{
 						val doneFuture = binding.unbind()
 							.flatMap(_ => system.terminate())(ExecutionContext.Implicits.global)
 						Await.result(doneFuture, 3 seconds)
 					}
 					system.log.info(s"Started CP DOI service: $binding")
+
+				case Failure(err) =>
+					system.log.error(err, "Could not start DOI minting service")
 			}
 	}
 }

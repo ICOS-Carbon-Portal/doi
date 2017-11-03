@@ -5,8 +5,10 @@ import com.typesafe.config.ConfigFactory
 import se.lu.nateko.cp.doi.core.DoiClientConfig
 import java.net.URL
 import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
+import se.lu.nateko.cp.cpauth.core.UserId
+import scala.collection.JavaConverters.asScalaBufferConverter
 
-case class DoiConfig(client: DoiClientConfig, auth: PublicAuthConfig)
+case class DoiConfig(client: DoiClientConfig, auth: PublicAuthConfig, admins: Seq[UserId])
 
 object DoiConfig {
 
@@ -14,7 +16,8 @@ object DoiConfig {
 		val allConf = getAppConfig
 		DoiConfig(
 			client = getClientConfig(allConf),
-			auth = getAuthConfig(allConf)
+			auth = getAuthConfig(allConf),
+			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_))
 		)
 	}
 
@@ -39,6 +42,8 @@ object DoiConfig {
 		val auth = allConf.getConfig("cpauth.auth.pub")
 		PublicAuthConfig(
 			authCookieName = auth.getString("authCookieName"),
+			authCookieDomain = auth.getString("authCookieDomain"),
+			cpauthHost = auth.getString("cpauthHost"),
 			publicKeyPath = auth.getString("publicKeyPath")
 		)
 	}

@@ -1,8 +1,7 @@
 @import views.html.CpCommonPage
-@import se.lu.nateko.cp.cpauth.core.UserId
 
-@(uid: Option[UserId], jsFastOpt: Boolean = false)
-@CpCommonPage("Carbon Portal's DOI minting service"){
+@(isAdmin: Boolean, jsFastOpt: Boolean = false, cpauthHost: String)
+@CpCommonPage("Carbon Portal's DOI minting service", cpauthHostOpt = Some(cpauthHost)){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
 			.spacyrow{
@@ -13,24 +12,15 @@
 	</style>
 }{
 	<div class = "page-header">
-		<div class="pull-right">
-			@uid match {
-				case None => {
-					<a href="https://cpauth.icos-cp.eu/login/?targetUrl=https://doi.icos-cp.eu/">Log in</a>
-				}
-				case Some(userId) => {
-					<span>Logged in as @(userId.email)</span>
-				}
-			}
-		</div>
 		<h1>Carbon Portal DOI minting service</h1>
 	</div>
 
 	<div class="panel panel-info">
 		<div class="panel-body">
-			<p>The service is in a test mode at the moment, using test prefix 10.5072 instead of real ICOS prefix 10.18160. The entries are going to be purged periodically by DataCite.</p>
+			<p>The service is in a test mode at the moment, using test prefix 10.5072 for new entries instead of real ICOS prefix 10.18160. The entries are going to be purged periodically by DataCite.</p>
 			<p>Users are invited to test the service, keeping in mind that the entries will eventually be lost.</p>
-			<p>Logging in with Carbon Portal is required for write operations to work.</p>
+			<p><strong>Logging in with Carbon Portal is required for write operations to work.</strong></p>
+			<p>Modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to admin users (@adminStatus)</p>
 		</div>
 	</div>
 
@@ -38,4 +28,8 @@
 	</div>
 	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>
 
+}
+
+@adminStatus = @{
+	if(isAdmin) "you are one" else "you are not one at the moment"
 }

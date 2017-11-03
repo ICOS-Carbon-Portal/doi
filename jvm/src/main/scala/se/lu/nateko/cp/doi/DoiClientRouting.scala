@@ -3,10 +3,9 @@ package se.lu.nateko.cp.doi
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
-import scala.concurrent.ExecutionContext
 import java.net.URL
 
-class DoiClientRouting(client: DoiClient)(implicit ec: ExecutionContext) {
+class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
 	import Pickling._
 
@@ -41,26 +40,33 @@ class DoiClientRouting(client: DoiClient)(implicit ec: ExecutionContext) {
 		}
 	}
 
-	val writingRoute = post{
+	def writingRoute(authorizer: Doi => Boolean) = post{
 		path(DoiPath / "target"){doi =>
-			entity(as[String]){url =>
-				onSuccess(client.setUrl(doi, new URL(url))){
-					complete(StatusCodes.OK)
+			if(authorizer(doi))
+				entity(as[String]){url =>
+					onSuccess(client.setUrl(doi, new URL(url))){
+						complete(StatusCodes.OK)
+					}
 				}
-			}
+			else forbid
 		} ~
 		path("metadata"){
 			entity(as[String]){metaStr =>
 				val meta = upickle.default.read[DoiMeta](metaStr)
-				onSuccess(client.postMetadata(meta)){
-					complete(StatusCodes.OK)
-				}
+				if(authorizer(meta.id))
+					onSuccess(client.postMetadata(meta)){
+						complete(StatusCodes.OK)
+					}
+				else forbid
 			}
 		}
 	}
 }
 
 object DoiClientRouting{
+
+	val forbid = complete(StatusCodes.Forbidden -> "You are not allowed to modify this DOI")
+
 	val DoiPath = (Segment / Segment).tflatMap{
 		case (prefix, suffix) =>
 			val doi = Doi(prefix, suffix)

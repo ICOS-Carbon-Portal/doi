@@ -4,19 +4,24 @@ import scala.xml.XML
 import se.lu.nateko.cp.doi.core.DoiMetaParser
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.Creator
+import se.lu.nateko.cp.doi.meta.PersonalName
 import se.lu.nateko.cp.doi.meta.Contributor
 import se.lu.nateko.cp.doi.meta.ContributorType
 import java.io.FileOutputStream
 import java.io.File
 import java.nio.charset.Charset
 import se.lu.nateko.cp.doi.Doi
+import scala.io.Source
 
 /**
  * Just a playground. Is put here in the test code area because it is not needed in the deployment artifacts.
  */
 object DoiTransform{
 
-	val folder = "/home/maintenance/Documents/CP/IngosMetadata/"
+	//val folder = "/home/maintenance/Documents/CP/IngosMetadata/"
+	//val srcFile = "IngosDataCiteMeta.xml"
+	val folder = "/home/maintenance/Documents/CP/L3metadata/GCPdoi/"
+	val srcFile = "gcp2017doiMetaDraft.xml"
 
 	def printPeopleAffiliations(): Unit = {
 		getMeta.contributors
@@ -29,7 +34,7 @@ object DoiTransform{
 	}
 
 	def getMeta: DoiMeta = {
-		val xml = XML.loadFile(folder + "IngosDataCiteMeta.xml")
+		val xml = XML.loadFile(folder + srcFile)
 		DoiMetaParser.parse(xml).get
 	}
 
@@ -71,6 +76,24 @@ object DoiTransform{
 		val os = new FileOutputStream(new File(folder + fileName))
 		os.write(s.getBytes(Charset.forName("UTF-8")))
 		os.close()
+	}
+
+	def readGcpContribs: Seq[Contributor] = {
+		Source.fromFile(folder + "contribsList.tsv").getLines().map{line =>
+			val vals = line.split("\t")
+			val Seq(lastName, firstName) = vals(0).split(", ").toSeq
+			Contributor(
+				name = PersonalName(firstName, lastName),
+				nameIds = Nil,
+				affiliations = vals.drop(1).map(_.trim),
+				contributorType = ContributorType.ContactPerson
+			)
+		}.toSeq
+	}
+
+	def transformGcp(): Unit = {
+		val newMeta = getMeta.copy(contributors = readGcpContribs)
+		saveXml(newMeta, "gcp2017doiMeta.xml")
 	}
 }
 

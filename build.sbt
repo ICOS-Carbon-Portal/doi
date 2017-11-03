@@ -13,6 +13,7 @@ lazy val commonJvmSettings = Seq(
 	)
 )
 
+//DataCite DOI metadata model, needed for back- and front end
 val common = crossProject
 	.crossType(CrossType.Pure)
 	.in(file("common"))
@@ -31,6 +32,7 @@ val common = crossProject
 lazy val commonJs = common.js
 lazy val commonJvm = common.jvm
 
+//core functionality that may be reused by different apps (backends)
 lazy val core = project
 	.in(file("core"))
 	.dependsOn(commonJvm)
@@ -50,6 +52,7 @@ lazy val core = project
 		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
+//the DOI minting web app itself
 lazy val app = crossProject
 	.in(file("."))
 	.settings(
@@ -69,9 +72,9 @@ lazy val app = crossProject
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"   % "10.0.4",
-			"se.lu.nateko.cp"   %% "views-core"  % "0.3.1-SNAPSHOT",
-			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5-SNAPSHOT"
+			"com.typesafe.akka" %% "akka-http"   % "10.0.10",
+			"se.lu.nateko.cp"   %% "views-core"  % "0.3.2-SNAPSHOT",
+			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5.1-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
 			baseDirectory.in(reStart).value.getParentFile
