@@ -1,7 +1,8 @@
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.20")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.0")
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.5")
+addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.13")
 
-addSbtPlugin("se.lu.nateko.cp" % "icoscp-sbt-deploy" % "0.1-SNAPSHOT")
+addSbtPlugin("se.lu.nateko.cp" % "icoscp-sbt-deploy" % "0.2.0-SNAPSHOT")
+
