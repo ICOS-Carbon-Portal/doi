@@ -58,6 +58,3 @@ trait Redux{
 			)
 	}
 }
-
-
-

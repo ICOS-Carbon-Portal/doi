@@ -21,18 +21,25 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 		(if(isSelected) "bottom" else "right")
 
 	private val selectDoi: Event => Unit = e => d.dispatch(ThunkActions.selectDoiFetchInfo(doi))
+	private val titleSpan = span(cls := "panel-title")().render
 
 	private val panelBody = div(cls := "panel-body").render
 
 	val element = div(cls := "panel panel-default")(
 		div(cls := "panel-heading", onclick := selectDoi, cursor := "pointer")(
 			doiListIcon,
-			span(cls := "panel-title")(" " + doi.toString)
+			titleSpan
 		),
 		panelBody
 	).render
 
 	private def updateContentVisibility(): Unit = {
+		val title = info
+			.flatMap( _.meta.titles.headOption)
+			.map(" " + _.title)
+			.getOrElse("")
+		titleSpan.textContent = s" $doi$title"
+
 		val display = if(isSelected && info.isDefined) "block" else "none"
 		panelBody.style.display = display
 	}

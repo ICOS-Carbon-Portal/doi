@@ -64,10 +64,17 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 }
 
 object DoiTargetWidget{
-	private val urlRegex = """^https://(\w+\.)?icos-cp\.eu/.*$""".r
+	private val urlRegex = """^https://([\w\-]+\.)?([\w\-]+)\.([^\./]+)/.*$""".r
+	private val allowed = Set("icos-cp.eu", "icos-etc.eu", "fieldsites.se")
 
-	def targetUrlError(uri: String): Option[String] =
-		if(urlRegex.findFirstIn(uri).isDefined)
-			None
-		else Some("Mush have format https://[<subdomain>.]icos-cp.eu/[<path>]")
+	def targetUrlError(uri: String): Option[String] = urlRegex.unapplySeq(uri).map(_.reverse) match {
+		case Some(l1 :: l2 :: _) =>
+			val domain = l2 + "." + l1
+			if(allowed.contains(domain))
+				None
+			else
+				Some(s"Domain '$domain' is not allowed, must be one of: " + allowed.mkString(", "))
+		case _ =>
+			Some("Must have format https://[<subdomain>.]<domain>/[<path>]")
+	}
 }

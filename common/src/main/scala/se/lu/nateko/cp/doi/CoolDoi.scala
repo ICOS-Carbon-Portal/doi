@@ -1,4 +1,4 @@
-package se.lu.nateko.cp.doi.core
+package se.lu.nateko.cp.doi
 
 import java.util.Random
 import scala.util.Try

@@ -1,5 +1,7 @@
-scalaVersion in ThisBuild := "2.12.4"
+scalaVersion in ThisBuild := "2.12.3"
 organization in ThisBuild := "se.lu.nateko.cp"
+
+watchService in ThisBuild := (() => new sbt.io.PollingWatchService(pollInterval.value)) //SBT bug
 
 lazy val commonJvmSettings = Seq(
 	scalacOptions ++= Seq(
@@ -41,7 +43,7 @@ lazy val core = project
 	.settings(
 		name := "doi-core",
 		version := "0.1.1-SNAPSHOT",
-		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test",
 		publishTo := {
 			val nexus = "https://repo.icos-cp.eu/content/repositories/"
 			if (isSnapshot.value)
@@ -58,7 +60,8 @@ lazy val app = crossProject
 	.settings(
 		name := "doi",
 		libraryDependencies ++= Seq(
-			"com.lihaoyi" %%% "upickle" % "0.4.4"
+			"com.lihaoyi" %%% "upickle" % "0.4.4",
+			"org.scalatest" %%% "scalatest" % "3.0.4" % "test",
 		)
 	)
 	.jvmSettings(commonJvmSettings: _*)

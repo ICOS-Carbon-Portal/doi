@@ -1,4 +1,4 @@
-package se.lu.nateko.cp.doi.core
+package se.lu.nateko.cp.doi
 
 import scala.collection.immutable.IndexedSeq
 import scala.collection.immutable.Map

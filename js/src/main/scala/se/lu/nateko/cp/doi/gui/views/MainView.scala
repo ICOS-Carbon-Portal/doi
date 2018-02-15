@@ -9,6 +9,7 @@ import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions.requestNewDoi
+import se.lu.nateko.cp.doi.CoolDoi
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -20,7 +21,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
-		onkeyup := (refreshDoiAdder _),
+		disabled := true,
+		//onkeyup := (refreshDoiAdder _),
 		placeholder := "New DOI suffix"
 	).render
 
@@ -28,6 +30,17 @@ class MainView(d: DoiRedux.Dispatcher) {
 		addDoiButton.disabled = true
 		d.dispatch(requestNewDoi(suffixInput.value))
 	}
+
+	private def genSuffix(): Unit = {
+		suffixInput.value = CoolDoi.makeRandom
+		addDoiButton.disabled = false
+	}
+
+	private val makeSuffixButton = button(
+		cls := "btn btn-default",
+		tpe := "button",
+		onclick := (genSuffix _)
+	)("Generate suffix").render
 
 	private val addDoiButton = button(
 		cls := "btn btn-default",
@@ -40,7 +53,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 			div(cls := "input-group")(
 				prefixSpan,
 				suffixInput,
-				span(cls := "input-group-btn")(addDoiButton)
+				span(cls := "input-group-btn")(makeSuffixButton, addDoiButton)
 			)
 		),
 		listElem
@@ -48,11 +61,10 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def supplyDoiList(dois: Seq[Doi]): Unit = {
 		listElem.innerHTML = ""
-		doiViews.clear()
+		doiViews.keys.toSeq.diff(dois).foreach(doiViews.-)
 
 		for(doi <- dois) {
-			val doiView = new DoiView(doi, d)
-			doiViews += ((doi, doiView))
+			val doiView = doiViews.getOrElseUpdate(doi, new DoiView(doi, d))
 			listElem.appendChild(doiView.element)
 		}
 	}
