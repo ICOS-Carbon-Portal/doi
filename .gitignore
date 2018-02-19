@@ -21,6 +21,7 @@ project/plugins/project/
 .project
 .settings/
 bin/
+**/.gitignore
 
 #ScalaJS specific
 *.sjsir

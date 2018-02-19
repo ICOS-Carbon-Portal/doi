@@ -3,13 +3,18 @@ package se.lu.nateko.cp.doi.gui
 import scala.concurrent.Future
 import org.scalajs.dom.ext.Ajax
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
-import se.lu.nateko.cp.doi.Pickling._
+import play.api.libs.json._
+import se.lu.nateko.cp.doi.JsonSupport._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 
 object Backend {
+
+	private def parseTo[T : Reads](xhr: XMLHttpRequest): T = {
+		Json.parse(xhr.responseText).as[T]
+	}
 
 	def getPrefix: Future[String] = Ajax
 		.get("/api/doiprefix")
@@ -19,7 +24,7 @@ object Backend {
 	def getDoiList: Future[Seq[Doi]] = Ajax
 		.get("/api/list")
 		.recoverWith(recovery("fetch DOI list"))
-		.map(req => upickle.default.read[Seq[Doi]](req.responseText))
+		.map(parseTo[Seq[Doi]])
 
 	def checkIfExists(doi: Doi): Future[Boolean] = Ajax
 		.get(s"/api/$doi/exists")
@@ -29,12 +34,13 @@ object Backend {
 	def getTarget(doi: Doi): Future[Option[String]] = Ajax
 		.get(s"/api/$doi/target")
 		.recoverWith(recovery("fetch DOI target URL"))
-		.map(req => upickle.default.read[Option[String]](req.responseText))
+		.map(parseTo[Seq[String]])
+		.map(_.headOption)
 
 	def getMeta(doi: Doi): Future[DoiMeta] = Ajax
 		.get(s"/api/$doi/metadata")
 		.recoverWith(recovery("fetch DOI metadata"))
-		.map(req => upickle.default.read[DoiMeta](req.responseText))
+		.map(parseTo[DoiMeta])
 
 	def getInfo(doi: Doi): Future[DoiInfo] = Backend.getMeta(doi)
 		.zip(Backend.getTarget(doi))
@@ -47,7 +53,7 @@ object Backend {
 		.recoverWith(recovery("update the target URL"))
 
 	def updateMeta(meta: DoiMeta) = Ajax
-		.post("/api/metadata", upickle.default.write(meta))
+		.post("/api/metadata", Json.toJson(meta).toString)
 		.recoverWith(recovery("update DOI metadata"))
 
 	private def recovery(hint: String): PartialFunction[Throwable, Future[XMLHttpRequest]] = {

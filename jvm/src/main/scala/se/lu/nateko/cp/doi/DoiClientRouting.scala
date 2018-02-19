@@ -4,16 +4,17 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
 import java.net.URL
+import play.api.libs.json._
 
 class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
-	import Pickling._
+	import JsonSupport._
 
 	val publicRoute = get{
 		path("list"){
 			onSuccess(client.listDois) { dois =>
 				complete{
-					upickle.default.write(dois)
+					Json.toJson(dois).toString
 				}
 			}
 		} ~
@@ -25,12 +26,12 @@ class DoiClientRouting(client: DoiClient) {
 			} ~
 			path("target"){
 				onSuccess(client.getUrl(doi)){url =>
-					complete(upickle.default.write(url.map(_.toString)))
+					complete(Json.toJson(url.map(url => Seq(url.toString)).getOrElse(Nil)).toString)
 				}
 			} ~
 			path("metadata"){
 				onSuccess(client.getMetadata(doi)){meta =>
-					complete(upickle.default.write(meta))
+					complete(Json.toJson(meta).toString)
 				}
 			} ~
 			complete(StatusCodes.NotFound)
@@ -52,7 +53,7 @@ class DoiClientRouting(client: DoiClient) {
 		} ~
 		path("metadata"){
 			entity(as[String]){metaStr =>
-				val meta = upickle.default.read[DoiMeta](metaStr)
+				val meta = Json.parse(metaStr).as[DoiMeta]
 				if(authorizer(meta.id))
 					onSuccess(client.postMetadata(meta)){
 						complete(StatusCodes.OK)

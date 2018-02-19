@@ -22,7 +22,7 @@ val common = crossProject
 	.settings(
 		name := "doi-common",
 		version := "0.1.1-SNAPSHOT",
-		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.1" % "test",
+		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.4" % "test",
 		cpDeploy := {
 			sys.error("Please switch to project appJVM for deployment")
 		}
@@ -60,7 +60,7 @@ lazy val app = crossProject
 	.settings(
 		name := "doi",
 		libraryDependencies ++= Seq(
-			"com.lihaoyi" %%% "upickle" % "0.4.4",
+			"com.typesafe.play" %%% "play-json" % "2.6.7",
 			"org.scalatest" %%% "scalatest" % "3.0.4" % "test",
 		)
 	)
@@ -75,8 +75,8 @@ lazy val app = crossProject
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"   % "10.0.10",
-			"se.lu.nateko.cp"   %% "views-core"  % "0.3.2-SNAPSHOT",
+			"com.typesafe.akka" %% "akka-http"   % "10.0.11",
+			"se.lu.nateko.cp"   %% "views-core"  % "0.3.3-SNAPSHOT",
 			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5.1-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
