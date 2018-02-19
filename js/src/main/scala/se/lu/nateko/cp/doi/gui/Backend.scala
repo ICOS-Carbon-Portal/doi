@@ -7,6 +7,7 @@ import play.api.libs.json._
 import se.lu.nateko.cp.doi.JsonSupport._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.PrefixInfo
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 
@@ -16,10 +17,10 @@ object Backend {
 		Json.parse(xhr.responseText).as[T]
 	}
 
-	def getPrefix: Future[String] = Ajax
+	def getPrefixInfo: Future[PrefixInfo] = Ajax
 		.get("/api/doiprefix")
 		.recoverWith(recovery("fetch DOI prefix"))
-		.map(_.responseText)
+		.map(parseTo[PrefixInfo])
 
 	def getDoiList: Future[Seq[Doi]] = Ajax
 		.get("/api/list")
@@ -34,8 +35,8 @@ object Backend {
 	def getTarget(doi: Doi): Future[Option[String]] = Ajax
 		.get(s"/api/$doi/target")
 		.recoverWith(recovery("fetch DOI target URL"))
-		.map(parseTo[Seq[String]])
-		.map(_.headOption)
+		.map(_.responseText)
+		.map(s => if(s.isEmpty) None else Some(s))
 
 	def getMeta(doi: Doi): Future[DoiMeta] = Ajax
 		.get(s"/api/$doi/metadata")

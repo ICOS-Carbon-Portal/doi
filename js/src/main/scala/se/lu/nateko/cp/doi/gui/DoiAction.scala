@@ -2,10 +2,11 @@ package se.lu.nateko.cp.doi.gui
 
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.PrefixInfo
 
 sealed trait DoiAction
 
-case class GotDoiPrefix(prefix: String) extends DoiAction
+case class GotPrefixInfo(info: PrefixInfo) extends DoiAction
 
 case class FreshDoiList(dois: Seq[Doi]) extends DoiAction
 

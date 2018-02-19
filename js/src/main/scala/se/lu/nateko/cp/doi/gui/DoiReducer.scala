@@ -12,7 +12,7 @@ object DoiReducer {
 
 	val reducer: Reducer = (action, state) => action match{
 
-		case GotDoiPrefix(prefix) => state.copy(prefix = prefix)
+		case GotPrefixInfo(info) => state.copy(stagingPrefix = info.stagingPrefix, productionPrefix = info.productionPrefix)
 
 		case FreshDoiList(dois) => state.copy(dois = dois)
 

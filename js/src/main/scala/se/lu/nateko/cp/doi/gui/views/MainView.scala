@@ -17,7 +17,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val listElem = ul(cls := "list-unstyled").render
 
-	private val prefixSpan = span(cls := "input-group-addon")(d.getState.prefix + "/").render
+	private val prefixSpan = span(cls := "input-group-addon").render
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
@@ -86,14 +86,14 @@ class MainView(d: DoiRedux.Dispatcher) {
 	def refreshDoiAdder(): Unit = {
 		val state = d.getState
 
-		prefixSpan.textContent = state.prefix
+		prefixSpan.textContent = state.stagingPrefix
 		suffixInput.value = suffixInput.value.toUpperCase
 
 		if(suffixInput.value.isEmpty){
 			setError(None)
 			addDoiButton.disabled = true
 		}else{
-			val doi = Doi(state.prefix, suffixInput.value)
+			val doi = Doi(state.stagingPrefix, suffixInput.value)
 			val error = doi.error.orElse{
 				if(state.dois.contains(doi) || state.alreadyExists.contains(doi))
 					Some("This DOI exists already!")

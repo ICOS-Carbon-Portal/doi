@@ -6,7 +6,8 @@ import se.lu.nateko.cp.doi.gui.views.MainView
 object DoiApp {
 
 	val initState = DoiState(
-		prefix = "10.5072",//test value; the actual one is fetched from backend
+		stagingPrefix = "10.5072",//default init value; the actual one is fetched from backend
+		productionPrefix = "10.18160",//default init value; the actual one is fetched from backend
 		dois = Nil,
 		info = Map.empty,
 		selected = None,
@@ -25,7 +26,7 @@ object DoiApp {
 		val mainDiv = document.getElementById("main")
 		mainDiv.parentNode.replaceChild(mainView.element.render, mainDiv)
 
-		store.dispatch(ThunkActions.FetchDoiPrefix)
+		store.dispatch(ThunkActions.FetchPrefixInfo)
 		store.dispatch(ThunkActions.DoiListRefreshRequest)
 	}
 

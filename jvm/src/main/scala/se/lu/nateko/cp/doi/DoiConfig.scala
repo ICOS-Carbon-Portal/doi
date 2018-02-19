@@ -8,14 +8,21 @@ import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
 import se.lu.nateko.cp.cpauth.core.UserId
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-case class DoiConfig(client: DoiClientConfig, auth: PublicAuthConfig, admins: Seq[UserId])
+case class DoiConfig(
+	client: DoiClientConfig,
+	prefixInfo: PrefixInfo,
+	auth: PublicAuthConfig,
+	admins: Seq[UserId]
+)
 
 object DoiConfig {
 
 	def getConfig: DoiConfig = {
 		val allConf = getAppConfig
+		val doiConf = allConf.getConfig("cpdoi")
 		DoiConfig(
-			client = getClientConfig(allConf),
+			client = getClientConfig(doiConf),
+			prefixInfo = getPrefixInfo(doiConf),
 			auth = getAuthConfig(allConf),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_))
 		)
@@ -28,15 +35,17 @@ object DoiConfig {
 		else ConfigFactory.parseFile(confFile).withFallback(default)
 	}
 
-	private def getClientConfig(allConf: Config): DoiClientConfig = {
-		val client = allConf.getConfig("cpdoi")
-		DoiClientConfig(
-			symbol = client.getString("symbol"),
-			password = client.getString("password"),
-			endpoint = new URL(client.getString("endpoint")),
-			doiPrefix = client.getString("doiPrefix")
-		)
-	}
+	private def getClientConfig(doiConf: Config) = DoiClientConfig(
+		symbol = doiConf.getString("symbol"),
+		password = doiConf.getString("password"),
+		endpoint = new URL(doiConf.getString("endpoint")),
+		doiPrefix = getPrefixInfo(doiConf).stagingPrefix
+	)
+
+	private def getPrefixInfo(doiConf: Config) = PrefixInfo(
+		stagingPrefix = doiConf.getString("stagingPrefix"),
+		productionPrefix = doiConf.getString("productionPrefix")
+	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {
 		val auth = allConf.getConfig("cpauth.auth.pub")

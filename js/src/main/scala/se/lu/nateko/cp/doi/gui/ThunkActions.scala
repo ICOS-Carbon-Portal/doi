@@ -15,8 +15,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 
 object ThunkActions {
 
-	val FetchDoiPrefix: ThunkAction = implicit d => {
-		dispatchFut(Backend.getPrefix.map(GotDoiPrefix(_)))
+	val FetchPrefixInfo: ThunkAction = implicit d => {
+		dispatchFut(Backend.getPrefixInfo.map(GotPrefixInfo(_)))
 	}
 
 	val DoiListRefreshRequest: ThunkAction = implicit d => {
@@ -60,7 +60,7 @@ object ThunkActions {
 	}
 
 	def requestNewDoi(suffix: String): ThunkAction = implicit d => {
-		val doi = Doi(d.getState.prefix, suffix.toUpperCase)
+		val doi = Doi(d.getState.stagingPrefix, suffix.toUpperCase)
 		doi.error match{
 			case Some(err) => d.dispatch(ReportError(err))
 			case None =>

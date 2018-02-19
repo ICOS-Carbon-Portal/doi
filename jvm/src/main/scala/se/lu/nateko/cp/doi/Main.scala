@@ -12,6 +12,7 @@ import se.lu.nateko.cp.doi.core.DoiClient
 import akka.http.scaladsl.server.ExceptionHandler
 import scala.util.{Success, Failure}
 import se.lu.nateko.cp.cpauth.core.UserId
+import play.api.libs.json.Json
 
 object Main{
 
@@ -23,7 +24,7 @@ object Main{
 		import system.dispatcher
 		implicit val materializer = ActorMaterializer()
 
-		val DoiConfig(clientConf, authConf, admins) = DoiConfig.getConfig
+		val DoiConfig(clientConf, prefixInfo, authConf, admins) = DoiConfig.getConfig
 
 		val authRouting = new AuthRouting(authConf)
 
@@ -57,7 +58,7 @@ object Main{
 					complete((StatusCodes.Unauthorized, "Must be logged in"))
 				} ~
 				path("doiprefix"){
-					get{complete(clientConf.doiPrefix)}
+					get{complete(Json.toJson(prefixInfo).toString)}
 				}
 			} ~
 			get{

@@ -26,7 +26,7 @@ class DoiClientRouting(client: DoiClient) {
 			} ~
 			path("target"){
 				onSuccess(client.getUrl(doi)){url =>
-					complete(Json.toJson(url.map(url => Seq(url.toString)).getOrElse(Nil)).toString)
+					complete(StatusCodes.OK -> url.map(_.toString).getOrElse(""))
 				}
 			} ~
 			path("metadata"){

@@ -8,7 +8,8 @@ case class DoiInfo(meta: DoiMeta, target: Option[String], hasBeenSaved: Boolean)
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
 case class DoiState(
-	prefix: String,
+	stagingPrefix: String,
+	productionPrefix: String,
 	dois: Seq[Doi],
 	info: Map[Doi, DoiInfo],
 	selected: Option[Doi],
