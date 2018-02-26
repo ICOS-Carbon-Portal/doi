@@ -11,7 +11,11 @@ import se.lu.nateko.cp.doi.gui.views.Constants
 
 import DoiMetaWidget._
 
-class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit) extends EntityWidget[DoiMeta] {
+class DoiMetaWidget(
+	init: DoiMeta,
+	protected val updateCb: DoiMeta => Unit,
+	cloneCb: DoiMeta => Unit
+) extends EntityWidget[DoiMeta] {
 
 	private[this] var _meta = init
 
@@ -91,6 +95,9 @@ class DoiMetaWidget(init: DoiMeta, protected val updateCb: DoiMeta => Unit) exte
 	val element = Bootstrap.defaultPanel("DOI Metadata")(
 		formElems,
 		errorMessages,
+		div(cls := "pull-right")(
+			button(tpe := "button", cls := "btn btn-default", onclick := {() => cloneCb(_meta)})("Clone")
+		),
 		div(cls := "btn-group")(updateButton, resetButton)
 	).render
 

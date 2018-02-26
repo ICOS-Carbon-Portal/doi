@@ -6,6 +6,7 @@ import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
 import se.lu.nateko.cp.doi.gui.widgets.DoiTargetWidget
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.DoiCloneRequest
 
 class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 
@@ -13,7 +14,8 @@ class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 		init.meta,
 		newMeta => {
 			d.dispatch(ThunkActions.requestMetaUpdate(newMeta))
-		}
+		},
+		meta => d.dispatch(DoiCloneRequest(meta))
 	)
 
 	private[this] val targetWidget = if(init.hasBeenSaved){

@@ -54,4 +54,6 @@ object JsonSupport{
 	implicit val descriptionFormat = Json.format[Description]
 
 	implicit val doiMetaFormat = Json.format[DoiMeta]
+
+	implicit val prefixInfoFormat = Json.format[PrefixInfo]
 }

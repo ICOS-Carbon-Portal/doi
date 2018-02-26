@@ -7,6 +7,7 @@ import DoiStateUpgrades._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.ResourceType
 import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral
+import se.lu.nateko.cp.doi.CoolDoi
 
 object DoiReducer {
 
@@ -29,6 +30,18 @@ object DoiReducer {
 		case TargetUrlUpdated(doi, url) => state.updateUrl(doi, url).stopUrlUpdate(doi)
 
 		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.id)
+
+		case DoiCloneRequest(meta) => {
+			val newDoi = Doi(state.stagingPrefix, CoolDoi.makeRandom)
+			val newInfo = DoiInfo(
+				meta = meta.copy(id = newDoi, titles = Nil),
+				target = None,
+				hasBeenSaved = false
+			)
+			state.copy(dois = newDoi +: state.dois)
+				.withSelected(newDoi)
+				.withDoiInfo(newInfo)
+		}
 
 		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.id)
 

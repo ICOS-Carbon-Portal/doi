@@ -18,6 +18,7 @@ case class TargetUrlUpdateRequest(doi: Doi, url: String) extends DoiAction
 case class TargetUrlUpdated(doi: Doi, url: String) extends DoiAction
 
 case class MetaUpdateRequest(meta: DoiMeta) extends DoiAction
+case class DoiCloneRequest(meta: DoiMeta) extends DoiAction
 case class MetaUpdated(meta: DoiMeta) extends DoiAction
 
 case class RefuseDoiCreation(doi: Doi) extends DoiAction

@@ -13,6 +13,7 @@ import akka.http.scaladsl.server.ExceptionHandler
 import scala.util.{Success, Failure}
 import se.lu.nateko.cp.cpauth.core.UserId
 import play.api.libs.json.Json
+import se.lu.nateko.cp.doi.JsonSupport.prefixInfoFormat
 
 object Main{
 

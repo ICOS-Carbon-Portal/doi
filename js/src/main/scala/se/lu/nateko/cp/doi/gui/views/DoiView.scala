@@ -36,7 +36,7 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 	private def updateContentVisibility(): Unit = {
 		val title = info
 			.flatMap( _.meta.titles.headOption)
-			.map(" " + _.title)
+			.map(" | " + _.title)
 			.getOrElse("")
 		titleSpan.textContent = s" $doi$title"
 
