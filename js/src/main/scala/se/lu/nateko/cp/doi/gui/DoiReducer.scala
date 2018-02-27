@@ -13,9 +13,9 @@ object DoiReducer {
 
 	val reducer: Reducer = (action, state) => action match{
 
-		case GotPrefixInfo(info) => state.copy(stagingPrefix = info.stagingPrefix, productionPrefix = info.productionPrefix)
+		case GotPrefixInfo(info) => state.copy(prefixes = info)
 
-		case FreshDoiList(dois) => state.copy(dois = dois)
+		case FreshDoiList(dois, lookup) => state.copy(dois = dois, titleLookup = lookup)
 
 		case SelectDoi(doi) =>
 			if(state.isSelected(doi))
@@ -32,7 +32,7 @@ object DoiReducer {
 		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.id)
 
 		case DoiCloneRequest(meta) => {
-			val newDoi = Doi(state.stagingPrefix, CoolDoi.makeRandom)
+			val newDoi = Doi(state.prefixes.staging, CoolDoi.makeRandom)
 			val newInfo = DoiInfo(
 				meta = meta.copy(id = newDoi, titles = Nil),
 				target = None,

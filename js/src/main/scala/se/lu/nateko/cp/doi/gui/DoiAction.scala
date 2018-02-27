@@ -8,7 +8,7 @@ sealed trait DoiAction
 
 case class GotPrefixInfo(info: PrefixInfo) extends DoiAction
 
-case class FreshDoiList(dois: Seq[Doi]) extends DoiAction
+case class FreshDoiList(dois: Seq[Doi], lookup: Map[Doi, String]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction
 

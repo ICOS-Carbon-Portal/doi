@@ -20,8 +20,9 @@ object ThunkActions {
 	}
 
 	val DoiListRefreshRequest: ThunkAction = implicit d => {
-		dispatchFut(Backend.getDoiList.map(FreshDoiList(_)))
+		dispatchFut(Backend.getFreshDoiList)
 	}
+
 
 	private def fetchInfo(doi: Doi): ThunkAction = implicit d => {
 		val state = d.getState
@@ -60,7 +61,7 @@ object ThunkActions {
 	}
 
 	def requestNewDoi(suffix: String): ThunkAction = implicit d => {
-		val doi = Doi(d.getState.stagingPrefix, suffix.toUpperCase)
+		val doi = Doi(d.getState.prefixes.staging, suffix.toUpperCase)
 		doi.error match{
 			case Some(err) => d.dispatch(ReportError(err))
 			case None =>

@@ -39,12 +39,12 @@ object DoiConfig {
 		symbol = doiConf.getString("symbol"),
 		password = doiConf.getString("password"),
 		endpoint = new URL(doiConf.getString("endpoint")),
-		doiPrefix = getPrefixInfo(doiConf).stagingPrefix
+		doiPrefix = getPrefixInfo(doiConf).staging
 	)
 
 	private def getPrefixInfo(doiConf: Config) = PrefixInfo(
-		stagingPrefix = doiConf.getString("stagingPrefix"),
-		productionPrefix = doiConf.getString("productionPrefix")
+		staging = doiConf.getString("stagingPrefix"),
+		production = doiConf.getString("productionPrefix")
 	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {

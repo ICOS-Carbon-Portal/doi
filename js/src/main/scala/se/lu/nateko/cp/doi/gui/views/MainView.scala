@@ -65,6 +65,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 		for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi, new DoiView(doi, d))
+			doiView.updateContentVisibility()
 			listElem.appendChild(doiView.element)
 		}
 	}
@@ -86,14 +87,14 @@ class MainView(d: DoiRedux.Dispatcher) {
 	def refreshDoiAdder(): Unit = {
 		val state = d.getState
 
-		prefixSpan.textContent = state.stagingPrefix
+		prefixSpan.textContent = state.prefixes.staging
 		suffixInput.value = suffixInput.value.toUpperCase
 
 		if(suffixInput.value.isEmpty){
 			setError(None)
 			addDoiButton.disabled = true
 		}else{
-			val doi = Doi(state.stagingPrefix, suffixInput.value)
+			val doi = Doi(state.prefixes.staging, suffixInput.value)
 			val error = doi.error.orElse{
 				if(state.dois.contains(doi) || state.alreadyExists.contains(doi))
 					Some("This DOI exists already!")

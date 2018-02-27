@@ -33,10 +33,12 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 		panelBody
 	).render
 
-	private def updateContentVisibility(): Unit = {
+	def updateContentVisibility(): Unit = {
 		val title = info
 			.flatMap( _.meta.titles.headOption)
-			.map(" | " + _.title)
+			.map(_.title)
+			.orElse(d.getState.titleLookup.get(doi))
+			.map(" | " + _)
 			.getOrElse("")
 		titleSpan.textContent = s" $doi$title"
 
@@ -57,5 +59,4 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 		val infoView = new DoiInfoView(doiInfo, d)
 		panelBody.appendChild(infoView.element)
 	}
-	updateContentVisibility()
 }

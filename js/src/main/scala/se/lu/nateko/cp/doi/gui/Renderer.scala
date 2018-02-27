@@ -9,7 +9,7 @@ class Renderer(mainView: MainView) extends StateListener {
 
 	def notify(state: State, oldState: State): Unit = {
 
-		if(state.stagingPrefix != oldState.stagingPrefix ||
+		if(state.prefixes.staging != oldState.prefixes.staging ||
 			state.alreadyExists != oldState.alreadyExists) mainView.refreshDoiAdder()
 
 		if(oldState.error != state.error){
@@ -19,7 +19,7 @@ class Renderer(mainView: MainView) extends StateListener {
 				mainView.clearErrors()
 		}
 
-		if(state.dois != oldState.dois){
+		if(state.dois != oldState.dois || state.titleLookup != oldState.titleLookup){
 			mainView.supplyDoiList(state.dois)
 			mainView.resetDoiAdder()
 		}

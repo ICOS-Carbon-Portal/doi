@@ -2,16 +2,17 @@ package se.lu.nateko.cp.doi.gui
 
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
+import se.lu.nateko.cp.doi.PrefixInfo
 
 case class DoiInfo(meta: DoiMeta, target: Option[String], hasBeenSaved: Boolean)
 
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
 case class DoiState(
-	stagingPrefix: String,
-	productionPrefix: String,
+	prefixes: PrefixInfo,
 	dois: Seq[Doi],
 	info: Map[Doi, DoiInfo],
+	titleLookup: Map[Doi, String],
 	selected: Option[Doi],
 	ioState: IoState,
 	alreadyExists: Option[Doi],
