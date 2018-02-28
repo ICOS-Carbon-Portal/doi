@@ -21,8 +21,7 @@ case class MetaUpdateRequest(meta: DoiMeta) extends DoiAction
 case class DoiCloneRequest(meta: DoiMeta) extends DoiAction
 case class MetaUpdated(meta: DoiMeta) extends DoiAction
 
-case class RefuseDoiCreation(doi: Doi) extends DoiAction
-case class PermitDoiCreation(doi: Doi) extends DoiAction
+case class EmptyDoiCreation(doi: Doi) extends DoiAction
 
 case class ReportError(msg: String) extends DoiAction
 case object ResetErrors extends DoiAction

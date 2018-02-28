@@ -60,23 +60,6 @@ object ThunkActions {
 		d.dispatch(writeTargetUrl(doi, url))
 	}
 
-	def requestNewDoi(suffix: String): ThunkAction = implicit d => {
-		val doi = Doi(d.getState.prefixes.staging, suffix.toUpperCase)
-		doi.error match{
-			case Some(err) => d.dispatch(ReportError(err))
-			case None =>
-				if(d.getState.dois.contains(doi)) { //already on the list
-					d.dispatch(RefuseDoiCreation(doi))
-				} else{
-					dispatchFut(Backend.checkIfExists(doi).map{
-						case true => RefuseDoiCreation(doi)
-						case false => PermitDoiCreation(doi)
-					})
-				}
-
-		}
-	}
-
 	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {
 		result.onComplete{
 			case Success(a) => d.dispatch(a)

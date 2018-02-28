@@ -53,7 +53,7 @@ object Main{
 				post{
 					authRouting.user{uid =>
 						doiRouting.writingRoute{doi =>
-							doi.prefix == clientConf.doiPrefix || admins.contains(uid)
+							doi.prefix == prefixInfo.staging || admins.contains(uid)
 						}
 					} ~
 					complete((StatusCodes.Unauthorized, "Must be logged in"))

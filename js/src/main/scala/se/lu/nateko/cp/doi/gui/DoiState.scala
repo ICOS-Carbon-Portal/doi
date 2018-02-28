@@ -15,7 +15,6 @@ case class DoiState(
 	titleLookup: Map[Doi, String],
 	selected: Option[Doi],
 	ioState: IoState,
-	alreadyExists: Option[Doi],
 	error: Option[String]
 )
 

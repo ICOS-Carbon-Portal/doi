@@ -17,10 +17,11 @@
 
 	<div class="panel panel-info">
 		<div class="panel-body">
-			<p>The service is in a test mode at the moment, using test prefix 10.5072 for new entries instead of real ICOS prefix 10.18160. The entries are going to be purged periodically by DataCite.</p>
-			<p>Users are invited to test the service, keeping in mind that the entries will eventually be lost.</p>
-			<p><strong>Logging in with Carbon Portal is required for write operations to work.</strong></p>
-			<p>Modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to admin users (@adminStatus)</p>
+			<p>New entries are created with staging test prefix 10.5072 instead of the &quot;official&quot; ICOS prefix 10.18160.</p>
+			<p>The workflow is designed as follows. Create a new entry or clone an existing one, edit, set DOI URL target, ask a DOI administrator from CP to publish it to 10.18160. To update metadata of a published DOI, repeat the workflow, starting from cloning the entry.</p>
+			<p>Publishing or modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to CP DOI admins (@adminStatus)</p>
+			<p><strong>Logging in with Carbon Portal is required for any write operations to work.</strong></p>
+			<p><strong>Stale staging entries are going to be purged periodically by DataCite.</strong></p>
 		</div>
 	</div>
 

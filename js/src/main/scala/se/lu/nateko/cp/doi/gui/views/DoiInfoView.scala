@@ -7,6 +7,7 @@ import se.lu.nateko.cp.doi.gui.widgets.DoiTargetWidget
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.DoiCloneRequest
+import se.lu.nateko.cp.doi.gui.widgets.PublishToProductionWidget
 
 class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 
@@ -28,5 +29,21 @@ class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 		).element
 	} else div.render
 
-	val element = div(metaWidget.element, targetWidget).render
+	private[this] val publishWidget = if(
+			init.meta.id.prefix == d.getState.prefixes.staging &&
+			init.hasBeenSaved
+		)
+			new PublishToProductionWidget(
+				d.getState.prefixes.production,
+				init.meta.id,
+				newDoi => {
+					d.dispatch(ThunkActions.requestMetaUpdate(init.meta.copy(id = newDoi)))
+					init.target.foreach{url =>
+						d.dispatch(ThunkActions.requestTargetUrlUpdate(newDoi, url))
+					}
+				}
+			).element
+		else div.render
+
+	val element = div(metaWidget.element, targetWidget, publishWidget).render
 }

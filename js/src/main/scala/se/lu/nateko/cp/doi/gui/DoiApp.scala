@@ -16,7 +16,6 @@ object DoiApp {
 		titleLookup = Map.empty,
 		selected = None,
 		ioState = IoState(None, None),
-		alreadyExists = None,
 		error = None
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)

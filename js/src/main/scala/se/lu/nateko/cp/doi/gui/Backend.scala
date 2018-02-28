@@ -75,6 +75,9 @@ object Backend {
 				doi -> title
 			}.toMap
 		}
+		.recover{
+			case _: Throwable => Map.empty
+		}
 
 	private def recovery(hint: String): PartialFunction[Throwable, Future[XMLHttpRequest]] = {
 		case AjaxException(xhr) =>

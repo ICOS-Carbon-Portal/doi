@@ -8,8 +8,8 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
-import se.lu.nateko.cp.doi.gui.ThunkActions.requestNewDoi
 import se.lu.nateko.cp.doi.CoolDoi
+import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -22,19 +22,20 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
 		disabled := true,
-		//onkeyup := (refreshDoiAdder _),
 		placeholder := "New DOI suffix"
 	).render
 
 	private def addDoi(): Unit = {
 		addDoiButton.disabled = true
-		d.dispatch(requestNewDoi(suffixInput.value))
+		d.dispatch(EmptyDoiCreation(Doi(getPrefix, suffixInput.value)))
 	}
 
 	private def genSuffix(): Unit = {
 		suffixInput.value = CoolDoi.makeRandom
 		addDoiButton.disabled = false
 	}
+
+	private def getPrefix = d.getState.prefixes.staging
 
 	private val makeSuffixButton = button(
 		cls := "btn btn-default",
@@ -45,6 +46,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val addDoiButton = button(
 		cls := "btn btn-default",
 		tpe := "button",
+		disabled := true,
 		onclick := (addDoi _)
 	)("Add new DOI").render
 
@@ -58,6 +60,10 @@ class MainView(d: DoiRedux.Dispatcher) {
 		),
 		listElem
 	)
+
+	def updateDefaultPrefix(): Unit = {
+		prefixSpan.textContent = getPrefix
+	}
 
 	def supplyDoiList(dois: Seq[Doi]): Unit = {
 		listElem.innerHTML = ""
@@ -84,37 +90,9 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def clearErrors(): Unit = errorView.clearErrors()
 
-	def refreshDoiAdder(): Unit = {
-		val state = d.getState
-
-		prefixSpan.textContent = state.prefixes.staging
-		suffixInput.value = suffixInput.value.toUpperCase
-
-		if(suffixInput.value.isEmpty){
-			setError(None)
-			addDoiButton.disabled = true
-		}else{
-			val doi = Doi(state.prefixes.staging, suffixInput.value)
-			val error = doi.error.orElse{
-				if(state.dois.contains(doi) || state.alreadyExists.contains(doi))
-					Some("This DOI exists already!")
-				else None
-			}
-			setError(error)
-			addDoiButton.disabled = error.isDefined
-		}
-
-	}
-
-	private def setError(err: Option[String]): Unit = {
-		suffixInput.style.background = err.map(_ => Constants.errorInputBackground).getOrElse("")
-		suffixInput.title = err.getOrElse("")
-	}
-
 	def resetDoiAdder(): Unit = {
 		suffixInput.value = ""
-		refreshDoiAdder()
 	}
 
-	refreshDoiAdder()
+	updateDefaultPrefix()
 }

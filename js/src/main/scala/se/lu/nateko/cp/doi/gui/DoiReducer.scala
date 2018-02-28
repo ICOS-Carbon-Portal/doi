@@ -32,23 +32,23 @@ object DoiReducer {
 		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.id)
 
 		case DoiCloneRequest(meta) => {
-			val newDoi = Doi(state.prefixes.staging, CoolDoi.makeRandom)
+			val newDoi = if(meta.id.prefix == state.prefixes.staging)
+					meta.id.copy(suffix = CoolDoi.makeRandom)
+				else meta.id.copy(prefix = state.prefixes.staging)
+
 			val newInfo = DoiInfo(
 				meta = meta.copy(id = newDoi, titles = Nil),
 				target = None,
 				hasBeenSaved = false
 			)
-			state.copy(dois = newDoi +: state.dois)
+			state.copy(dois = newDoi +: state.dois.filter(_ != newDoi))
 				.withSelected(newDoi)
 				.withDoiInfo(newInfo)
 		}
 
 		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.id)
 
-		case RefuseDoiCreation(doi) => state.copy(alreadyExists = Some(doi))
-
-		case PermitDoiCreation(doi) => state.copy(
-				alreadyExists = None,
+		case EmptyDoiCreation(doi) => state.copy(
 				dois = doi +: state.dois
 			)
 			.withSelected(doi)

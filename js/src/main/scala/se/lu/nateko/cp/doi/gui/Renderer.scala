@@ -9,8 +9,7 @@ class Renderer(mainView: MainView) extends StateListener {
 
 	def notify(state: State, oldState: State): Unit = {
 
-		if(state.prefixes.staging != oldState.prefixes.staging ||
-			state.alreadyExists != oldState.alreadyExists) mainView.refreshDoiAdder()
+		if(state.prefixes != oldState.prefixes) mainView.updateDefaultPrefix()
 
 		if(oldState.error != state.error){
 			if(state.error.isDefined)

@@ -96,7 +96,7 @@ class DoiMetaWidget(
 		formElems,
 		errorMessages,
 		div(cls := "pull-right")(
-			button(tpe := "button", cls := "btn btn-default", onclick := {() => cloneCb(_meta)})("Clone")
+			button(tpe := "button", cls := "btn btn-info", onclick := {() => cloneCb(_meta)})("Clone")
 		),
 		div(cls := "btn-group")(updateButton, resetButton)
 	).render
