@@ -39,7 +39,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 		validateTargetUrl()
 	}
 
-	private val doiUrl = "http://doi.org/" + doi
+	private val doiUrl = "https://doi.org/" + doi
 
 	val element = Bootstrap.defaultPanel("DOI Target")(
 		Bootstrap.basicPanel(
@@ -64,7 +64,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 }
 
 object DoiTargetWidget{
-	private val urlRegex = """^https://([\w\-]+\.)?([\w\-]+)\.([^\./]+)/.*$""".r
+	private val urlRegex = """^https?://([\w\-]+\.)?([\w\-]+)\.([^\./]+)/.*$""".r
 	private val allowed = Set("icos-cp.eu", "icos-etc.eu", "fieldsites.se")
 
 	def targetUrlError(uri: String): Option[String] = urlRegex.unapplySeq(uri).map(_.reverse) match {
@@ -75,6 +75,6 @@ object DoiTargetWidget{
 			else
 				Some(s"Domain '$domain' is not allowed, must be one of: " + allowed.mkString(", "))
 		case _ =>
-			Some("Must have format https://[<subdomain>.]<domain>/[<path>]")
+			Some("Must have format http[s]://[<subdomain>.]<domain>/[<path>]")
 	}
 }
