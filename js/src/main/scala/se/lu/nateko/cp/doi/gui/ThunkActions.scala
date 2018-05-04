@@ -38,15 +38,17 @@ object ThunkActions {
 		d.dispatch(fetchInfo(doi))
 	}
 
-	private def writeMeta(meta: DoiMeta): ThunkAction = implicit d => {
+	private def writeMeta(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
 		if(d.getState.isUpdatingMeta(meta.id)){
-			dispatchFut(Backend.updateMeta(meta).map(_ => MetaUpdated(meta)))
+			val updatedFut = Backend.updateMeta(meta).map(_ => MetaUpdated(meta))
+			dispatchFut(updatedFut)
+			updatedFut.foreach{_ => andThen foreach d.dispatch}
 		}
 	}
 
-	def requestMetaUpdate(meta: DoiMeta): ThunkAction = implicit d => {
+	def requestMetaUpdate(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
 		d.dispatch(MetaUpdateRequest(meta))
-		d.dispatch(writeMeta(meta))
+		d.dispatch(writeMeta(meta, andThen))
 	}
 
 	private def writeTargetUrl(doi: Doi, url: String): ThunkAction = implicit d => {

@@ -14,7 +14,7 @@ class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 	private[this] val metaWidget = new DoiMetaWidget(
 		init.meta,
 		newMeta => {
-			d.dispatch(ThunkActions.requestMetaUpdate(newMeta))
+			d.dispatch(ThunkActions.requestMetaUpdate(newMeta, None))
 		},
 		meta => d.dispatch(DoiCloneRequest(meta))
 	)
@@ -37,10 +37,10 @@ class DoiInfoView(init: DoiInfo, d: DoiRedux.Dispatcher) {
 				d.getState.prefixes.production,
 				init.meta.id,
 				newDoi => {
-					d.dispatch(ThunkActions.requestMetaUpdate(init.meta.copy(id = newDoi)))
-					init.target.foreach{url =>
-						d.dispatch(ThunkActions.requestTargetUrlUpdate(newDoi, url))
+					val urlActionOpt = init.target.map{url =>
+						ThunkActions.requestTargetUrlUpdate(newDoi, url)
 					}
+					d.dispatch(ThunkActions.requestMetaUpdate(init.meta.copy(id = newDoi), urlActionOpt))
 				}
 			).element
 		else div.render
