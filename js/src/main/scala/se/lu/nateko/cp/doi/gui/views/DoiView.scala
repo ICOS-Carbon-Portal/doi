@@ -9,6 +9,7 @@ import org.scalajs.dom.console
 import se.lu.nateko.cp.doi.gui.SelectDoi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
 class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 
@@ -25,7 +26,11 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 
 	private val panelBody = div(cls := "panel-body").render
 
-	val element = div(cls := "panel panel-default")(
+	val panelStyle = {
+		val prefs = d.getState.prefixes
+		if(doi.prefix == prefs.staging) "warning" else "info"
+	}
+	val element = div(cls := s"panel panel-$panelStyle")(
 		div(cls := "panel-heading", onclick := selectDoi, cursor := "pointer")(
 			doiListIcon,
 			titleSpan
@@ -37,7 +42,7 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 		val title = info
 			.flatMap( _.meta.titles.headOption)
 			.map(_.title)
-			.orElse(d.getState.titleLookup.get(doi))
+			.orElse(d.getState.dois.collectFirst{case DoiWithTitle(`doi`, title) => title})
 			.map(" | " + _)
 			.getOrElse("")
 		titleSpan.textContent = s" $doi$title"

@@ -10,6 +10,7 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
+import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -65,12 +66,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 		prefixSpan.textContent = getPrefix
 	}
 
-	def supplyDoiList(dois: Seq[Doi]): Unit = {
+	def supplyDoiList(dois: Seq[DoiWithTitle]): Unit = {
 		listElem.innerHTML = ""
 		doiViews.keys.toSeq.diff(dois).foreach(doiViews.-)
 
 		for(doi <- dois) {
-			val doiView = doiViews.getOrElseUpdate(doi, new DoiView(doi, d))
+			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi.doi, d))
 			doiView.updateContentVisibility()
 			listElem.appendChild(doiView.element)
 		}

@@ -11,6 +11,8 @@ import se.lu.nateko.cp.doi.PrefixInfo
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 
+case class DoiWithTitle(doi: Doi, title: String)
+
 object Backend {
 
 	private def parseTo[T : Reads](xhr: XMLHttpRequest): T = {
@@ -52,31 +54,20 @@ object Backend {
 		.post("/api/metadata", Json.toJson(meta).toString)
 		.recoverWith(recovery("update DOI metadata"))
 
-	def getFreshDoiList: Future[FreshDoiList] = {
-		getDoiList.zipWith(getTitleLookup)(FreshDoiList.apply)
-	}
-
-	private def getDoiList: Future[Seq[Doi]] = Ajax
-		.get("/api/list")
-		.recoverWith(recovery("fetch DOI list"))
-		.map(parseTo[Seq[Doi]])
-
-	private def getTitleLookup: Future[Map[Doi, String]] = Ajax
-		.get("https://api.datacite.org/works?data-center-id=snd.icos")
+	def getFreshDoiList: Future[FreshDoiList] = Ajax
+		.get("https://api.datacite.org/dois?client-id=snd.icos&page%5Bsize%5D=50")
 		.recoverWith(recovery("fetch DOI list from DataCite REST API"))
 		.map(parseTo[JsObject])
 		.map{jso =>
-			(jso \ "data").as[JsArray].value.map{jsv =>
+			val dois = (jso \ "data").as[JsArray].value.map{jsv =>
 				val attrs = jsv \ "attributes"
 				val title = (attrs \ "title").as[String]
 				val doiStr = (attrs \ "doi").as[String]
 				val idx = doiStr.indexOf('/')
 				val doi = Doi(doiStr.substring(0, idx), doiStr.substring(idx + 1).toUpperCase)
-				doi -> title
-			}.toMap
-		}
-		.recover{
-			case _: Throwable => Map.empty
+				DoiWithTitle(doi, title)
+			}
+			FreshDoiList(dois)
 		}
 
 	private def recovery(hint: String): PartialFunction[Throwable, Future[XMLHttpRequest]] = {

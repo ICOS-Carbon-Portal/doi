@@ -9,6 +9,10 @@
 				margin-bottom: 15px;
 			}
 		}
+		span.label{
+			font-size: 100%;
+			color: #000;
+		}
 	</style>
 }{
 	<div class = "page-header">
@@ -17,7 +21,7 @@
 
 	<div class="panel panel-info">
 		<div class="panel-body">
-			<p>New entries are created with staging test prefix 10.5072 instead of the &quot;official&quot; ICOS prefix 10.18160.</p>
+			<p>New entries are created with staging test prefix <span class="label label-warning">10.5072</span> instead of the &quot;official&quot; ICOS prefix <span class="label label-info">10.18160</span>.</p>
 			<p>The workflow is designed as follows. Create a new entry or clone an existing one, edit, set DOI URL target, ask a DOI administrator from CP to publish it to 10.18160. To update metadata of a published DOI, repeat the workflow, starting from cloning the entry.</p>
 			<p>Publishing or modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to CP DOI admins (@adminStatus)</p>
 			<p><strong>Logging in with Carbon Portal is required for any write operations to work.</strong></p>

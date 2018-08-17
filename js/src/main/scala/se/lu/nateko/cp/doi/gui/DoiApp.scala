@@ -13,7 +13,6 @@ object DoiApp {
 		),
 		dois = Nil,
 		info = Map.empty,
-		titleLookup = Map.empty,
 		selected = None,
 		ioState = IoState(None, None),
 		error = None

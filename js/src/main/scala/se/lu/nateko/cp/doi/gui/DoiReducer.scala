@@ -15,7 +15,7 @@ object DoiReducer {
 
 		case GotPrefixInfo(info) => state.copy(prefixes = info)
 
-		case FreshDoiList(dois, lookup) => state.copy(dois = dois, titleLookup = lookup)
+		case FreshDoiList(dois) => state.copy(dois = dois)
 
 		case SelectDoi(doi) =>
 			if(state.isSelected(doi))
@@ -41,7 +41,7 @@ object DoiReducer {
 				target = None,
 				hasBeenSaved = false
 			)
-			state.copy(dois = newDoi +: state.dois.filter(_ != newDoi))
+			state.copy(dois = DoiWithTitle(newDoi, "") +: state.dois.filter(_.doi != newDoi))
 				.withSelected(newDoi)
 				.withDoiInfo(newInfo)
 		}
@@ -49,7 +49,7 @@ object DoiReducer {
 		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.id)
 
 		case EmptyDoiCreation(doi) => state.copy(
-				dois = doi +: state.dois
+				dois = DoiWithTitle(doi, "") +: state.dois
 			)
 			.withSelected(doi)
 			.withDoiInfo(emptyInfo(doi))

@@ -10,9 +10,8 @@ case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
 case class DoiState(
 	prefixes: PrefixInfo,
-	dois: Seq[Doi],
+	dois: Seq[DoiWithTitle],
 	info: Map[Doi, DoiInfo],
-	titleLookup: Map[Doi, String],
 	selected: Option[Doi],
 	ioState: IoState,
 	error: Option[String]

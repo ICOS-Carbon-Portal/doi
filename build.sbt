@@ -76,7 +76,7 @@ lazy val app = crossProject
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
 			"com.typesafe.akka" %% "akka-http"   % "10.0.11",
-			"se.lu.nateko.cp"   %% "views-core"  % "0.3.3-SNAPSHOT",
+			"se.lu.nateko.cp"   %% "views-core"  % "0.3.8-SNAPSHOT",
 			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5.1-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
