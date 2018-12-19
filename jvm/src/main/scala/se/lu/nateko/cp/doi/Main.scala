@@ -44,7 +44,7 @@ object Main{
 		def isAdmin(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
 
 		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(isAdmin(uidOpt), development, authConf.cpauthHost))
+			complete(views.html.doi.DoiPage(isAdmin(uidOpt), development, authConf.authHost))
 		}
 
 		val route = handleExceptions(exceptionHandler){

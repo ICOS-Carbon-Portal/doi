@@ -61,7 +61,9 @@ object Backend {
 		.map{jso =>
 			val dois = (jso \ "data").as[JsArray].value.map{jsv =>
 				val attrs = jsv \ "attributes"
-				val title = (attrs \ "title").as[String]
+				val title = (attrs \ "titles").as[JsArray].value.headOption
+					.map{title => (title \ "title").as[String]}
+					.getOrElse("")
 				val doiStr = (attrs \ "doi").as[String]
 				val idx = doiStr.indexOf('/')
 				val doi = Doi(doiStr.substring(0, idx), doiStr.substring(idx + 1).toUpperCase)

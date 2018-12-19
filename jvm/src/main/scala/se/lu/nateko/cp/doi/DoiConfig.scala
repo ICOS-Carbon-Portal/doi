@@ -48,11 +48,11 @@ object DoiConfig {
 	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {
-		val auth = allConf.getConfig("cpauth.auth.pub")
+		val auth = allConf.getConfig("cpauthAuthPub")
 		PublicAuthConfig(
 			authCookieName = auth.getString("authCookieName"),
 			authCookieDomain = auth.getString("authCookieDomain"),
-			cpauthHost = auth.getString("cpauthHost"),
+			authHost = auth.getString("authHost"),
 			publicKeyPath = auth.getString("publicKeyPath")
 		)
 	}

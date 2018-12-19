@@ -1,4 +1,4 @@
-scalaVersion in ThisBuild := "2.12.3"
+scalaVersion in ThisBuild := "2.12.8"
 organization in ThisBuild := "se.lu.nateko.cp"
 
 watchService in ThisBuild := (() => new sbt.io.PollingWatchService(pollInterval.value)) //SBT bug
@@ -15,14 +15,16 @@ lazy val commonJvmSettings = Seq(
 	)
 )
 
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
 //DataCite DOI metadata model, needed for back- and front end
-val common = crossProject
+val common = crossProject(JSPlatform, JVMPlatform)
 	.crossType(CrossType.Pure)
 	.in(file("common"))
 	.settings(
 		name := "doi-common",
 		version := "0.1.1-SNAPSHOT",
-		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.4" % "test",
+		libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test",
 		cpDeploy := {
 			sys.error("Please switch to project appJVM for deployment")
 		}
@@ -31,19 +33,16 @@ val common = crossProject
 	.jsSettings(name := "doi-common-js")
 	.jvmSettings(name := "doi-common-jvm")
 
-lazy val commonJs = common.js
-lazy val commonJvm = common.jvm
-
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
 	.in(file("core"))
-	.dependsOn(commonJvm)
+	.dependsOn(common.jvm)
 	.settings(commonJvmSettings: _*)
 	.enablePlugins(SbtTwirl)
 	.settings(
 		name := "doi-core",
 		version := "0.1.1-SNAPSHOT",
-		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
 		publishTo := {
 			val nexus = "https://repo.icos-cp.eu/content/repositories/"
 			if (isSnapshot.value)
@@ -55,29 +54,30 @@ lazy val core = project
 	)
 
 //the DOI minting web app itself
-lazy val app = crossProject
+lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.in(file("."))
 	.settings(
 		name := "doi",
 		libraryDependencies ++= Seq(
-			"com.typesafe.play" %%% "play-json" % "2.6.7",
-			"org.scalatest" %%% "scalatest" % "3.0.4" % "test",
+			"com.typesafe.play" %%% "play-json" % "2.6.13",
+			"org.scalatest"     %%% "scalatest" % "3.0.5" % "test",
 		)
 	)
 	.jvmSettings(commonJvmSettings: _*)
 	.jsSettings(
 		name := "doi-js",
 		libraryDependencies ++= Seq(
-			"com.lihaoyi" %%% "scalatags" % "0.6.2"
+			"com.lihaoyi" %%% "scalatags" % "0.6.7"
 		),
 		scalaJSUseMainModuleInitializer := true
 	)
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"   % "10.0.11",
+			"com.typesafe.akka" %% "akka-http"   % "10.1.5",
+			"com.typesafe.akka" %% "akka-stream" % "2.5.19",
 			"se.lu.nateko.cp"   %% "views-core"  % "0.4.0-SNAPSHOT",
-			"se.lu.nateko.cp"   %% "cpauth-core" % "0.5.1-SNAPSHOT"
+			"se.lu.nateko.cp"   %% "cpauth-core" % "0.6.0-SNAPSHOT"
 		),
 		baseDirectory in reStart := {
 			baseDirectory.in(reStart).value.getParentFile
@@ -90,7 +90,7 @@ lazy val app = crossProject
 				originalStrategy(x)
 		}
 	)
-	.jsConfigure(_.dependsOn(commonJs))
+	.jsConfigure(_.dependsOn(common.js))
 	.jvmConfigure(_.dependsOn(core).enablePlugins(SbtTwirl))
 
 lazy val appJs = app.js
