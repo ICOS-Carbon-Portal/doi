@@ -52,8 +52,8 @@ object Main{
 				doiRouting.publicRoute ~
 				post{
 					authRouting.user{uid =>
-						doiRouting.writingRoute{doi =>
-							doi.prefix == prefixInfo.staging || admins.contains(uid)
+						doiRouting.writingRoute{_ =>
+							admins.contains(uid)
 						}
 					} ~
 					complete((StatusCodes.Unauthorized, "Must be logged in"))

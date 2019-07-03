@@ -18,6 +18,7 @@ object Doi{
 		if(suffixRegex.findFirstIn(suffix).isDefined) None else Some("Invalid DOI suffix")
 }
 
+//TODO Move Doi out of DoiMeta
 case class DoiMeta(
 	id: Doi,
 	creators: Seq[Creator],

@@ -21,11 +21,13 @@
 
 	<div class="panel panel-info">
 		<div class="panel-body">
-			<p>New entries are created with staging test prefix <span class="label label-warning">10.5072</span> instead of the &quot;official&quot; ICOS prefix <span class="label label-info">10.18160</span>.</p>
-			<p>The workflow is designed as follows. Create a new entry or clone an existing one, edit, set DOI URL target, ask a DOI administrator from CP to publish it to 10.18160. To update metadata of a published DOI, repeat the workflow, starting from cloning the entry.</p>
-			<p>Publishing or modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to CP DOI admins (@adminStatus)</p>
+			<p><b>Due to recent breaking change of DataCite's services, this service is only useable by administrators (@adminStatus)</b></p>
+			<p>DOI entries are created directly in production, with ICOS prefix <span class="label label-info">10.18160</span>, as findable DataCite DOIs.</p>
+			<div style="text-decoration: line-through">
+				<p>The workflow is designed as follows. Create a new entry or clone an existing one, edit, set DOI URL target, ask a DOI administrator from CP to publish it to 10.18160. To update metadata of a published DOI, repeat the workflow, starting from cloning the entry.</p>
+				<p>Publishing or modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to CP DOI admins (@adminStatus)</p>
+			</div>
 			<p><strong>Logging in with Carbon Portal is required for any write operations to work.</strong></p>
-			<p><strong>Stale staging entries are going to be purged periodically by DataCite.</strong></p>
 		</div>
 	</div>
 
