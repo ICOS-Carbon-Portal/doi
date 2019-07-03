@@ -22,7 +22,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
-		disabled := true,
+		//disabled := true,
 		placeholder := "New DOI suffix"
 	).render
 
