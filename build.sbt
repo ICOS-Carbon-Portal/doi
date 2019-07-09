@@ -2,7 +2,6 @@ scalaVersion in ThisBuild := "2.12.8"
 organization in ThisBuild := "se.lu.nateko.cp"
 
 watchService in ThisBuild := (() => new sbt.io.PollingWatchService(pollInterval.value)) //SBT bug
-
 lazy val commonJvmSettings = Seq(
 	scalacOptions ++= Seq(
 		"-unchecked",
@@ -13,6 +12,17 @@ lazy val commonJvmSettings = Seq(
 		"-target:jvm-1.8",
 		"-encoding", "UTF-8"
 	)
+)
+
+val publishSettings = Seq(
+	publishTo := {
+		val nexus = "https://repo.icos-cp.eu/content/repositories/"
+		if (isSnapshot.value)
+			Some("snapshots" at nexus + "snapshots")
+		else
+			Some("releases"  at nexus + "releases")
+	},
+	credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 )
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
@@ -29,7 +39,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 			sys.error("Please switch to project appJVM for deployment")
 		}
 	)
-	.jvmSettings(commonJvmSettings: _*)
+	.jvmSettings(commonJvmSettings ++ publishSettings: _*)
 	.jsSettings(name := "doi-common-js")
 	.jvmSettings(name := "doi-common-jvm")
 
@@ -37,20 +47,12 @@ val common = crossProject(JSPlatform, JVMPlatform)
 lazy val core = project
 	.in(file("core"))
 	.dependsOn(common.jvm)
-	.settings(commonJvmSettings: _*)
+	.settings(commonJvmSettings ++ publishSettings: _*)
 	.enablePlugins(SbtTwirl)
 	.settings(
 		name := "doi-core",
 		version := "0.1.1-SNAPSHOT",
 		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-		publishTo := {
-			val nexus = "https://repo.icos-cp.eu/content/repositories/"
-			if (isSnapshot.value)
-				Some("snapshots" at nexus + "snapshots")
-			else
-				Some("releases"  at nexus + "releases")
-		},
-		credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 	)
 
 //the DOI minting web app itself
