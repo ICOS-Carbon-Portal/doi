@@ -23,7 +23,7 @@ class NameIdentifierWidget(
 	})
 
 	private[this] val schemeInput = new SelectWidget[NameIdentifierScheme](
-		SelectWidget.selectOptions(None)(Orcid, Isni),
+		SelectWidget.selectOptions(None)(NameIdentifierScheme.supported: _*),
 		Some(init.scheme),
 		schemeOpt => {
 			schemeOpt.foreach{scheme =>

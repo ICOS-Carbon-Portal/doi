@@ -60,7 +60,11 @@ case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends Self
 				if(id.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
 				else Some("Wrong ISNI ID format")
 
-			case _ if(supported.contains(scheme.name)) => None
+			case Fluxnet =>
+				if(id.matches("""^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""")) None
+				else Some("Wrong FLUXNET site id format")
+
+			case _ if(supported.contains(scheme)) => None
 			case _ =>
 				val supportedNames = supported.mkString(", ")
 				Some("Only the following name identifier schemes are supported: " + supportedNames)
@@ -84,7 +88,8 @@ case class NameIdentifierScheme(name: String, uri: Option[String]) extends SelfV
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
-	val supported = Seq(Orcid, Isni).map(_.name)
+	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
+	val supported = Seq(Orcid, Isni, Fluxnet)
 }
 
 sealed trait Person extends SelfValidating{
