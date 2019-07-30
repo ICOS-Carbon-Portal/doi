@@ -40,8 +40,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 		}
 	)
 	.jvmSettings(commonJvmSettings ++ publishSettings: _*)
-	.jsSettings(name := "doi-common-js")
-	.jvmSettings(name := "doi-common-jvm")
+	.jsSettings(publishSettings: _*)
 
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
