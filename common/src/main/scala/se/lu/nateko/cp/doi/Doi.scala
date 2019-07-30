@@ -1,6 +1,9 @@
 package se.lu.nateko.cp.doi
 
 import se.lu.nateko.cp.doi.meta._
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 case class Doi(prefix: String, suffix: String) extends SelfValidating{
 	override def toString = prefix + "/" + suffix
@@ -14,8 +17,19 @@ case class Doi(prefix: String, suffix: String) extends SelfValidating{
 
 object Doi{
 	private val suffixRegex = """^[\d\w\.\-]+$""".r
+	private val DoiRegex = """(10\.\d+)/(.+)""".r
+
 	def suffixError(suffix: String) =
 		if(suffixRegex.findFirstIn(suffix).isDefined) None else Some("Invalid DOI suffix")
+
+	def parse(doiStr: String): Try[Doi] = doiStr match {
+		case DoiRegex(prefix, suffix) =>
+			val doi = Doi(prefix, suffix)
+			doi.error.fold[Try[Doi]](Success(doi)){err =>
+				Failure(new Exception(err))
+			}
+		case _ => Failure(new Exception("Error parsing a DOI, expected string of the form 10.nnnn/xxxxx, got " + doiStr))
+	}
 }
 
 //TODO Move Doi out of DoiMeta

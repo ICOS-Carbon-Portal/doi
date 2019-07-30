@@ -28,4 +28,18 @@ class DoiTests extends FunSpec{
 			assert(Doi("10.5555", "bla bla").error.isDefined)
 		}
 	}
+
+	describe("DOI parsing"){
+		it("succeeds on correct DOI string"){
+			assert(Doi.parse("10.1234/bebebe").isSuccess)
+		}
+
+		it("fails if prefix does not start with 10"){
+			assert(Doi.parse("20.1234/bebebe").isFailure)
+		}
+
+		it("fails if suffix is bad"){
+			assert(Doi.parse("10.1234/$").isFailure)
+		}
+	}
 }
