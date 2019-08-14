@@ -55,7 +55,7 @@ object Backend {
 		.recoverWith(recovery("update DOI metadata"))
 
 	def getFreshDoiList: Future[FreshDoiList] = Ajax
-		.get("https://api.datacite.org/dois?client-id=snd.icos&page%5Bsize%5D=50")
+		.get("https://api.datacite.org/dois?client-id=snd.icos&page%5Bsize%5D=500")
 		.recoverWith(recovery("fetch DOI list from DataCite REST API"))
 		.map(parseTo[JsObject])
 		.map{jso =>
