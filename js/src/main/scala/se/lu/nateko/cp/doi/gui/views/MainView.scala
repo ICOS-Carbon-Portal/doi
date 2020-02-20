@@ -12,6 +12,8 @@ import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
 import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
+import scala.collection.Seq
+
 class MainView(d: DoiRedux.Dispatcher) {
 
 	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]

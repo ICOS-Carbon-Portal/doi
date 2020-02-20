@@ -2,29 +2,14 @@
 *.log
 
 # sbt specific
-.cache
-.history
-.lib/
-dist/*
 target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
 
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
-.cache-main
-.cache-tests
-.classpath
-.project
-.settings/
+# VSCode + Scala metals specific
 .bloop/
 .metals/
 project/.bloop/
-bin/
-**/.gitignore
+project/metals.sbt
+
 
 #ScalaJS specific
 *.sjsir

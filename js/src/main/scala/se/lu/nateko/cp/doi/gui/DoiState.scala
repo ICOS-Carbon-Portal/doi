@@ -4,6 +4,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.PrefixInfo
 
+import scala.collection.Seq
+
 case class DoiInfo(meta: DoiMeta, target: Option[String], hasBeenSaved: Boolean)
 
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])

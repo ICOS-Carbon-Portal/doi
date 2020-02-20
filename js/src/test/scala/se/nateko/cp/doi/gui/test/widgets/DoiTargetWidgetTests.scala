@@ -1,15 +1,16 @@
 package se.lu.nateko.cp.doi.gui.test.widgets
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import se.lu.nateko.cp.doi.gui.widgets.DoiTargetWidget.targetUrlError
 
-class DoiTargetWidgetTests extends FunSpec{
+class DoiTargetWidgetTests extends AnyFunSpec{
 
 	describe("targetUrlError method"){
 		okTest("https://www.icos-cp.eu/")
 		okTest("https://www.icos-cp.eu/simplePath")
 		notOkTest("https://www.icos-cp.eu")
-		notOkTest("http://www.icos-cp.eu/")
+		notOkTest("https://www.blabla.eu/")
+		okTest("http://www.icos-cp.eu/")
 		okTest("https://meta-data.fieldsites.se/multi/segment/path/and#fragment")
 		okTest("https://some-thing.icos-etc.eu/simplePathAnd#fragment")
 	}

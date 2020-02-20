@@ -11,6 +11,7 @@ import se.lu.nateko.cp.doi.meta._
 import scala.util.control.NoStackTrace
 import scala.xml.XML
 import scala.collection.mutable.Buffer
+import scala.collection.Seq
 
 object DoiMetaParser {
 

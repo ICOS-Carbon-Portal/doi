@@ -1,9 +1,9 @@
 package se.lu.nateko.cp.doi.test.meta
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import se.lu.nateko.cp.doi.Doi
 
-class DoiTests extends FunSpec{
+class DoiTests extends AnyFunSpec{
 
 	describe("Doi validation"){
 

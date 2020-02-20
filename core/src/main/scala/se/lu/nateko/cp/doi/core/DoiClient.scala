@@ -8,6 +8,7 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 import scala.xml.XML
 import scala.util.Try
+import scala.collection.Seq
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
@@ -15,8 +16,8 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	val metaBase: URL = new URL(config.endpoint, "metadata")
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
-	def doiUrl(doi: Doi) = new URL(doiBase + "/" + doi.toString)
-	def metaUrl(doi: Doi) = new URL(metaBase + "/" + doi.toString)
+	def doiUrl(doi: Doi) = new URL(s"$doiBase/$doi")
+	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
 
 	def listDois: Future[Seq[Doi]] = {
 

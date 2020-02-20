@@ -4,6 +4,8 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.PrefixInfo
 
+import scala.collection.Seq
+
 sealed trait DoiAction
 
 case class GotPrefixInfo(info: PrefixInfo) extends DoiAction

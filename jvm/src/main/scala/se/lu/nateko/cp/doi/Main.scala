@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
@@ -23,7 +23,6 @@ object Main{
 
 		implicit val system = ActorSystem()
 		import system.dispatcher
-		implicit val materializer = ActorMaterializer()
 
 		val DoiConfig(clientConf, prefixInfo, authConf, admins) = DoiConfig.getConfig
 

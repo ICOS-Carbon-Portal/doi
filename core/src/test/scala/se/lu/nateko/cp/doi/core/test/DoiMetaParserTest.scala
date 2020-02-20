@@ -1,11 +1,11 @@
 package se.lu.nateko.cp.doi.core.test
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import scala.xml.Elem
 import scala.xml.XML
 import se.lu.nateko.cp.doi.core.DoiMetaParser
 
-class DoiMetaParserTest extends FunSuite{
+class DoiMetaParserTest extends AnyFunSuite{
 
 	def getTestXml: Elem = XML.load(getClass.getResource("/doiMetaExampleFull.xml"))
 

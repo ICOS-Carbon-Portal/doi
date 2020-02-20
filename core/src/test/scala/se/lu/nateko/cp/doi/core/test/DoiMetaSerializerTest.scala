@@ -1,6 +1,6 @@
 package se.lu.nateko.cp.doi.core.test
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import scala.xml.XML
 import se.lu.nateko.cp.doi.core.DoiMetaParser
 import javax.xml.validation.SchemaFactory
@@ -9,7 +9,7 @@ import java.net.URL
 import javax.xml.transform.stream.StreamSource
 import java.io.StringReader
 
-class DoiMetaSerializerTest extends FunSuite{
+class DoiMetaSerializerTest extends AnyFunSuite{
 
 	test("Serializing/parsing round trip"){
 		val meta = DoiMetaExamples.full

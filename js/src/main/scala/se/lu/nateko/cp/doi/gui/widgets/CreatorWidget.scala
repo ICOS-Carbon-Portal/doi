@@ -5,6 +5,8 @@ import se.lu.nateko.cp.doi.meta.NameIdentifier
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 
+import scala.collection.Seq
+
 import CreatorWidget._
 
 class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) extends EntityWidget[Creator]{
@@ -35,13 +37,8 @@ class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) exte
 
 object CreatorWidget{
 
-	class NameIdsInput(init: Seq[NameIdentifier], updateCb: Seq[NameIdentifier] => Unit) extends {
-
-		protected val title = "IDs"
-
-		protected val minAmount = 0
-
-	} with MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb){
+	class NameIdsInput(init: Seq[NameIdentifier], updateCb: Seq[NameIdentifier] => Unit) extends
+		MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb)("IDs"){
 
 		protected def makeWidget(value: NameIdentifier, updateCb: NameIdentifier => Unit) =
 			new NameIdentifierWidget(value, updateCb)
@@ -50,12 +47,7 @@ object CreatorWidget{
 	}
 
 
-	class AffiliationsInput(init: Seq[String], updateCb: Seq[String] => Unit) extends {
-
-		protected val title = "Affiliations"
-
-		protected val minAmount = 0
-
-	} with MultiStringsWidget(init, updateCb, "Affiliation")
+	class AffiliationsInput(init: Seq[String], updateCb: Seq[String] => Unit) extends
+		MultiStringsWidget(init, updateCb, "Affiliation")("Affiliations")
 
 }

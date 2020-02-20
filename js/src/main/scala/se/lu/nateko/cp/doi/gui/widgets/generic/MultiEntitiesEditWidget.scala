@@ -4,13 +4,14 @@ import scalatags.JsDom.all.{title => htmlTitle, _}
 import scala.collection.mutable.Buffer
 import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
+import scala.collection.Seq
 
-abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](initValues: Seq[E], cb: Seq[E] => Unit){
+abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
+	initValues: Seq[E], cb: Seq[E] => Unit
+)(protected val title: String, protected val minAmount: Int = 0){
 
-	protected val title: String
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
-	protected val minAmount: Int
 	private var isCollapsed = false
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]

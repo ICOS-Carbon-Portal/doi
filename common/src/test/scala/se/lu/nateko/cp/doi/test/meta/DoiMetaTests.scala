@@ -1,12 +1,12 @@
 package se.lu.nateko.cp.doi.test.meta
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 
 
-class DoiMetaTests extends FunSpec{
+class DoiMetaTests extends AnyFunSpec{
 
 	describe("NameIdentifier"){
 

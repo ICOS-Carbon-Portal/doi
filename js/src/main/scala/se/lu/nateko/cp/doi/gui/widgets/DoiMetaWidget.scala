@@ -9,6 +9,8 @@ import se.lu.nateko.cp.doi.gui.widgets.generic._
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.gui.views.Constants
 
+import scala.collection.Seq
+
 import DoiMetaWidget._
 
 class DoiMetaWidget(
@@ -106,10 +108,8 @@ class DoiMetaWidget(
 
 object DoiMetaWidget{
 
-	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends {
-		protected val title = "Creators"
-		protected val minAmount = 1
-	} with MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb){
+	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends
+		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", 1){
 
 		protected def makeWidget(value: Creator, updateCb: Creator => Unit) = new CreatorWidget(value, updateCb)
 
@@ -117,10 +117,8 @@ object DoiMetaWidget{
 	}
 
 
-	class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends {
-		protected val title = "Titles"
-		protected val minAmount = 1
-	} with MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb){
+	class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends
+		MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb)("Titles", 1){
 
 		protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
 
@@ -128,20 +126,16 @@ object DoiMetaWidget{
 	}
 
 
-	class SubjectsEditWidget(init: Seq[Subject], cb: Seq[Subject] => Unit) extends {
-		protected val title = "Subjects"
-		protected val minAmount = 0
-	} with MultiEntitiesEditWidget[Subject, SubjectWidget](init, cb){
+	class SubjectsEditWidget(init: Seq[Subject], cb: Seq[Subject] => Unit) extends
+		MultiEntitiesEditWidget[Subject, SubjectWidget](init, cb)("Subjects"){
 
 		protected def makeWidget(value: Subject, updateCb: Subject => Unit) = new SubjectWidget(value, updateCb)
 
 		protected def defaultValue = Subject("", None, None)
 	}
 
-	class ContributorsEditWidget(init: Seq[Contributor], cb: Seq[Contributor] => Unit) extends {
-		protected val title = "Contributors"
-		protected val minAmount = 0
-	} with MultiEntitiesEditWidget[Contributor, ContributorWidget](init, cb){
+	class ContributorsEditWidget(init: Seq[Contributor], cb: Seq[Contributor] => Unit) extends
+		MultiEntitiesEditWidget[Contributor, ContributorWidget](init, cb)("Contributors"){
 
 		protected def makeWidget(value: Contributor, updateCb: Contributor => Unit) = new ContributorWidget(value, updateCb)
 
@@ -149,10 +143,8 @@ object DoiMetaWidget{
 	}
 
 
-	class DatesEditWidget(init: Seq[Date], cb: Seq[Date] => Unit) extends {
-		protected val title = "Dates"
-		protected val minAmount = 0
-	} with MultiEntitiesEditWidget[Date, DateWidget](init, cb){
+	class DatesEditWidget(init: Seq[Date], cb: Seq[Date] => Unit) extends
+		MultiEntitiesEditWidget[Date, DateWidget](init, cb)("Dates"){
 
 		protected def makeWidget(value: Date, updateCb: Date => Unit) = new DateWidget(value, updateCb)
 
@@ -160,16 +152,12 @@ object DoiMetaWidget{
 	}
 
 
-	class FormatsEditWidget(init: Seq[String], cb: Seq[String] => Unit) extends {
-		protected val title = "Formats"
-		protected val minAmount = 0
-	} with MultiStringsWidget(init, cb, "Format")
+	class FormatsEditWidget(init: Seq[String], cb: Seq[String] => Unit) extends
+		MultiStringsWidget(init, cb, "Format")("Formats")
 
 
-	class RightsEditWidget(init: Seq[Rights], cb: Seq[Rights] => Unit) extends {
-		protected val title = "Rights"
-		protected val minAmount = 0
-	} with MultiEntitiesEditWidget[Rights, RightsWidget](init, cb){
+	class RightsEditWidget(init: Seq[Rights], cb: Seq[Rights] => Unit) extends
+		MultiEntitiesEditWidget[Rights, RightsWidget](init, cb)("Rights"){
 
 		protected def makeWidget(value: Rights, updateCb: Rights => Unit) = new RightsWidget(value, updateCb)
 
@@ -177,10 +165,8 @@ object DoiMetaWidget{
 	}
 
 
-	class DescriptionsEditWidget(init: Seq[Description], cb: Seq[Description] => Unit) extends {
-		protected val title = "Descriptions"
-		protected val minAmount = 0
-	} with MultiEntitiesEditWidget[Description, DescriptionWidget](init, cb){
+	class DescriptionsEditWidget(init: Seq[Description], cb: Seq[Description] => Unit) extends
+		MultiEntitiesEditWidget[Description, DescriptionWidget](init, cb)("Descriptions"){
 
 		protected def makeWidget(value: Description, updateCb: Description => Unit) = new DescriptionWidget(value, updateCb)
 

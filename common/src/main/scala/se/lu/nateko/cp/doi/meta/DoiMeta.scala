@@ -1,14 +1,18 @@
 package se.lu.nateko.cp.doi.meta
 
+import scala.collection.Seq
+import scala.collection.immutable
+
 trait SelfValidating{
 	def error: Option[String]
 
-	protected def joinErrors(errors: Option[String]*): Option[String] = {
+	protected def joinErrors(errors: Seq[Option[String]]): Option[String] = {
 		val list = errors.flatten
 		if(list.isEmpty) None else Some(list.mkString("\n"))
 	}
+	protected def joinErrors(errors: Option[String]*): Option[String] = joinErrors(errors)
 
-	protected def allGood(items: Seq[SelfValidating]): Option[String] = joinErrors(items.map(_.error): _*)
+	protected def allGood(items: Seq[SelfValidating]): Option[String] = joinErrors(items.map(_.error))
 
 	protected def nonNull(obj: AnyRef)(msg: String): Option[String] =
 		if(obj == null) Some(msg) else None
@@ -17,7 +21,7 @@ trait SelfValidating{
 		if(s == null || s.length == 0) Some(msg) else None
 
 	protected def eachNonEmpty(ss: Seq[String])(msg: String): Option[String] =
-		joinErrors(ss.map(s => nonEmpty(s)(msg)): _*)
+		joinErrors(ss.map(s => nonEmpty(s)(msg)))
 
 	protected def nonEmptyAllGood(items: Seq[SelfValidating])(msg: String): Option[String] =
 		if(items.isEmpty) Some(msg) else allGood(items)
@@ -89,7 +93,7 @@ object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
 	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
-	val supported = Seq(Orcid, Isni, Fluxnet)
+	val supported = immutable.Seq(Orcid, Isni, Fluxnet)
 }
 
 sealed trait Person extends SelfValidating{
@@ -189,7 +193,7 @@ case class Version(major: Int, minor: Int) extends SelfValidating{
 		versionCorrect(minor, "Minor")
 	)
 
-	override def toString = major + "." + minor
+	override def toString = s"$major.$minor"
 }
 
 case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidating{

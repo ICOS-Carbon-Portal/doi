@@ -4,6 +4,7 @@ import se.lu.nateko.cp.doi.meta._
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
+import scala.collection.Seq
 
 case class Doi(prefix: String, suffix: String) extends SelfValidating{
 	override def toString = prefix + "/" + suffix

@@ -1,9 +1,9 @@
 package se.lu.nateko.cp.doi.core.test
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import se.lu.nateko.cp.doi.CoolDoi
 
-class CoolDoiTests extends FunSuite{
+class CoolDoiTests extends AnyFunSuite{
 
 	test("decodes a valid cool DOI successfully"){
 		assert(CoolDoi.validate("VNX5-QXCB").isSuccess)

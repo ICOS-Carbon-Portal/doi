@@ -16,7 +16,6 @@ import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.model.headers.Accept
 import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
-import akka.stream.ActorMaterializer
 import akka.util.ByteString
 import se.lu.nateko.cp.doi.core.DoiHttp
 
@@ -27,13 +26,12 @@ class AkkaDoiHttp(
 
 	private val http = Http(system)
 	private val authHeader = new Authorization(BasicHttpCredentials(username, password))
-	private implicit val materializer = ActorMaterializer()
 	import system.dispatcher
 
 
 	protected def getContent(url: URL, accept: String): Future[DoiResponse] = {
 
-		val acceptHeader = Accept.parseFromValueString(accept).right.getOrElse(
+		val acceptHeader = Accept.parseFromValueString(accept).getOrElse(
 			throw new Exception("Invalid accept header value: " + accept)
 		)
 
@@ -43,7 +41,7 @@ class AkkaDoiHttp(
 
 
 	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = {
-		val cType = ContentType.parse(contentType).right.getOrElse(
+		val cType = ContentType.parse(contentType).getOrElse(
 			throw new Exception("Invalid content type: " + contentType)
 		)
 		val content = ByteString.apply(payload, "UTF-8")
@@ -65,7 +63,7 @@ class AkkaDoiHttp(
 
 	private def responseToDoi(resp: HttpResponse): Future[DoiResponse] = {
 
-		val bodyFut = resp.entity.toStrict(10 seconds).map(_.data.utf8String)
+		val bodyFut = resp.entity.toStrict(10.seconds).map(_.data.utf8String)
 
 		bodyFut.map(DoiResponse(
 			resp.status.intValue,

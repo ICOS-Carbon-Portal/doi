@@ -6,7 +6,8 @@ import se.lu.nateko.cp.doi.core.DoiClientConfig
 import java.net.URL
 import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
 import se.lu.nateko.cp.cpauth.core.UserId
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.jdk.CollectionConverters.ListHasAsScala
+import scala.collection.Seq
 
 case class DoiConfig(
 	client: DoiClientConfig,
