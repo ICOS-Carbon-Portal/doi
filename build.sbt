@@ -61,6 +61,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
+		version := "0.1.1",
 		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.8.1"
 	)
 	.jvmSettings(jvmOnlySettings: _*)
@@ -81,7 +82,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 			baseDirectory.in(reStart).value.getParentFile
 		},
 		assemblyMergeStrategy.in(assembly) := {
-			case PathList(name) if(name.endsWith("-fastopt.js")) =>
+			case PathList(name) if(name.endsWith("-fastopt.js") || name.endsWith("module-info.class")) =>
 				MergeStrategy.discard
 			case x =>
 				val originalStrategy = assemblyMergeStrategy.in(assembly).value
