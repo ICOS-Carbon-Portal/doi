@@ -61,7 +61,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.1.1",
+		version := "0.1.2",
 		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.8.1"
 	)
 	.jvmSettings(jvmOnlySettings: _*)

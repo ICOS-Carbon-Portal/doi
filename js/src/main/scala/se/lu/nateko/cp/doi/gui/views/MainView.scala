@@ -70,7 +70,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def supplyDoiList(dois: Seq[DoiWithTitle]): Unit = {
 		listElem.innerHTML = ""
-		doiViews.keys.toSeq.diff(dois).foreach(doiViews.-)
+		doiViews.keys.toSeq.diff(dois).foreach(doiViews.remove)
 
 		for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi.doi, d))
