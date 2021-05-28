@@ -1,11 +1,13 @@
 *.class
-*.log
 
 # sbt specific
 target/
+project/project/
 
 # VSCode + Scala metals specific
+.vscode/
 .bloop/
+.bsp/
 .metals/
 project/.bloop/
 project/metals.sbt

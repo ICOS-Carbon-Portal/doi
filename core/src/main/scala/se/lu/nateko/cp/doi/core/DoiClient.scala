@@ -23,7 +23,7 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 
 		http.getText(doiBase).flatMap(response => analyzeResponse{
 			case 200 =>
-				val doiLines = Source.fromString(response.body).getLines
+				val doiLines = Source.fromString(response.body).getLines()
 				val doiTries = doiLines.map(DoiMetaParser.parseDoi)
 				Future.fromTry(DoiMetaParser.tryAll(doiTries))
 			case 204 =>

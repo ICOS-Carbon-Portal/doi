@@ -82,7 +82,8 @@ object Main{
 			}
 		}
 
-		Http().bindAndHandle(route, "127.0.0.1", port = 8079)
+		Http().newServerAt("127.0.0.1", port = 8079)
+			.bindFlow(route)
 			.onComplete{
 				case Success(binding) =>
 					sys.addShutdownHook{
