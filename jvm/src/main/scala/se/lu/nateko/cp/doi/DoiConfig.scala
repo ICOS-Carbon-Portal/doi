@@ -39,7 +39,8 @@ object DoiConfig {
 	private def getClientConfig(doiConf: Config) = DoiClientConfig(
 		symbol = doiConf.getString("symbol"),
 		password = doiConf.getString("password"),
-		endpoint = new URL(doiConf.getString("endpoint")),
+		restEndpoint = new URL(doiConf.getString("restEndpoint")),
+		mdsEndpoint = new URL(doiConf.getString("mdsEndpoint")),
 		doiPrefix = getPrefixInfo(doiConf).staging
 	)
 
