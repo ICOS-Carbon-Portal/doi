@@ -18,6 +18,13 @@ class DoiClientRouting(client: DoiClient) {
 				}
 			}
 		} ~
+		path("metalist"){
+			onSuccess(client.listDoisMeta) { json =>
+				complete(
+					HttpEntity(ContentTypes.`application/json`, json)
+				)
+			}
+		} ~
 		pathPrefix(DoiPath){doi =>
 			path("exists"){
 				onSuccess(client.checkIfKnown(doi)){isKnown =>

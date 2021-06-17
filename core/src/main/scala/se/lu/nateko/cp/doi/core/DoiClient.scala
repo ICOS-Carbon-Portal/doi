@@ -12,8 +12,9 @@ import scala.collection.Seq
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
-	val doiBase: URL = new URL(config.endpoint, "doi")
-	val metaBase: URL = new URL(config.endpoint, "metadata")
+	val doiBase: URL = new URL(config.mdsEndpoint, "doi")
+	val metaBase: URL = new URL(config.mdsEndpoint, "metadata")
+	val clientDois: URL = new URL(s"${config.restEndpoint}dois?client-id=${config.symbol.toLowerCase()}&page[size]=500")
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 	def doiUrl(doi: Doi) = new URL(s"$doiBase/$doi")
@@ -29,6 +30,10 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 			case 204 =>
 				Future.successful(Seq.empty)
 		}(response))
+	}
+
+	def listDoisMeta: Future[String] = {
+		http.getJson(clientDois).map(response => response.body)
 	}
 
 	def setDoi(meta: DoiMeta, targetUrl: URL): Future[Unit] = {
