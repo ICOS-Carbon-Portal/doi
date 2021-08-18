@@ -18,13 +18,13 @@ class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) exte
 		updateCb(_creator)
 	})
 
-	private[this] val nameIdsInput = new NameIdsInput(init.nameIds, ids => {
-		_creator = _creator.copy(nameIds = ids)
+	private[this] val nameIdsInput = new NameIdsInput(init.nameIdentifiers, ids => {
+		_creator = _creator.copy(nameIdentifiers = ids)
 		updateCb(_creator)
 	})
 
-	private[this] val affiliationsInput = new AffiliationsInput(init.affiliations, affs => {
-		_creator = _creator.copy(affiliations = affs)
+	private[this] val affiliationsInput = new AffiliationsInput(init.affiliation, affs => {
+		_creator = _creator.copy(affiliation = affs)
 		updateCb(_creator)
 	})
 

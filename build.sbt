@@ -38,6 +38,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(
 		name := "doi-common",
 		version := "0.1.3",
+		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.9.2",
 		cpDeploy := {
 			sys.error("Please switch to project appJVM for deployment")
 		}
@@ -100,7 +101,12 @@ lazy val appJvm = app.jvm
 		cpDeployTarget := "doi",
 		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
 
-		Compile / resources += (appJs / Compile / fastOptJS).value.data,
+		Compile / resources ++= {
+			val jsFile = (appJs / Compile / fastOptJS).value.data
+			val srcMap = new java.io.File(jsFile.getAbsolutePath + ".map")
+			Seq(jsFile, srcMap)
+		},
+
 		watchSources ++= (appJs / Compile / watchSources).value,
 		assembly / assembledMappings := {
 			val finalJsFile = (appJs / Compile / fullOptJS).value.data

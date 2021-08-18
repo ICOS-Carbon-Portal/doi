@@ -98,22 +98,22 @@ object NameIdentifierScheme{
 
 sealed trait Person extends SelfValidating{
 	val name: Name
-	val nameIds: Seq[NameIdentifier]
-	val affiliations: Seq[String]
+	val nameIdentifiers: Seq[NameIdentifier]
+	val affiliation: Seq[String]
 
 	def error = joinErrors(
 		name.error,
-		allGood(nameIds),
-		eachNonEmpty(affiliations)("Affiliation is not required but must not be empty if provided")
+		allGood(nameIdentifiers),
+		eachNonEmpty(affiliation)("Affiliation is not required but must not be empty if provided")
 	)
 }
 
-case class Creator(name: Name, nameIds: Seq[NameIdentifier], affiliations: Seq[String]) extends Person
+case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[String]) extends Person
 
 case class Contributor(
 	name: Name,
-	nameIds: Seq[NameIdentifier],
-	affiliations: Seq[String],
+	nameIdentifiers: Seq[NameIdentifier],
+	affiliation: Seq[String],
 	contributorType: ContributorType.Value
 ) extends Person{
 
@@ -131,9 +131,9 @@ case class Title(title: String, lang: Option[String], titleType: Option[TitleTyp
 	)
 }
 
-case class ResourceType(resourceType: String, resourceTypeGeneral: ResourceTypeGeneral.Value) extends SelfValidating{
+case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral.Value]) extends SelfValidating{
 	def error = joinErrors(
-		nonEmpty(resourceType)("Specific resource type must not be empty"),
+		nonEmpty(resourceType.fold("")(r => r))("Specific resource type must not be empty"),
 		nonNull(resourceTypeGeneral)("The general resource type must be specified")
 	)
 }

@@ -13,7 +13,6 @@ import akka.http.scaladsl.server.ExceptionHandler
 import scala.util.{Success, Failure}
 import se.lu.nateko.cp.cpauth.core.UserId
 import play.api.libs.json.Json
-import se.lu.nateko.cp.doi.JsonSupport.prefixInfoFormat
 
 object Main{
 
@@ -41,9 +40,11 @@ object Main{
 		}
 
 		def isAdmin(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
+		def isLoggedIn(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
+
 
 		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(isAdmin(uidOpt), development, authConf.authHost))
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isAdmin(uidOpt), development, authConf.authHost))
 		}
 
 		val route = handleExceptions(exceptionHandler){
@@ -52,6 +53,14 @@ object Main{
 				post{
 					authRouting.user{uid =>
 						doiRouting.writingRoute{_ =>
+							admins.contains(uid)
+						}
+					} ~
+					complete((StatusCodes.Unauthorized, "Must be logged in"))
+				} ~
+				delete{
+					authRouting.user{uid =>
+						doiRouting.deleteRoute{_ =>
 							admins.contains(uid)
 						}
 					} ~

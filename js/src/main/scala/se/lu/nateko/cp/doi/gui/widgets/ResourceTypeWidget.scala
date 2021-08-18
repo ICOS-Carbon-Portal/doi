@@ -14,17 +14,17 @@ class ResourceTypeWidget(
 
 	private[this] var _resType = init
 
-	private[this] val rtInput = new TextInputWidget(init.resourceType, rt => {
-		_resType = _resType.copy(resourceType = rt)
+	private[this] val rtInput = new TextInputWidget(init.resourceType.getOrElse(""), rt => {
+		_resType = _resType.copy(resourceType = Some(rt))
 		updateCb(_resType)
 	}, "Specific resource type")
 
 	private[this] val rtGenInput = new SelectWidget[ResourceTypeGeneral](
 		SelectWidget.selectOptions(ResourceTypeGeneral, Some("General resource type")),
-		Option(init.resourceTypeGeneral),
+		init.resourceTypeGeneral,
 		rtGenOpt => {
 			val rtGen = rtGenOpt.getOrElse(null)
-			_resType = _resType.copy(resourceTypeGeneral = rtGen)
+			_resType = _resType.copy(resourceTypeGeneral = Some(rtGen))
 			updateCb(_resType)
 		}
 	)

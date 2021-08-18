@@ -26,12 +26,12 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = Future{
+	def putPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
 		conn.setDoOutput(true)
 		conn.setRequestProperty("Content-Type", contentType)
-		conn.setRequestMethod("POST")
+		conn.setRequestMethod("PUT")
 
 		try{
 			val out = conn.getOutputStream()

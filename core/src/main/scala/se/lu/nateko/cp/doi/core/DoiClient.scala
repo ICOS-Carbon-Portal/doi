@@ -6,83 +6,35 @@ import scala.concurrent.ExecutionContext
 import scala.io.Source
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
-import scala.xml.XML
 import scala.util.Try
 import scala.collection.Seq
+import play.api.libs.json._
+import se.lu.nateko.cp.doi.JsonSupport._
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
-	val doiBase: URL = new URL(config.mdsEndpoint, "doi")
-	val metaBase: URL = new URL(config.mdsEndpoint, "metadata")
+	val metaBase: URL = new URL(config.restEndpoint, "dois")
 	val clientDois: URL = new URL(s"${config.restEndpoint}dois?client-id=${config.symbol.toLowerCase()}&page[size]=500")
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
-	def doiUrl(doi: Doi) = new URL(s"$doiBase/$doi")
 	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
-
-	def listDois: Future[Seq[Doi]] = {
-
-		http.getText(doiBase).flatMap(response => analyzeResponse{
-			case 200 =>
-				val doiLines = Source.fromString(response.body).getLines()
-				val doiTries = doiLines.map(DoiMetaParser.parseDoi)
-				Future.fromTry(DoiMetaParser.tryAll(doiTries))
-			case 204 =>
-				Future.successful(Seq.empty)
-		}(response))
-	}
 
 	def listDoisMeta: Future[String] = {
 		http.getJson(clientDois).map(response => response.body)
 	}
 
-	def setDoi(meta: DoiMeta, targetUrl: URL): Future[Unit] = {
-		postMetadata(meta).flatMap(_ => setUrl(meta.id, targetUrl))
-	}
+	def getMetadata(doi: Doi): Future[String] = http.getJson(metaUrl(doi)).map(response => response.body)
 
-	def getMetadata(doi: Doi): Future[DoiMeta] = http.getXml(metaUrl(doi)).flatMap(response =>
-		analyzeResponse{
-			case 200 =>
-				val metaXmlTry = Try(XML.loadString(response.body))
-				Future.fromTry(metaXmlTry.flatMap(DoiMetaParser.parse))
-		}(response)
-	)
-
-	def checkIfKnown(doi: Doi): Future[Boolean] = http.getText(doiUrl(doi)).flatMap(
-		analyzeResponse{
-			case 200 | 204 => Future.successful(true)
-			case 404 => Future.successful(false)
-		}
-	)
-
-	def getUrl(doi: Doi): Future[Option[URL]] = http.getText(doiUrl(doi)).flatMap(response =>
-		analyzeResponse{
-			case 200 =>
-				Future.fromTry(Try(Some(new URL(response.body))))
-			case 204 =>
-				Future.successful(None)
-		}(response)
-	)
-
-	def setUrl(doi: Doi, targetUrl: URL): Future[Unit] = {
-		val payload = s"doi=$doi\nurl=$targetUrl"
-
-		http.postPayload(doiBase, payload, "text/plain;charset=UTF-8").flatMap(analyzeResponse{
-			case 201 => Future.successful(())
+	def putMetadata(meta: DoiMeta): Future[Unit] = {
+		http.putPayload(metaUrl(meta.doi), Json.obj("data" -> Json.obj("attributes" -> meta)).toString(), "application/vnd.api+json").flatMap(analyzeResponse{
+			case 200 | 201 => Future.successful(())
 		})
 	}
 
-	def postMetadata(meta: DoiMeta): Future[Unit] = {
-		val xml = views.xml.doi.DoiMeta(meta)
-
-		http.postPayload(metaBase, xml.body, "application/xml;charset=UTF-8").flatMap(analyzeResponse{
-			case 201 => Future.successful(())
-		})
-	}
-
-	def deactivate(doi: Doi): Future[Unit] = http.delete(metaUrl(doi)).flatMap(
-		analyzeResponse{case 200 => Future.successful(())}
-	)
+	def delete(doi: Doi): Future[Unit] =
+		http.delete(metaUrl(doi)).flatMap(
+			analyzeResponse{case 204 => Future.successful(())}
+		)
 
 	private def analyzeResponse[T](pf: PartialFunction[Int, Future[T]])(resp: http.DoiResponse): Future[T] = {
 		pf.applyOrElse(

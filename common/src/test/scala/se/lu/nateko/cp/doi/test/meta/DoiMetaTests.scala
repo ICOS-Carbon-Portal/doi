@@ -53,21 +53,22 @@ class DoiMetaTests extends AnyFunSpec{
 	describe("DoiMeta validation support"){
 
 		val example = DoiMeta(
-			id = Doi("10.5072", "carbonportal"),
+			doi = Doi("10.5072", "carbonportal"),
 			creators = Seq(
 				Creator(
 					name = GenericName("ICOS CP"),
-					nameIds = Nil,
-					affiliations = Nil
+					nameIdentifiers = Nil,
+					affiliation = Nil
 				)
 			),
 			contributors = Nil,
-			titles = Seq(
+			titles = Some(Seq(
 				Title("Carbon Portal home page", None, None)
-			),
-			publisher = "ICOS Carbon Portal",
-			publicationYear = 2016,
-			resourceType = ResourceType("website", ResourceTypeGeneral.Service)
+			)),
+			publisher = Some("ICOS Carbon Portal"),
+			publicationYear = Some(2016),
+			types = Some(ResourceType(Some("website"), Some(ResourceTypeGeneral.Service))),
+			url = Some("https://meta.icos-cp.eu/objects/-S_VUEUOFnH4L7nqlWmxuRN_")
 		)
 
 		it("accepts valid DoiMeta"){
@@ -75,7 +76,7 @@ class DoiMetaTests extends AnyFunSpec{
 		}
 
 		it("gives correct error if only title is wrong (empty)"){
-			val wrongExample = example.copy(titles = Seq(Title("", None, None)))
+			val wrongExample = example.copy(titles = Some(Seq(Title("", None, None))))
 			assertResult(Some("Title must not be empty"))(wrongExample.error)
 		}
 	}

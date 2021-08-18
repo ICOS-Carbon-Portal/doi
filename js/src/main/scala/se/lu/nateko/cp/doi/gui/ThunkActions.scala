@@ -39,7 +39,7 @@ object ThunkActions {
 	}
 
 	private def writeMeta(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
-		if(d.getState.isUpdatingMeta(meta.id)){
+		if(d.getState.isUpdatingMeta(meta.doi)){
 			val updatedFut = Backend.updateMeta(meta).map(_ => MetaUpdated(meta))
 			dispatchFut(updatedFut)
 			updatedFut.foreach{_ => andThen foreach d.dispatch}
@@ -51,21 +51,14 @@ object ThunkActions {
 		d.dispatch(writeMeta(meta, andThen))
 	}
 
-	private def writeTargetUrl(doi: Doi, url: String): ThunkAction = implicit d => {
-		if(d.getState.isUpdatingUrl(doi)){
-			dispatchFut(Backend.updateUrl(doi, url).map(_ => TargetUrlUpdated(doi, url)))
-		}
-	}
-
-	def requestTargetUrlUpdate(doi: Doi, url: String): ThunkAction = implicit d => {
-		d.dispatch(TargetUrlUpdateRequest(doi, url))
-		d.dispatch(writeTargetUrl(doi, url))
-	}
-
 	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {
 		result.onComplete{
 			case Success(a) => d.dispatch(a)
 			case Failure(err) => d.dispatch(ReportError(err.getMessage))
 		}
+	}
+
+	def requestDoiDeletion(doi: Doi): ThunkAction = implicit d => {
+		dispatchFut(Backend.delete(doi).map(_ => DoiDeleted(doi)))
 	}
 }

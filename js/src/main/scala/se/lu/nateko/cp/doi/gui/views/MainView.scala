@@ -6,13 +6,13 @@ import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiInfo
-import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
 import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
 import scala.collection.Seq
+import se.lu.nateko.cp.doi.DoiMeta
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -38,7 +38,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 		addDoiButton.disabled = false
 	}
 
-	private def getPrefix = d.getState.prefixes.staging
+	private def getPrefix = d.getState.prefix
 
 	private val makeSuffixButton = button(
 		cls := "btn btn-default",
@@ -54,11 +54,13 @@ class MainView(d: DoiRedux.Dispatcher) {
 	)("Add new DOI").render
 
 	val element = div(id := "main")(
-		Bootstrap.basicPanel(
-			div(cls := "input-group")(
-				prefixSpan,
-				suffixInput,
-				span(cls := "input-group-btn")(makeSuffixButton, addDoiButton)
+		div(cls := "new-doi-input")(
+			Bootstrap.basicPanel(
+				div(cls := "input-group")(
+					prefixSpan,
+					suffixInput,
+					span(cls := "input-group-btn")(makeSuffixButton, addDoiButton)
+				)
 			)
 		),
 		listElem
@@ -68,12 +70,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 		prefixSpan.textContent = getPrefix
 	}
 
-	def supplyDoiList(dois: Seq[DoiWithTitle]): Unit = {
+	def supplyDoiList(dois: Seq[DoiMeta]): Unit = {
 		listElem.innerHTML = ""
 		doiViews.keys.toSeq.diff(dois).foreach(doiViews.remove)
 
 		for(doi <- dois) {
-			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi.doi, d))
+			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
 			doiView.updateContentVisibility()
 			listElem.appendChild(doiView.element)
 		}
@@ -84,7 +86,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	}
 
 	def supplyInfo(info: DoiInfo): Unit = {
-		doiViews.get(info.meta.id).foreach(_.supplyInfo(info))
+		doiViews.get(info.meta.doi).foreach(_.supplyInfo(info))
 	}
 
 	private[this] val errorView = new ErrorView(400, 300, d)

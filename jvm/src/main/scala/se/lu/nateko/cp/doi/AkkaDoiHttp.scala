@@ -40,14 +40,14 @@ class AkkaDoiHttp(
 	}
 
 
-	def postPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = {
+	def putPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = {
 		val cType = ContentType.parse(contentType).getOrElse(
 			throw new Exception("Invalid content type: " + contentType)
 		)
 		val content = ByteString.apply(payload, "UTF-8")
 		val entity = HttpEntity(cType, content)
 
-		val request = basicRequest(url).withMethod(HttpMethods.POST).withEntity(entity)
+		val request = basicRequest(url).withMethod(HttpMethods.PUT).withEntity(entity)
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 

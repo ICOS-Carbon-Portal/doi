@@ -2,7 +2,6 @@ package se.lu.nateko.cp.doi.gui
 
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
-import se.lu.nateko.cp.doi.PrefixInfo
 
 import scala.collection.Seq
 
@@ -11,8 +10,8 @@ case class DoiInfo(meta: DoiMeta, target: Option[String], hasBeenSaved: Boolean)
 case class IoState(updatingUrl: Option[Doi], updatingMeta: Option[Doi])
 
 case class DoiState(
-	prefixes: PrefixInfo,
-	dois: Seq[DoiWithTitle],
+	prefix: String,
+	dois: Seq[DoiMeta],
 	info: Map[Doi, DoiInfo],
 	selected: Option[Doi],
 	ioState: IoState,
@@ -31,7 +30,7 @@ object DoiStateUpgrades{
 		def withMetaUpdate(doi: Doi) = state.copy(ioState = state.ioState.copy(updatingMeta = Some(doi)))
 		def withoutMetaUpdate(doi: Doi) = state.copy(ioState = state.ioState.copy(updatingMeta = None))
 
-		def withDoiInfo(doiInfo: DoiInfo) = state.copy(info = state.info + ((doiInfo.meta.id, doiInfo)))
+		def withDoiInfo(doiInfo: DoiInfo) = state.copy(info = state.info + ((doiInfo.meta.doi, doiInfo)))
 
 		def updateUrl(doi: Doi, url: String) = state.info.get(doi) match{
 
@@ -40,7 +39,7 @@ object DoiStateUpgrades{
 			case _ => state
 		}
 
-		def updateMeta(meta: DoiMeta) = state.info.get(meta.id) match{
+		def updateMeta(meta: DoiMeta) = state.info.get(meta.doi) match{
 
 			case Some(doiInfo) => state.withDoiInfo(doiInfo.withSavedMeta(meta))
 

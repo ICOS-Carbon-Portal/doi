@@ -10,8 +10,10 @@ import se.lu.nateko.cp.doi.gui.SelectDoi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.DoiWithTitle
+import se.lu.nateko.cp.doi.meta.DoiPublicationState
+import se.lu.nateko.cp.doi.DoiMeta
 
-class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
+class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private[this] var info: Option[DoiInfo] = None
 	private[this] var isSelected = false
@@ -21,14 +23,14 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 	private def doiListIconClass = "glyphicon glyphicon-triangle-" +
 		(if(isSelected) "bottom" else "right")
 
-	private val selectDoi: Event => Unit = e => d.dispatch(ThunkActions.selectDoiFetchInfo(doi))
+	private val selectDoi: Event => Unit = e => d.dispatch(ThunkActions.selectDoiFetchInfo(doi.doi))
 	private val titleSpan = span(cls := "panel-title")().render
 
 	private val panelBody = div(cls := "panel-body").render
 
 	val panelStyle = {
-		val prefs = d.getState.prefixes
-		if(doi.prefix == prefs.staging) "warning" else "info"
+		val prefs = d.getState.prefix
+		if(doi.state == DoiPublicationState.draft) "warning" else "info"
 	}
 	val element = div(cls := s"panel panel-$panelStyle")(
 		div(cls := "panel-heading", onclick := selectDoi, cursor := "pointer")(
@@ -40,12 +42,17 @@ class DoiView(doi: Doi, d: DoiRedux.Dispatcher) {
 
 	def updateContentVisibility(): Unit = {
 		val title = info
-			.flatMap( _.meta.titles.headOption)
-			.map(_.title)
-			.orElse(d.getState.dois.collectFirst{case DoiWithTitle(`doi`, title) => title})
-			.map(" | " + _)
+			.flatMap( _.meta.titles.map(_.headOption))
+			.orElse(
+				d.getState.dois.collectFirst{
+					case dm: DoiMeta if dm.doi == doi.doi => dm.titles.map(_.headOption)
+				}.flatten
+			)
+			.flatten
+			.map(" | " + _.title)
 			.getOrElse("")
-		titleSpan.textContent = s" $doi$title"
+
+		titleSpan.textContent = s" ${doi.doi} $title"
 
 		val display = if(isSelected && info.isDefined) "block" else "none"
 		panelBody.style.display = display

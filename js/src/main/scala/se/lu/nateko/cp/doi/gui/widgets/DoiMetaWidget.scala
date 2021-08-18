@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi.gui.widgets
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta._
+import se.lu.nateko.cp.doi.Doi
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic._
@@ -16,7 +17,8 @@ import DoiMetaWidget._
 class DoiMetaWidget(
 	init: DoiMeta,
 	protected val updateCb: DoiMeta => Unit,
-	cloneCb: DoiMeta => Unit
+	cloneCb: DoiMeta => Unit,
+	deleteCb: Doi => Unit
 ) extends EntityWidget[DoiMeta] {
 
 	private[this] var _meta = init
@@ -25,18 +27,18 @@ class DoiMetaWidget(
 
 		new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element.render,
 
-		new TitlesEditWidget(init.titles, cb(ts => _.copy(titles = ts))).element.render,
+		new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element.render,
 
 		Bootstrap.basicPropValueWidget("Publisher")(
-			new TextInputWidget(init.publisher, cb(pub => _.copy(publisher = pub))).element
+			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub)))).element
 		).render,
 
 		Bootstrap.basicPropValueWidget("Publication year")(
-			new IntInputWidget(init.publicationYear, cb(pub => _.copy(publicationYear = pub))).element
+			new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
 		).render,
 
 		Bootstrap.basicPropValueWidget("Resource type")(
-			new ResourceTypeWidget(init.resourceType, cb(rt => _.copy(resourceType = rt))).element
+			new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
 		).render,
 
 		new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element.render,
@@ -51,21 +53,27 @@ class DoiMetaWidget(
 			new VersionWidget(init.version, cb(v => _.copy(version = v))).element
 		).render,
 
-		new RightsEditWidget(init.rights, cb(rs => _.copy(rights = rs))).element.render,
+		new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element.render,
 
-		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render
+		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
+
+		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = Some(t)))).element
 
 	)
 
 	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
 		_meta = upd(prop)(_meta)
-		validateMeta()
+		_meta.state match {
+			case DoiPublicationState.draft => validateDraftMeta()
+			case _ => validateFindableMeta()
+		}
+		resetButton.disabled = false
 	}
 
 	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
 
-	private[this] def validateMeta(): Unit = {
-		val errors = _meta.error.toSeq.flatMap(_.split("\n"))
+	private[this] def validateDraftMeta(): Unit = {
+		val errors = _meta.draftError.toSeq.flatMap(_.split("\n"))
 
 		errorMessages.innerHTML = ""
 		errors.foreach(err => errorMessages.appendChild(p(err).render))
@@ -76,31 +84,75 @@ class DoiMetaWidget(
 		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
 	}
 
+	private[this] def validateFindableMeta(): Boolean = {
+		val errors = _meta.error.toSeq.flatMap(_.split("\n"))
+
+		errorMessages.innerHTML = ""
+		errors.foreach(err => errorMessages.appendChild(p(err).render))
+
+		val canSave = errors.isEmpty && _meta != init
+
+		updateButton.disabled = !canSave
+		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
+
+		canSave
+	}
+
 	private[this] def resetForms(): Unit = {
 		_meta = init
 		formElems.innerHTML = ""
 		formElements.foreach(formElems.appendChild)
-		validateMeta()
+		validateDraftMeta()
+		resetButton.disabled = true
 	}
 
-	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
+	private[this] val updateButton = button(tpe := "button", cls := "btn btn-primary", disabled := true)("Update").render
 	updateButton.onclick = (_: Event) => {
 		updateButton.disabled = true
 		updateCb(_meta)
 	}
 
-	private[this] val resetButton = button(tpe := "button", cls := "btn btn-default")("Reset").render
+	private[this] val publishButton = button(tpe := "button", cls := "btn btn-default btn-publish")("Publish").render
+	publishButton.onclick = (_: Event) => {
+		publishButton.disabled = true
+		if (validateFindableMeta()) {
+			updateCb(_meta.copy(event = Some(DoiPublicationEvent.publish)))
+		}
+	}
+
+	private[this] val cloneButton = button(tpe := "button", cls := "btn btn-default")("Clone").render
+	cloneButton.onclick = (_: Event) => cloneCb(_meta)
+
+	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-default btn-delete")("Delete").render
+	deleteButton.onclick = (_: Event) => {
+		deleteButton.disabled = true
+		deleteCb(_meta.doi)
+	}
+
+	private[this] val resetButton = button(tpe := "button", cls := "btn btn-default", disabled := true)("Reset").render
 	resetButton.onclick = (_: Event) => resetForms()
 
 	private[this] val formElems = div.render
 
-	val element = Bootstrap.defaultPanel("DOI Metadata")(
+	private[this] val buttons = {
+		_meta.state match {
+			case DoiPublicationState.draft =>
+				div()(
+					div(cls := "btn-group draft-controls")(deleteButton, resetButton),
+					div(cls := "btn-group draft-controls pull-right")(cloneButton, publishButton, updateButton)
+				)
+			case _ =>
+				div()(
+					div(cls := "btn-group draft-controls")(resetButton),
+					div(cls := "btn-group draft-controls pull-right")(cloneButton, updateButton)
+				)
+		}
+	}
+
+	val element = div(
 		formElems,
 		errorMessages,
-		div(cls := "pull-right")(
-			button(tpe := "button", cls := "btn btn-info", onclick := {() => cloneCb(_meta)})("Clone")
-		),
-		div(cls := "btn-group")(updateButton, resetButton)
+		buttons
 	).render
 
 	resetForms()

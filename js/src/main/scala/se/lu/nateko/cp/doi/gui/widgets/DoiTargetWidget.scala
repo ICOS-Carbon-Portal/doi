@@ -12,32 +12,20 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 	private[this] var _target = init.getOrElse("")
 
 	private[this] val urlInput = input(tpe := "text", cls := "form-control", value := _target).render
-	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
 
 	private[this] def validateTargetUrl(): Unit = {
 		val candidateUrl = Option(urlInput.value).getOrElse("")
 
-		val targetError = targetUrlError(candidateUrl)
+		val targetError = if(_target.isEmpty) None else targetUrlError(candidateUrl)
 		val canUpdate = targetError.isEmpty && _target != candidateUrl
 
-		updateButton.disabled = !canUpdate
-		updateButton.className = "btn btn-" + (if(canUpdate) "primary" else "default")
-		urlInput.placeholder = if(_target.isEmpty) "NOT MINTED" else ""
 		highlightError(urlInput, targetError)
+
+		if(canUpdate) updateCb(urlInput.value)
 	}
 	validateTargetUrl()
 
 	urlInput.onkeyup = (_: Event) => validateTargetUrl()
-
-	updateButton.onclick = (_: Event) => {
-		updateButton.disabled = true
-		updateCb(urlInput.value)
-	}
-
-	private[this] val resetTarget = (_: Event) => {
-		urlInput.value = _target
-		validateTargetUrl()
-	}
 
 	private val doiUrl = "https://doi.org/" + doi
 
@@ -49,18 +37,9 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: St
 		),
 		div(cls := "input-group")(
 			span(cls := "input-group-addon")("Target URL"),
-			urlInput,
-			div(cls := "input-group-btn")(
-				updateButton,
-				button(cls := "btn btn-default", tpe := "button", onclick := resetTarget)("Reset")
-			)
+			urlInput
 		)
 	).render
-
-	def refreshUrl(url: String): Unit = {
-		_target = url
-		resetTarget(null)
-	}
 }
 
 object DoiTargetWidget{

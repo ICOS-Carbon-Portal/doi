@@ -11,34 +11,15 @@ class DoiClientRouting(client: DoiClient) {
 	import JsonSupport._
 
 	val publicRoute = get{
-		path("list"){
-			onSuccess(client.listDois) { dois =>
-				complete{
-					Json.toJson(dois).toString
-				}
-			}
-		} ~
 		path("metalist"){
 			onSuccess(client.listDoisMeta) { json =>
-				complete(
-					HttpEntity(ContentTypes.`application/json`, json)
-				)
+				complete(HttpEntity(ContentTypes.`application/json`, json))
 			}
 		} ~
 		pathPrefix(DoiPath){doi =>
-			path("exists"){
-				onSuccess(client.checkIfKnown(doi)){isKnown =>
-					complete(isKnown.toString)
-				}
-			} ~
-			path("target"){
-				onSuccess(client.getUrl(doi)){url =>
-					complete(StatusCodes.OK -> url.map(_.toString).getOrElse(""))
-				}
-			} ~
 			path("metadata"){
 				onSuccess(client.getMetadata(doi)){meta =>
-					complete(Json.toJson(meta).toString)
+					complete(HttpEntity(ContentTypes.`application/json`, meta))
 				}
 			} ~
 			complete(StatusCodes.NotFound)
@@ -49,24 +30,25 @@ class DoiClientRouting(client: DoiClient) {
 	}
 
 	def writingRoute(authorizer: Doi => Boolean) = post{
-		path(DoiPath / "target"){doi =>
-			if(authorizer(doi))
-				entity(as[String]){url =>
-					onSuccess(client.setUrl(doi, new URL(url))){
-						complete(StatusCodes.OK)
-					}
-				}
-			else forbid
-		} ~
 		path("metadata"){
 			entity(as[String]){metaStr =>
 				val meta = Json.parse(metaStr).as[DoiMeta]
-				if(authorizer(meta.id))
-					onSuccess(client.postMetadata(meta)){
+				if(authorizer(meta.doi))
+					onSuccess(client.putMetadata(meta)){
 						complete(StatusCodes.OK)
 					}
 				else forbid
 			}
+		}
+	}
+
+	def deleteRoute(authorizer: Doi => Boolean) = delete {
+		pathPrefix(DoiPath){doi =>
+			if(authorizer(doi)) {
+				onSuccess(client.delete(doi)){
+					complete(StatusCodes.OK)
+				}
+			} else forbid
 		}
 	}
 }

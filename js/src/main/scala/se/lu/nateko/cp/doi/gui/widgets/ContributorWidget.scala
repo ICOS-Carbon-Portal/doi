@@ -28,13 +28,13 @@ class ContributorWidget(init: Contributor, protected val updateCb: Contributor =
 		updateCb(_contributor)
 	})
 
-	private[this] val nameIdsInput = new NameIdsInput(init.nameIds, ids => {
-		_contributor = _contributor.copy(nameIds = ids)
+	private[this] val nameIdsInput = new NameIdsInput(init.nameIdentifiers, ids => {
+		_contributor = _contributor.copy(nameIdentifiers = ids)
 		updateCb(_contributor)
 	})
 
-	private[this] val affiliationsInput = new AffiliationsInput(init.affiliations, affs => {
-		_contributor = _contributor.copy(affiliations = affs)
+	private[this] val affiliationsInput = new AffiliationsInput(init.affiliation, affs => {
+		_contributor = _contributor.copy(affiliation = affs)
 		updateCb(_contributor)
 	})
 

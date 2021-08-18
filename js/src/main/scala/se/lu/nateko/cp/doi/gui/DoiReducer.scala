@@ -8,12 +8,13 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.ResourceType
 import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral
 import se.lu.nateko.cp.doi.CoolDoi
+import se.lu.nateko.cp.doi.meta.DoiPublicationState
 
 object DoiReducer {
 
 	val reducer: Reducer = (action, state) => action match{
 
-		case GotPrefixInfo(info) => state.copy(prefixes = info)
+		case GotPrefixInfo(info) => state.copy(prefix = info)
 
 		case FreshDoiList(dois) => state.copy(dois = dois)
 
@@ -29,27 +30,25 @@ object DoiReducer {
 
 		case TargetUrlUpdated(doi, url) => state.updateUrl(doi, url).stopUrlUpdate(doi)
 
-		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.id)
+		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.doi)
 
 		case DoiCloneRequest(meta) => {
-			val newDoi = if(meta.id.prefix == state.prefixes.staging)
-					meta.id.copy(suffix = CoolDoi.makeRandom)
-				else meta.id.copy(prefix = state.prefixes.staging)
+			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
 
 			val newInfo = DoiInfo(
-				meta = meta.copy(id = newDoi, titles = Nil),
+				meta = meta.copy(doi = newDoi, titles = None),
 				target = None,
 				hasBeenSaved = false
 			)
-			state.copy(dois = DoiWithTitle(newDoi, "") +: state.dois.filter(_.doi != newDoi))
+			state.copy(dois = DoiMeta(newDoi) +: state.dois.filter(_.doi != newDoi))
 				.withSelected(newDoi)
 				.withDoiInfo(newInfo)
 		}
 
-		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.id)
+		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.doi)
 
 		case EmptyDoiCreation(doi) => state.copy(
-				dois = DoiWithTitle(doi, "") +: state.dois
+				dois = DoiMeta(doi) +: state.dois
 			)
 			.withSelected(doi)
 			.withDoiInfo(emptyInfo(doi))
@@ -58,16 +57,26 @@ object DoiReducer {
 
 		case ResetErrors => state.copy(error = None)
 
+		case DeleteDoi(doi) => state
+
+		case DoiDeleted(doi) => state.copy(
+			dois = state.dois.filter(_.doi != doi),
+			info = state.info.filter(_._1 != doi),
+			selected = None
+		)
+
 	}
 
 	private def emptyInfo(doi: Doi) = DoiInfo(
 		meta = DoiMeta(
-			id = doi,
+			doi = doi,
+			state = DoiPublicationState.draft,
 			creators = Nil,
-			titles = Nil,
-			publisher = "",
-			publicationYear = 0,
-			resourceType = ResourceType("", null)
+			titles = None,
+			publisher = None,
+			publicationYear = None,
+			types = None,
+			url = None
 		),
 		target = None,
 		hasBeenSaved = false

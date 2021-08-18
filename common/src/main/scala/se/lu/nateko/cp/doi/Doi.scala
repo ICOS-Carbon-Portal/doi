@@ -1,6 +1,7 @@
 package se.lu.nateko.cp.doi
 
 import se.lu.nateko.cp.doi.meta._
+import se.lu.nateko.cp.doi.meta.DoiPublicationState._
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
@@ -35,34 +36,51 @@ object Doi{
 
 //TODO Move Doi out of DoiMeta
 case class DoiMeta(
-	id: Doi,
-	creators: Seq[Creator],
-	titles: Seq[Title],
-	publisher: String,
-	publicationYear: Int,
-	resourceType: ResourceType,
+	doi: Doi,
+	state: DoiPublicationState.Value = draft,
+	event: Option[DoiPublicationEvent.Value] = None,
+	creators: Seq[Creator] = Seq(),
+	titles: Option[Seq[Title]] = None,
+	publisher: Option[String] = None,
+	publicationYear: Option[Int] = None,
+	types: Option[ResourceType] = None,
 	subjects: Seq[Subject] = Nil,
 	contributors: Seq[Contributor] = Nil,
 	dates: Seq[Date] = Nil,
 	formats: Seq[String] = Nil,
 	version: Option[Version] = None,
-	rights: Seq[Rights] = Nil,
-	descriptions: Seq[Description] = Nil
+	rightsList: Option[Seq[Rights]] = None,
+	descriptions: Seq[Description] = Nil,
+	url: Option[String] = None
 ) extends SelfValidating{
 
-	def error: Option[String] = joinErrors(
-		id.error,
-		nonEmptyAllGood(creators)("At least one creator is required"),
-		nonEmptyAllGood(titles)("At least one title is required"),
-		nonEmpty(publisher)("Publisher is required"),
-		if(publicationYear < 1000 || publicationYear > 3000) Some("Invalid publication year") else None,
-		resourceType.error,
+	def draftError: Option[String] = joinErrors(
+		doi.error,
+		allGood(creators),
+		titles.flatMap(t => allGood(t)),
+		publicationYear.map(p => if(p < 1000 || p > 3000) Some("Invalid publication year") else None).getOrElse(None),
 		allGood(subjects),
 		allGood(contributors),
 		allGood(dates),
 		eachNonEmpty(formats)("Format is not required but must not be empty if specified"),
 		version.flatMap(_.error),
-		allGood(rights),
+		rightsList.flatMap(r => allGood(r)),
+		allGood(descriptions)
+	)
+
+	def error: Option[String] = joinErrors(
+		doi.error,
+		nonEmptyAllGood(creators)("At least one creator is required"),
+		titles.fold[Option[String]](Some("At least one title is required"))(t => allGood(t)),
+		nonEmpty(publisher.fold("")(p => p))("Publisher is required"),
+		publicationYear.fold[Option[String]](Some("Publication year is required"))(y => if(y < 1000 || y > 3000) Some("Invalid publication year") else None),
+		types.fold[Option[String]](Some("Resource type is required"))(r => r.error),
+		allGood(subjects),
+		allGood(contributors),
+		allGood(dates),
+		eachNonEmpty(formats)("Format is not required but must not be empty if specified"),
+		version.flatMap(_.error),
+		rightsList.flatMap(r => allGood(r)),
 		allGood(descriptions)
 	)
 }

@@ -7,7 +7,6 @@ import play.api.libs.json._
 import se.lu.nateko.cp.doi.JsonSupport._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
-import se.lu.nateko.cp.doi.PrefixInfo
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 
@@ -19,36 +18,21 @@ object Backend {
 		Json.parse(xhr.responseText).as[T]
 	}
 
-	def getPrefixInfo: Future[PrefixInfo] = Ajax
+	def getPrefixInfo: Future[String] = Ajax
 		.get("/api/doiprefix")
 		.recoverWith(recovery("fetch DOI prefix"))
-		.map(parseTo[PrefixInfo])
-
-	def checkIfExists(doi: Doi): Future[Boolean] = Ajax
-		.get(s"/api/$doi/exists")
-		.recoverWith(recovery("check for DOI existence"))
-		.map(_.responseText.toBoolean)
-
-	def getTarget(doi: Doi): Future[Option[String]] = Ajax
-		.get(s"/api/$doi/target")
-		.recoverWith(recovery("fetch DOI target URL"))
-		.map(_.responseText)
-		.map(s => if(s.isEmpty) None else Some(s))
+		.map(parseTo[String])
 
 	def getMeta(doi: Doi): Future[DoiMeta] = Ajax
 		.get(s"/api/$doi/metadata")
 		.recoverWith(recovery("fetch DOI metadata"))
-		.map(parseTo[DoiMeta])
+		.map(parseTo[JsObject])
+		.map(jso =>
+			(jso \ "data" \ "attributes").as[DoiMeta]
+		)
 
 	def getInfo(doi: Doi): Future[DoiInfo] = Backend.getMeta(doi)
-		.zip(Backend.getTarget(doi))
-		.map{
-			case (meta, target) => DoiInfo(meta, target, true)
-		}
-
-	def updateUrl(doi: Doi, url: String) = Ajax
-		.post(s"/api/$doi/target", url)
-		.recoverWith(recovery("update the target URL"))
+		.map(meta => DoiInfo(meta, meta.url, true))
 
 	def updateMeta(meta: DoiMeta) = Ajax
 		.post("/api/metadata", Json.toJson(meta).toString)
@@ -60,17 +44,14 @@ object Backend {
 		.map(parseTo[JsObject])
 		.map{jso =>
 			val dois = (jso \ "data").as[JsArray].value.map{jsv =>
-				val attrs = jsv \ "attributes"
-				val title = (attrs \ "titles").as[JsArray].value.headOption
-					.map{title => (title \ "title").as[String]}
-					.getOrElse("")
-				val doiStr = (attrs \ "doi").as[String]
-				val idx = doiStr.indexOf('/')
-				val doi = Doi(doiStr.substring(0, idx), doiStr.substring(idx + 1).toUpperCase)
-				DoiWithTitle(doi, title)
+				(jsv \ "attributes").as[DoiMeta]
 			}
 			FreshDoiList(dois)
 		}
+
+		def delete(doi: Doi) = Ajax
+			.delete(s"/api/$doi/")
+			.recoverWith(recovery("delete DOI"))
 
 	private def recovery(hint: String): PartialFunction[Throwable, Future[XMLHttpRequest]] = {
 		case AjaxException(xhr) =>

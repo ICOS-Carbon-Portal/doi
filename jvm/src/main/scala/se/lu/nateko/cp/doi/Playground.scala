@@ -17,43 +17,47 @@ object Playground {
 
 	val testDoi = client.doi("carbonportal")
 	val example = DoiMeta(
-		id = testDoi,
+		doi = testDoi,
 		creators = Seq(
 			Creator(
 				name = GenericName("ICOS CP"),
-				nameIds = Nil,
-				affiliations = Nil
+				// name = "ICOS CP",
+				nameIdentifiers = Nil,
+				affiliation = Nil
 			)
 		),
 		contributors = Nil,
-		titles = Seq(
+		titles = Some(Seq(
 			Title("Carbon Portal home page", None, None)
-		),
-		publisher = "ICOS Carbon Portal",
-		publicationYear = 2016,
-		resourceType = ResourceType("website", ResourceTypeGeneral.Service)
+		)),
+		publisher = Some("ICOS Carbon Portal"),
+		publicationYear = Some(2016),
+		types = Some(ResourceType(Some("website"), Some(ResourceTypeGeneral.Service))),
+		url = Some("https://www.icos-cp.eu/")
 	)
 
 	val testDoi2 = client.doi("icosdocs")
 	val example2 = DoiMeta(
-		id = testDoi2,
+		doi = testDoi2,
 		creators = Seq(
 			Creator(
 				name = PersonalName("Oleg", "Mirzov"),
-				nameIds = Seq(NameIdentifier.orcid("0000-0002-4742-958X")),
-				affiliations = Seq("Lund University")
+				// name = "Oleg Mirzov",
+				nameIdentifiers = Seq(NameIdentifier.orcid("0000-0002-4742-958X")),
+				affiliation = Seq("Lund University")
 			)
 		),
 		contributors = Nil,
-		titles = Seq(
+		titles = Some(Seq(
 			Title("ICOS Alfresco document handling system", None, None)
-		),
-		publisher = "ICOS Carbon Portal",
-		publicationYear = 2017,
-		resourceType = ResourceType("website", ResourceTypeGeneral.Service)
+		)),
+		publisher = Some("ICOS Carbon Portal"),
+		publicationYear = Some(2017),
+		types = Some(ResourceType(Some("website"), Some(ResourceTypeGeneral.Service))),
+		url = Some("https://docs.icos-cp.eu/")
 	)
 
-	def testCreate = client.setDoi(example, new URL("https://www.icos-cp.eu/"))
-	def testCreate2 = client.setDoi(example2, new URL("https://docs.icos-cp.eu/"))
+	def testCreate = client.putMetadata(example)
+	def testCreate2 = client.putMetadata(example2)
 	def testMeta = client.getMetadata(testDoi)
 }

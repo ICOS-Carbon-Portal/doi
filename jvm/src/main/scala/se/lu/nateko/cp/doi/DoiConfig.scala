@@ -11,7 +11,7 @@ import scala.collection.Seq
 
 case class DoiConfig(
 	client: DoiClientConfig,
-	prefixInfo: PrefixInfo,
+	prefixInfo: String,
 	auth: PublicAuthConfig,
 	admins: Seq[UserId]
 )
@@ -23,7 +23,7 @@ object DoiConfig {
 		val doiConf = allConf.getConfig("cpdoi")
 		DoiConfig(
 			client = getClientConfig(doiConf),
-			prefixInfo = getPrefixInfo(doiConf),
+			prefixInfo = doiConf.getString("prefix"),
 			auth = getAuthConfig(allConf),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_))
 		)
@@ -41,12 +41,7 @@ object DoiConfig {
 		password = doiConf.getString("password"),
 		restEndpoint = new URL(doiConf.getString("restEndpoint")),
 		mdsEndpoint = new URL(doiConf.getString("mdsEndpoint")),
-		doiPrefix = getPrefixInfo(doiConf).staging
-	)
-
-	private def getPrefixInfo(doiConf: Config) = PrefixInfo(
-		staging = doiConf.getString("stagingPrefix"),
-		production = doiConf.getString("productionPrefix")
+		doiPrefix = doiConf.getString("prefix")
 	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {

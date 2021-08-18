@@ -1,6 +1,6 @@
 @import views.html.CpCommonPage
 
-@(isAdmin: Boolean, jsFastOpt: Boolean = false, cpauthHost: String)
+@(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false, cpauthHost: String)
 @CpCommonPage("Carbon Portal's DOI minting service", cpauthHostOpt = Some(cpauthHost)){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
@@ -13,30 +13,57 @@
 			font-size: 100%;
 			color: #000;
 		}
+		.btn-publish,
+		.published-controls,
+		.new-doi-input,
+		.draft-controls {
+			display: none;
+		}
+		.is-admin .btn-publish,
+		.is-admin .published-controls,
+		.is-logged-in .new-doi-input,
+		.is-logged-in .draft-controls {
+			display: block;
+		}
 	</style>
 }{
 	<div class = "page-header">
 		<h1>Carbon Portal DOI minting service</h1>
 	</div>
 
-	<div class="panel panel-info">
+	<div class="panel panel-default">
 		<div class="panel-body">
-			<p><b>Due to recent breaking change of DataCite's services, this service is only useable by administrators (@adminStatus)</b></p>
-			<p>DOI entries are created directly in production, with ICOS prefix <span class="label label-info">10.18160</span>, as findable DataCite DOIs.</p>
-			<div style="text-decoration: line-through">
-				<p>The workflow is designed as follows. Create a new entry or clone an existing one, edit, set DOI URL target, ask a DOI administrator from CP to publish it to 10.18160. To update metadata of a published DOI, repeat the workflow, starting from cloning the entry.</p>
-				<p>Publishing or modifying the &quot;official&quot; ICOS DOI entries (with prefix 10.18160) is only permitted to CP DOI admins (@adminStatus)</p>
+			<p><b>@permissions</b></p>
+			<div>
+				<div>🔵 Published DOIs are in blue.</div>
+				<div>🟡 Drafts are in yellow.</div>
 			</div>
-			<p><strong>Logging in with Carbon Portal is required for any write operations to work.</strong></p>
 		</div>
 	</div>
 
-	<div id="main">
-	</div>
+	<div id="main-wrapper" class="@isAdminClass @isLoggedInClass"></div>
+
 	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>
 
 }
 
+@permissions = @{
+	if(isAdmin)
+		"As an admin, you can create, update, and delete draft and published DOIs."
+	else if(isLoggedIn)
+		"You can create draft DOIs. Please contact us to publish a DOI or update it after it has been published."
+	else
+		"Please log in to create or update DOIs."
+}
+
 @adminStatus = @{
 	if(isAdmin) "you are one" else "you are not one at the moment"
+}
+
+@isAdminClass = @{
+	if(isAdmin) "is-admin" else ""
+}
+
+@isLoggedInClass = @{
+	if(isLoggedIn) "is-logged-in" else ""
 }
