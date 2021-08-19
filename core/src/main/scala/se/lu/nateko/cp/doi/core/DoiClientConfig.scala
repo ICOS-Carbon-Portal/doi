@@ -6,6 +6,5 @@ case class DoiClientConfig(
 	symbol: String,
 	password: String,
 	restEndpoint: URL,
-	mdsEndpoint: URL,
 	doiPrefix: String
 )

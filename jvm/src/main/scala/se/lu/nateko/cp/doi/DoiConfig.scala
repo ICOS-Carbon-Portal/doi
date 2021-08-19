@@ -40,7 +40,6 @@ object DoiConfig {
 		symbol = doiConf.getString("symbol"),
 		password = doiConf.getString("password"),
 		restEndpoint = new URL(doiConf.getString("restEndpoint")),
-		mdsEndpoint = new URL(doiConf.getString("mdsEndpoint")),
 		doiPrefix = doiConf.getString("prefix")
 	)
 
