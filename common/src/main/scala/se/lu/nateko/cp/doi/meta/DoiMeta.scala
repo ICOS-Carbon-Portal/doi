@@ -2,6 +2,9 @@ package se.lu.nateko.cp.doi.meta
 
 import scala.collection.Seq
 import scala.collection.immutable
+import scala.util.Success
+import scala.util.Try
+import scala.util.Failure
 
 trait SelfValidating{
 	def error: Option[String]
@@ -194,6 +197,14 @@ case class Version(major: Int, minor: Int) extends SelfValidating{
 	)
 
 	override def toString = s"$major.$minor"
+}
+
+object Version{
+	val VersionRegex = """^(\d+).(\d+)$""".r
+	def parse(s: String): Try[Version] = s match{
+		case VersionRegex(major, minor) => Success(Version(major.toInt, minor.toInt))
+		case _ => Failure(new IllegalArgumentException(s"Invalid version string: $s"))
+	}
 }
 
 case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidating{

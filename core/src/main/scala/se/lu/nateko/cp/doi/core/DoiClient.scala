@@ -8,8 +8,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 import scala.util.Try
 import scala.collection.Seq
-import play.api.libs.json._
-import se.lu.nateko.cp.doi.JsonSupport._
+import spray.json._
+import JsonSupport._
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
@@ -25,11 +25,15 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 
 	def getMetadata(doi: Doi): Future[String] = http.getJson(metaUrl(doi)).map(response => response.body)
 
-	def putMetadata(meta: DoiMeta): Future[Unit] = {
-		http.putPayload(metaUrl(meta.doi), Json.obj("data" -> Json.obj("attributes" -> meta)).toString(), "application/vnd.api+json").flatMap(analyzeResponse{
+	def putMetadata(meta: DoiMeta): Future[Unit] = http
+		.putPayload(
+			metaUrl(meta.doi),
+			JsObject("data" -> JsObject("attributes" -> meta.toJson)).compactPrint,
+			"application/vnd.api+json"
+		).flatMap(analyzeResponse{
 			case 200 | 201 => Future.successful(())
 		})
-	}
+
 
 	def delete(doi: Doi): Future[Unit] =
 		http.delete(metaUrl(doi)).flatMap(

@@ -37,8 +37,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi-common",
-		version := "0.1.3",
-		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.9.2",
+		version := "0.2.0",
 		cpDeploy := {
 			sys.error("Please switch to project appJVM for deployment")
 		}
@@ -54,7 +53,8 @@ lazy val core = project
 	.enablePlugins(SbtTwirl)
 	.settings(
 		name := "doi-core",
-		version := "0.1.3"
+		libraryDependencies += "io.spray" %%  "spray-json" % "1.3.6",
+		version := "0.2.0"
 	)
 
 //the DOI minting web app itself
@@ -63,13 +63,15 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.1.3",
-		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.9.2"
+		version := "0.2.0"
 	)
 	.jvmSettings(jvmOnlySettings: _*)
 	.jsSettings(
 		name := "doi-js",
-		libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.9.4",
+		libraryDependencies ++= Seq(
+			"com.lihaoyi" %%% "scalatags" % "0.9.4",
+			"com.typesafe.play" %%% "play-json" % "2.9.2"
+		),
 		scalaJSUseMainModuleInitializer := true
 	)
 	.jvmSettings(

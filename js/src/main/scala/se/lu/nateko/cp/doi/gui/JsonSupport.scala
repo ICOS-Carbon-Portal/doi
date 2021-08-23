@@ -3,6 +3,10 @@ package se.lu.nateko.cp.doi
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
 
+/**
+TODO When/if spray-json gets published for ScalaJS, retire this code by moving
+spray-json based JsonSupport from core project to common project
+*/
 object JsonSupport{
 
 	private def enumFormat[T <: Enumeration](enum: T) = new Format[enum.Value]{
@@ -26,15 +30,13 @@ object JsonSupport{
 	implicit val DoiStateEnumFormat = enumFormat(DoiPublicationState)
 	implicit val DoiEventEnumFormat = enumFormat(DoiPublicationEvent)
 
-	private val doiRegex = """^(10\.\d+)/(.+)$""".r
-
-	def parseDoi(doiTxt: String): JsResult[Doi] = doiTxt match {
-		case doiRegex(prefix, suffix) => JsSuccess(Doi(prefix, suffix.toUpperCase()))
-		case _ => JsError("DOI cannot be parsed")
-	}
+	private def parseDoi(doiTxt: String): JsResult[Doi] = Doi.parse(doiTxt).fold(
+		err => JsError("DOI cannot be parsed: " + err.getMessage),
+		doi => JsSuccess(doi)
+	)
 
 	implicit val doiFormat = new Format[Doi]{
-		def writes(doi: Doi): JsValue = JsString(s"${doi.prefix}/${doi.suffix}")
+		def writes(doi: Doi): JsValue = JsString(doi.toString)
 		def reads(json: JsValue): JsResult[Doi] = parseDoi(json.as[String])
 	}
 	implicit val subjectShemeFormat = Json.format[SubjectScheme]
@@ -91,12 +93,10 @@ object JsonSupport{
 	implicit val resourceTypeFormat = Json.format[ResourceType]
 	implicit val dateFormat = Json.format[Date]
 
-	private val versionRegex = """^(\d+).(\d+)$""".r
-
-	def parseVersion(versionTxt: String): JsResult[Version] = versionTxt match {
-		case versionRegex(major, minor) => JsSuccess(Version(major.toInt, minor.toInt))
-		case _ => JsError("Version cannot be parsed")
-	}
+	def parseVersion(versionTxt: String): JsResult[Version] = Version.parse(versionTxt).fold(
+		err => JsError("Version cannot be parsed. " + err.getMessage),
+		v => JsSuccess(v)
+	)
 	implicit val versionFormat = new Format[Version]{
 		def writes(o: Version): JsValue = {
 			JsString(o.toString)

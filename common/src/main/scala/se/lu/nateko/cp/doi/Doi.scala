@@ -26,7 +26,7 @@ object Doi{
 
 	def parse(doiStr: String): Try[Doi] = doiStr match {
 		case DoiRegex(prefix, suffix) =>
-			val doi = Doi(prefix, suffix)
+			val doi = Doi(prefix, suffix.toUpperCase)
 			doi.error.fold[Try[Doi]](Success(doi)){err =>
 				Failure(new Exception(err))
 			}
