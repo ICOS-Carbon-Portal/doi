@@ -24,8 +24,6 @@ object DoiReducer {
 			else
 				state.withSelected(doi)
 
-		case GotDoiInfo(info) => state.withDoiInfo(info)
-
 		case TargetUrlUpdateRequest(doi, _) => state.startUrlUpdate(doi)
 
 		case TargetUrlUpdated(doi, url) => state.updateUrl(doi, url).stopUrlUpdate(doi)

@@ -9,31 +9,34 @@ import scala.util.Failure
 trait SelfValidating{
 	def error: Option[String]
 
-	protected def joinErrors(errors: Seq[Option[String]]): Option[String] = {
+	protected def joinErrors(errors: Iterable[Option[String]]): Option[String] = {
 		val list = errors.flatten
 		if(list.isEmpty) None else Some(list.mkString("\n"))
 	}
 	protected def joinErrors(errors: Option[String]*): Option[String] = joinErrors(errors)
 
-	protected def allGood(items: Seq[SelfValidating]): Option[String] = joinErrors(items.map(_.error))
+	protected def allGood(items: Iterable[SelfValidating]): Option[String] = joinErrors(items.map(_.error))
 
 	protected def nonNull(obj: AnyRef)(msg: String): Option[String] =
 		if(obj == null) Some(msg) else None
 
-	protected def nonEmpty(s: String)(msg: String): Option[String] =
-		if(s == null || s.length == 0) Some(msg) else None
+	protected def nonEmpty[T](seq: Iterable[T])(msg: String): Option[String] =
+		if(seq == null || seq.isEmpty) Some(msg) else None
 
 	protected def eachNonEmpty(ss: Seq[String])(msg: String): Option[String] =
 		joinErrors(ss.map(s => nonEmpty(s)(msg)))
 
-	protected def nonEmptyAllGood(items: Seq[SelfValidating])(msg: String): Option[String] =
+	protected def nonEmptyAllGood(items: Iterable[SelfValidating])(msg: String): Option[String] =
 		if(items.isEmpty) Some(msg) else allGood(items)
 
 	//TODO Improve this naive URI syntax validation
-	private val uriRegex = """^https?://.+$""".r
 	protected def validUri(uri: String): Option[String] =
-		if(uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
+		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
+}
+
+object SelfValidating{
+	private val uriRegex = """^https?://.+$""".r
 }
 
 sealed trait Name extends SelfValidating
@@ -167,8 +170,7 @@ case class Subject(
 }
 
 case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
-	private[this] val dateRegex = """(\d{4})-(\d\d)-(\d\d)""".r
-
+	import Date._
 	def error = joinErrors(
 		nonEmpty(date)("Date must not be empty if specified"),
 		nonNull(dateType)("Date type must be specified for every date"),
@@ -184,6 +186,10 @@ case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
 			year < 1900 || year > 3000 || month < 1 || month > 12 || day < 1 || day > 31
 		case _ => true
 	}
+}
+
+object Date{
+	private val dateRegex = """(\d{4})-(\d\d)-(\d\d)""".r
 }
 
 case class Version(major: Int, minor: Int) extends SelfValidating{

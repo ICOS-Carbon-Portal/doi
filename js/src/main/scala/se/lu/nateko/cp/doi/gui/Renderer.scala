@@ -26,15 +26,10 @@ class Renderer(mainView: MainView) extends StateListener {
 		val selectedInfo = state.selectedInfo
 
 		if(state.selected != oldState.selected){
-			selectedInfo.foreach(mainView.supplyInfo)
 
 			state.selected.foreach(mainView.setSelected(_, true))
 
 			oldState.selected.foreach(mainView.setSelected(_, false))
-
-		}else if(selectedInfo != oldState.selectedInfo){
-
-			selectedInfo.foreach(mainView.supplyInfo)
 
 		}
 	}

@@ -1,4 +1,4 @@
-package se.lu.nateko.cp.doi.core.test
+package se.lu.nateko.cp.doi.core
 
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.{Doi, DoiMeta}

@@ -54,11 +54,13 @@ case class DoiMeta(
 	url: Option[String] = None
 ) extends SelfValidating{
 
-	def draftError: Option[String] = joinErrors(
+	def draftError: Option[String] = joinErrors(draftErrors)
+
+	private def draftErrors: Seq[Option[String]] = Seq(
 		doi.error,
 		allGood(creators),
-		titles.flatMap(t => allGood(t)),
-		publicationYear.map(p => if(p < 1000 || p > 3000) Some("Invalid publication year") else None).getOrElse(None),
+		titles.flatMap(allGood),
+		publicationYear.flatMap(p => if(p < 1000 || p > 3000) Some("Invalid publication year") else None),
 		allGood(subjects),
 		allGood(contributors),
 		allGood(dates),
@@ -69,18 +71,11 @@ case class DoiMeta(
 	)
 
 	def error: Option[String] = joinErrors(
-		doi.error,
-		nonEmptyAllGood(creators)("At least one creator is required"),
-		titles.fold[Option[String]](Some("At least one title is required"))(t => allGood(t)),
-		nonEmpty(publisher.fold("")(p => p))("Publisher is required"),
-		publicationYear.fold[Option[String]](Some("Publication year is required"))(y => if(y < 1000 || y > 3000) Some("Invalid publication year") else None),
-		types.fold[Option[String]](Some("Resource type is required"))(r => r.error),
-		allGood(subjects),
-		allGood(contributors),
-		allGood(dates),
-		eachNonEmpty(formats)("Format is not required but must not be empty if specified"),
-		version.flatMap(_.error),
-		rightsList.flatMap(r => allGood(r)),
-		allGood(descriptions)
+		nonEmpty(creators)("At least one creator is required") +:
+		nonEmpty(titles)("At least one title is required") +:
+		nonEmpty(publisher.getOrElse(""))("Publisher is required") +:
+		nonEmpty(publicationYear)("Publication year is required") +:
+		nonEmptyAllGood(types)("Resource type is required") +:
+		draftErrors
 	)
 }

@@ -85,10 +85,6 @@ class MainView(d: DoiRedux.Dispatcher) {
 		doiViews.get(doi).foreach(_.setSelected(isSelected))
 	}
 
-	def supplyInfo(info: DoiInfo): Unit = {
-		doiViews.get(info.meta.doi).foreach(_.supplyInfo(info))
-	}
-
 	private[this] val errorView = new ErrorView(400, 300, d)
 
 	def appendError(msg: String): Unit = errorView.appendError(msg)

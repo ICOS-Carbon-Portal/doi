@@ -23,19 +23,12 @@ object Backend {
 		.recoverWith(recovery("fetch DOI prefix"))
 		.map(parseTo[String])
 
-	def getMeta(doi: Doi): Future[DoiMeta] = Ajax
-		.get(s"/api/$doi/metadata")
-		.recoverWith(recovery("fetch DOI metadata"))
-		.map(parseTo[JsObject])
-		.map(jso =>
-			(jso \ "data" \ "attributes").as[DoiMeta]
-		)
-
-	def getInfo(doi: Doi): Future[DoiInfo] = Backend.getMeta(doi)
-		.map(meta => DoiInfo(meta, meta.url, true))
-
 	def updateMeta(meta: DoiMeta) = Ajax
-		.post("/api/metadata", Json.toJson(meta).toString)
+		.post(
+			"/api/metadata",
+			Json.toJson(meta).toString,
+			headers = Map("content-type" -> "application/json")
+		)
 		.recoverWith(recovery("update DOI metadata"))
 
 	def getFreshDoiList: Future[FreshDoiList] = Ajax

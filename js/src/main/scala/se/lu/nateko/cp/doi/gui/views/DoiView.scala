@@ -15,7 +15,7 @@ import se.lu.nateko.cp.doi.DoiMeta
 
 class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 
-	private[this] var info: Option[DoiInfo] = None
+	private[this] val info = DoiInfo(doi, doi.url, true)
 	private[this] var isSelected = false
 
 	private val doiListIcon = span(cls := doiListIconClass).render
@@ -23,10 +23,11 @@ class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 	private def doiListIconClass = "glyphicon glyphicon-triangle-" +
 		(if(isSelected) "bottom" else "right")
 
-	private val selectDoi: Event => Unit = e => d.dispatch(ThunkActions.selectDoiFetchInfo(doi.doi))
+	private val selectDoi: Event => Unit = e => d.dispatch(SelectDoi(doi.doi))
 	private val titleSpan = span(cls := "panel-title")().render
 
 	private val panelBody = div(cls := "panel-body").render
+	panelBody.appendChild(new DoiInfoView(info, d).element)
 
 	val panelStyle = {
 		val prefs = d.getState.prefix
@@ -42,7 +43,7 @@ class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	def updateContentVisibility(): Unit = {
 		val title = info
-			.flatMap( _.meta.titles.map(_.headOption))
+			.meta.titles.map(_.headOption)
 			.orElse(
 				d.getState.dois.collectFirst{
 					case dm: DoiMeta if dm.doi == doi.doi => dm.titles.map(_.headOption)
@@ -54,7 +55,7 @@ class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 
 		titleSpan.textContent = s" ${doi.doi} $title"
 
-		val display = if(isSelected && info.isDefined) "block" else "none"
+		val display = if(isSelected) "block" else "none"
 		panelBody.style.display = display
 	}
 
@@ -64,11 +65,4 @@ class DoiView(doi: DoiMeta, d: DoiRedux.Dispatcher) {
 		updateContentVisibility()
 	}
 
-	def supplyInfo(doiInfo: DoiInfo): Unit = if(!info.contains(doiInfo)){
-		info = Some(doiInfo)
-		updateContentVisibility()
-		panelBody.innerHTML = ""
-		val infoView = new DoiInfoView(doiInfo, d)
-		panelBody.appendChild(infoView.element)
-	}
 }

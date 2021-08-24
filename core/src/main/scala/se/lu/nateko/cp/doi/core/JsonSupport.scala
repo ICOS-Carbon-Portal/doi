@@ -95,7 +95,7 @@ object JsonSupport extends DefaultJsonProtocol{
 	}
 	implicit val titleFormat = jsonFormat3(Title)
 	implicit val resourceTypeFormat = jsonFormat2(ResourceType)
-	implicit val dateFormat = jsonFormat2(Date)
+	implicit val dateFormat = jsonFormat2(Date.apply)
 
 	private val versionRegex = """^(\d+).(\d+)$""".r
 

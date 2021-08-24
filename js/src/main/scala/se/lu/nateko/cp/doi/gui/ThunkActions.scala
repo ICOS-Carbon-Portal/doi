@@ -23,21 +23,6 @@ object ThunkActions {
 		dispatchFut(Backend.getFreshDoiList)
 	}
 
-
-	private def fetchInfo(doi: Doi): ThunkAction = implicit d => {
-		val state = d.getState
-		if(state.isSelected(doi) && state.info.get(doi).map(_.hasBeenSaved).getOrElse(true)){
-			//fetching info only if the doi is selected and is now new
-			//if the info is absent then the doi is not new (otherwise an incomplete DoiInfo would be there)
-			dispatchFut(Backend.getInfo(doi).map(GotDoiInfo(_)))
-		}
-	}
-
-	def selectDoiFetchInfo(doi: Doi): ThunkAction = implicit d => {
-		d.dispatch(SelectDoi(doi))
-		d.dispatch(fetchInfo(doi))
-	}
-
 	private def writeMeta(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
 		if(d.getState.isUpdatingMeta(meta.doi)){
 			val updatedFut = Backend.updateMeta(meta).map(_ => MetaUpdated(meta))

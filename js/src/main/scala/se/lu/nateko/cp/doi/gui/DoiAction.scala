@@ -13,8 +13,6 @@ case class FreshDoiList(dois: Seq[DoiMeta]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction
 
-case class GotDoiInfo(info: DoiInfo) extends DoiAction
-
 case class TargetUrlUpdateRequest(doi: Doi, url: String) extends DoiAction
 case class TargetUrlUpdated(doi: Doi, url: String) extends DoiAction
 
