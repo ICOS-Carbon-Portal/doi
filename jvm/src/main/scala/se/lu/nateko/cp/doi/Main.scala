@@ -12,7 +12,7 @@ import se.lu.nateko.cp.doi.core.DoiClient
 import akka.http.scaladsl.server.ExceptionHandler
 import scala.util.{Success, Failure}
 import se.lu.nateko.cp.cpauth.core.UserId
-import play.api.libs.json.Json
+import spray.json.JsString
 
 object Main{
 
@@ -67,7 +67,7 @@ object Main{
 					complete((StatusCodes.Unauthorized, "Must be logged in"))
 				} ~
 				path("doiprefix"){
-					get{complete(Json.toJson(prefixInfo).toString)}
+					get{complete(JsString(prefixInfo).compactPrint)}
 				}
 			} ~
 			get{

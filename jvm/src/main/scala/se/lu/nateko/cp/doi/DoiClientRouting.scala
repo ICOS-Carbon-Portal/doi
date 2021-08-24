@@ -1,14 +1,13 @@
 package se.lu.nateko.cp.doi
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
-import java.net.URL
-import play.api.libs.json._
+import core.JsonSupport.doiMetaFormat
 
 class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
-	import JsonSupport._
 
 	val publicRoute = get{
 		path("metalist"){
@@ -31,14 +30,14 @@ class DoiClientRouting(client: DoiClient) {
 
 	def writingRoute(authorizer: Doi => Boolean) = post{
 		path("metadata"){
-			entity(as[String]){metaStr =>
-				val meta = Json.parse(metaStr).as[DoiMeta]
+			entity(as[DoiMeta]){meta =>
 				if(authorizer(meta.doi))
 					onSuccess(client.putMetadata(meta)){
 						complete(StatusCodes.OK)
 					}
 				else forbid
-			}
+			} ~
+			complete(StatusCodes.BadRequest -> "Expected DoiMeta as payload")
 		}
 	}
 

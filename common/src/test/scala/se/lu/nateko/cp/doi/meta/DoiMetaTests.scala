@@ -1,7 +1,6 @@
-package se.lu.nateko.cp.doi.test.meta
+package se.lu.nateko.cp.doi.meta
 
 import org.scalatest.funspec.AnyFunSpec
-import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 

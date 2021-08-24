@@ -77,10 +77,11 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.jvmSettings(
 		name := "doi-jvm",
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"   % "10.2.4",
-			"com.typesafe.akka" %% "akka-stream" % "2.6.14",
-			"se.lu.nateko.cp"   %% "views-core"  % "0.4.5",
-			"se.lu.nateko.cp"   %% "cpauth-core" % "0.6.4"
+			"com.typesafe.akka" %% "akka-http"            % "10.2.6",
+			"com.typesafe.akka" %% "akka-http-spray-json" % "10.2.6",
+			"com.typesafe.akka" %% "akka-stream"          % "2.6.16",
+			"se.lu.nateko.cp"   %% "views-core"           % "0.4.5",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.4"
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile

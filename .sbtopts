@@ -1,1 +1,5 @@
--Dsbt.override.build.repos=true -Dsbt.repository.config=project/repositories
+#-J-XX:+UseG1GC
+-J-Xmx1G
+-J-Xms256m
+-Dsbt.override.build.repos=true
+-Dsbt.repository.config=project/repositories

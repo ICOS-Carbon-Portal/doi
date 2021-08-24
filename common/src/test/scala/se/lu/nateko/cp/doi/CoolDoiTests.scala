@@ -1,7 +1,6 @@
-package se.lu.nateko.cp.doi.core.test
+package se.lu.nateko.cp.doi
 
 import org.scalatest.funsuite.AnyFunSuite
-import se.lu.nateko.cp.doi.CoolDoi
 
 class CoolDoiTests extends AnyFunSuite{
 
