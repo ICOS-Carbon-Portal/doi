@@ -5,6 +5,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
 import core.JsonSupport.doiMetaFormat
+import scala.concurrent.Future
 
 class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
@@ -28,14 +29,16 @@ class DoiClientRouting(client: DoiClient) {
 		}
 	}
 
-	def writingRoute(authorizer: Doi => Boolean) = post{
+	def writingRoute(authorizer: DoiMeta => Future[Boolean]) = post{
 		path("metadata"){
 			entity(as[DoiMeta]){meta =>
-				if(authorizer(meta.doi))
-					onSuccess(client.putMetadata(meta)){
-						complete(StatusCodes.OK)
-					}
-				else forbid
+				onSuccess(authorizer(meta)){allowed =>
+					if(allowed)
+						onSuccess(client.putMetadata(meta)){
+							complete(StatusCodes.OK)
+						}
+					else forbid
+				}
 			} ~
 			complete(StatusCodes.BadRequest -> "Expected DoiMeta as payload")
 		}

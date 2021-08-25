@@ -25,7 +25,7 @@ object JsonSupport{
 	private def fieldConflatingFormat[T](vanillaF: OFormat[T], field: String, opt: Boolean = false) = new OFormat[T]{
 		def writes(obj: T): JsObject = {
 			val vanilla = vanillaF.writes(obj)
-			val innerFields = vanilla.value(field).as[JsObject]
+			val innerFields = vanilla.value.get(field).map(_.as[JsObject]).getOrElse(JsObject.empty)
 			vanilla - field ++ innerFields
 		}
 		def reads(js: JsValue) = {

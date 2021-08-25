@@ -4,7 +4,8 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.DoiMeta
-import se.lu.nateko.cp.doi.JsonSupport.doiMetaFormat
+import se.lu.nateko.cp.doi.JsonSupport._
+import se.lu.nateko.cp.doi.meta.Subject
 class JsonSupportTest extends AnyFunSuite{
 
 	test("Parsing all-DOIs JSON from production"){
@@ -15,5 +16,9 @@ class JsonSupportTest extends AnyFunSuite{
 			(jsv \ "attributes").as[DoiMeta]
 		}
 		assert(dois.length === 5)
+	}
+
+	test("Subject without SubjectScheme gets serialized without problems"){
+		val subj = Json.toJson(Subject("subj"))
 	}
 }

@@ -24,6 +24,9 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	}
 
 	def getMetadata(doi: Doi): Future[String] = http.getJson(metaUrl(doi)).map(response => response.body)
+	def getMetadataParsed(doi: Doi): Future[DoiMeta] = getMetadata(doi).map{jsStr =>
+		jsStr.parseJson.asJsObject.fields("data").asJsObject.fields("attributes").convertTo[DoiMeta]
+	}
 
 	def putMetadata(meta: DoiMeta): Future[Unit] = http
 		.putPayload(

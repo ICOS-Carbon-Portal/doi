@@ -5,6 +5,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import JsonSupport._
 import spray.json._
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.meta.Subject
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -29,4 +30,9 @@ class JsonSupportTest extends AnyFunSuite{
 		}
 		assert(dois.length === 5)
 	}
+
+	test("Subject without SubjectScheme gets serialized without problems"){
+		val subj = Subject("subj").toJson
+	}
+
 }

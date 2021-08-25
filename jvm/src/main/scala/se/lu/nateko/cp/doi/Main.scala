@@ -13,6 +13,8 @@ import akka.http.scaladsl.server.ExceptionHandler
 import scala.util.{Success, Failure}
 import se.lu.nateko.cp.cpauth.core.UserId
 import spray.json.JsString
+import se.lu.nateko.cp.doi.meta.DoiPublicationState
+import scala.concurrent.Future
 
 object Main{
 
@@ -27,11 +29,11 @@ object Main{
 
 		val authRouting = new AuthRouting(authConf)
 
-		val doiRouting = {
+		val client = {
 			val http = new AkkaDoiHttp(clientConf.symbol, clientConf.password)
-			val client = new DoiClient(clientConf, http)
-			new DoiClientRouting(client)
+			new DoiClient(clientConf, http)
 		}
+		val doiRouting = new DoiClientRouting(client)
 
 
 		val exceptionHandler = ExceptionHandler{
@@ -52,8 +54,11 @@ object Main{
 				doiRouting.publicRoute ~
 				post{
 					authRouting.user{uid =>
-						doiRouting.writingRoute{_ =>
-							admins.contains(uid)
+						doiRouting.writingRoute{doiMeta =>
+							if(admins.contains(uid)) Future.successful(true)
+							else client.getMetadataParsed(doiMeta.doi).map{currMeta =>
+								doiMeta.event.isEmpty && currMeta.state == DoiPublicationState.draft
+							}
 						}
 					} ~
 					complete((StatusCodes.Unauthorized, "Must be logged in"))
