@@ -26,9 +26,21 @@ object JsonSupport extends DefaultJsonProtocol{
 		targetObj.asJsObject.fields ++ fields
 	)
 
-	private def dropNameMerge(o1: JsValue, o2: JsValue) = JsObject(
-		o1.asJsObject.fields - "name" ++ o2.asJsObject.fields
-	)
+	private def fieldConflatingFormat[T](vanillaF: JsonFormat[T], field: String, opt: Boolean = false) = new JsonFormat[T]{
+		def write(obj: T): JsValue = {
+			val vanilla = vanillaF.write(obj).asJsObject.fields
+			val innerFields = vanilla.get(field).toSeq.flatMap(_.asJsObject.fields.toSeq)
+			JsObject(vanilla - field ++ innerFields)
+		}
+		def read(js: JsValue): T = {
+			val patchedJson = mergeFields(js, field -> js)
+			try{
+				vanillaF.read(patchedJson)
+			} catch{
+				case _: Throwable if(opt) => vanillaF.read(js)
+			}
+		}
+	}
 
 	implicit val dateTypeFormat = enumFormat(DateType)
 	implicit val contrTypeFormat = enumFormat(ContributorType)
@@ -48,9 +60,10 @@ object JsonSupport extends DefaultJsonProtocol{
 		)
 	}
 	implicit val subjectShemeFormat = jsonFormat2(SubjectScheme.apply)
-	implicit val subjectFormat = jsonFormat4(Subject)
+	implicit val subjectFormat = fieldConflatingFormat(jsonFormat4(Subject), "scheme", opt = true)
 	implicit val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
-	implicit val nameIdentifierFormat = jsonFormat2(NameIdentifier.apply)
+	implicit val nameIdentifierFormat = fieldConflatingFormat(jsonFormat2(NameIdentifier.apply), "scheme")
+
 	implicit val genericNameFormat = jsonFormat1(GenericName)
 	implicit val personalNameFormat = jsonFormat2(PersonalName)
 
@@ -61,38 +74,14 @@ object JsonSupport extends DefaultJsonProtocol{
 			case pn: PersonalName =>
 				mergeFields(pn.toJson, "nameType" -> JsString("Personal"))
 		}
-		def read(js: JsValue) =
-			if(js.asJsObject.fields.contains("givenName"))
-				personalNameFormat.read(js)
-			else
-				genericNameFormat.read(js)
+		def read(js: JsValue) = js.asJsObject.fields.get("familyName") match{
+			case Some(JsString(_)) => personalNameFormat.read(js)
+			case _ => genericNameFormat.read(js)
+		}
 	}
 
-	private val vanillaCreatorFormat = jsonFormat3(Creator)
-
-	implicit val creatorFormat = new JsonFormat[Creator]{
-		def write(c: Creator): JsValue = {
-			val nameJs = nameFormat.write(c.name)
-			val vanilla = vanillaCreatorFormat.write(c)
-			dropNameMerge(vanilla, nameJs)
-		}
-		def read(json: JsValue): Creator = {
-			val patchedJson = mergeFields(json, "name" -> json)
-			vanillaCreatorFormat.read(patchedJson)
-		}
-	}
-	private val vanillaContributorFormat = jsonFormat4(Contributor)
-	implicit val contributorFormat = new JsonFormat[Contributor]{
-		def write(c: Contributor): JsValue = {
-			val nameJs = nameFormat.write(c.name)
-			val vanilla = vanillaContributorFormat.write(c)
-			dropNameMerge(vanilla, nameJs)
-		}
-		def read(json: JsValue): Contributor = {
-			val patchedJson = mergeFields(json, "name" -> json)
-			vanillaContributorFormat.read(patchedJson)
-		}
-	}
+	implicit val creatorFormat = fieldConflatingFormat(jsonFormat3(Creator), "name")
+	implicit val contributorFormat = fieldConflatingFormat(jsonFormat4(Contributor), "name")
 	implicit val titleFormat = jsonFormat3(Title)
 	implicit val resourceTypeFormat = jsonFormat2(ResourceType)
 	implicit val dateFormat = jsonFormat2(Date.apply)

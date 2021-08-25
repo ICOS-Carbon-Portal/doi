@@ -1,0 +1,935 @@
+{
+	"data": [
+		{
+			"id": "10.18160/3k6z-4h73",
+			"type": "dois",
+			"attributes": {
+				"doi": "10.18160/3k6z-4h73",
+				"identifiers": [],
+				"creators": [
+					{
+						"name": "Gałkowski, Michał",
+						"givenName": "Michał",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"nameIdentifier": "https://orcid.org/0000-0003-1681-3965",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Fiehn, Alina",
+						"nameType": "Personal",
+						"givenName": "Alina",
+						"familyName": "Fiehn",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0003-3376-4405",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Swolkien, Justyna",
+						"nameType": "Personal",
+						"givenName": "Justyna",
+						"familyName": "Swolkien",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0003-4332-9415",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Stanisavljevic, Mila",
+						"nameType": "Personal",
+						"givenName": "Mila",
+						"familyName": "Stanisavljevic",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-6257-6617",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Korben, Piotr",
+						"nameType": null,
+						"givenName": "Piotr",
+						"familyName": "Korben",
+						"affiliation": [],
+						"nameIdentifiers": []
+					},
+					{
+						"name": "Menoud, Malika",
+						"nameType": "Personal",
+						"givenName": "Malika",
+						"familyName": "Menoud",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0001-7061-2684",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Necki, Jaroslaw",
+						"nameType": "Personal",
+						"givenName": "Jaroslaw",
+						"familyName": "Necki",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-0225-2581",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Roiger, Anke",
+						"nameType": null,
+						"givenName": "Anke",
+						"familyName": "Roiger",
+						"affiliation": [],
+						"nameIdentifiers": []
+					},
+					{
+						"name": "Röckmann, Thomas",
+						"nameType": "Personal",
+						"givenName": "Thomas",
+						"familyName": "Röckmann",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-6688-8968",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Gerbig, Christoph",
+						"nameType": "Personal",
+						"givenName": "Christoph",
+						"familyName": "Gerbig",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-1112-8603",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Fix, Andreas",
+						"nameType": "Personal",
+						"givenName": "Andreas",
+						"familyName": "Fix",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0003-2818-9290",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"titles": [
+					{
+						"lang": null,
+						"title": "Emissions of CH4 and CO2 over the Upper Silesian Coal Basin (Poland) and its vicinity",
+						"titleType": null
+					}
+				],
+				"publisher": "ICOS ERIC - Carbon Portal",
+				"container": {},
+				"publicationYear": 2021,
+				"subjects": [
+					{
+						"subject": "FOS: Earth and related environmental sciences",
+						"valueUri": "http://www.oecd.org/science/inno/38235147.pdf",
+						"schemeUri": "http://www.oecd.org/science/inno",
+						"subjectScheme": "Fields of Science and Technology (FOS)"
+					}
+				],
+				"contributors": [],
+				"dates": [],
+				"language": null,
+				"types": {
+					"ris": "DATA",
+					"bibtex": "misc",
+					"citeproc": "dataset",
+					"schemaOrg": "Dataset",
+					"resourceType": "ZIP archive",
+					"resourceTypeGeneral": "Dataset"
+				},
+				"relatedIdentifiers": [],
+				"sizes": [
+					"203 KB"
+				],
+				"formats": [
+					"zip archive with excel .xlsx file"
+				],
+				"version": "4.01",
+				"rightsList": [
+					{
+						"rights": "Creative Commons Attribution 4.0 International",
+						"rightsUri": "https://creativecommons.org/licenses/by/4.0/legalcode",
+						"schemeUri": "https://spdx.org/licenses/",
+						"rightsIdentifier": "cc-by-4.0",
+						"rightsIdentifierScheme": "SPDX"
+					}
+				],
+				"descriptions": [
+					{
+						"lang": null,
+						"description": "The data in the archive provides information on locations of point sources...",
+						"descriptionType": "Abstract"
+					}
+				],
+				"geoLocations": [
+					{
+						"geoLocationBox": {
+							"eastBoundLongitude": 23,
+							"northBoundLatitude": 54.3,
+							"southBoundLatitude": 49.9,
+							"westBoundLongitude": 15
+						},
+						"geoLocationPlace": "Upper Silesian Coal Basin, Poland"
+					}
+				],
+				"fundingReferences": [
+					{
+						"awardUri": null,
+						"awardTitle": "MEMO2",
+						"funderName": "H2020 Marie Skłodowska-Curie Actions",
+						"awardNumber": "722479",
+						"funderIdentifier": "https://doi.org/10.13039/100010665",
+						"funderIdentifierType": "Crossref Funder ID"
+					}
+				],
+				"url": "https://meta.icos-cp.eu/objects/4YLOpOtT0keMUckH1MrhxZZW",
+				"contentUrl": null,
+				"metadataVersion": 2,
+				"schemaVersion": "http://datacite.org/schema/kernel-4",
+				"source": "fabricaForm",
+				"isActive": true,
+				"state": "findable",
+				"reason": null,
+				"viewCount": 0,
+				"downloadCount": 0,
+				"referenceCount": 0,
+				"citationCount": 0,
+				"partCount": 0,
+				"partOfCount": 0,
+				"versionCount": 0,
+				"versionOfCount": 0,
+				"created": "2021-07-06T06:42:26Z",
+				"registered": "2021-07-07T13:07:30Z",
+				"published": null,
+				"updated": "2021-07-07T13:07:30Z"
+			},
+			"relationships": {
+				"client": {
+					"data": {
+						"id": "snd.icos",
+						"type": "clients"
+					}
+				}
+			}
+		},
+		{
+			"id": "10.18160/qq7d-t060",
+			"type": "dois",
+			"attributes": {
+				"doi": "10.18160/qq7d-t060",
+				"identifiers": [],
+				"creators": [
+					{
+						"name": "Nguyen, Linh N.T.",
+						"nameType": "Personal",
+						"givenName": "Linh N.T.",
+						"familyName": "Nguyen",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0003-0763-9387",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Luijkx, Ingrid",
+						"nameType": "Personal",
+						"givenName": "Ingrid",
+						"familyName": "Luijkx",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-3990-6737",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Meijer, Harro A.J.",
+						"nameType": "Personal",
+						"givenName": "Harro A.J.",
+						"familyName": "Meijer",
+						"affiliation": [],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0001-8744-5632",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"titles": [
+					{
+						"lang": null,
+						"title": "Two decades of flask observations of atmospheric δO2/N2, CO2, and APO at stations Lutjewad (the Netherlands) and Mace Head (Ireland) plus 3 years from Halley station (Antarctica)",
+						"titleType": null
+					}
+				],
+				"publisher": "ICOS ERIC - Carbon Portal",
+				"container": {},
+				"publicationYear": 2021,
+				"subjects": [
+					{
+						"subject": "FOS: Earth and related environmental sciences",
+						"valueUri": "http://www.oecd.org/science/inno/38235147.pdf",
+						"schemeUri": "http://www.oecd.org/science/inno",
+						"subjectScheme": "Fields of Science and Technology (FOS)"
+					},
+					{
+						"subject": "FOS: Earth and related environmental sciences",
+						"schemeUri": "http://www.oecd.org/science/inno/38235147.pdf",
+						"subjectScheme": "Fields of Science and Technology (FOS)"
+					},
+					{
+						"subject": "APO",
+						"valueUri": "http://www.oecd.org/science/inno/38235147.pdf",
+						"schemeUri": "http://www.oecd.org/science/inno"
+					},
+					{
+						"subject": "dO2/N2"
+					},
+					{
+						"subject": "CO2"
+					},
+					{
+						"subject": "Lutjewad"
+					},
+					{
+						"subject": "Mace Head"
+					},
+					{
+						"subject": "Halley"
+					}
+				],
+				"contributors": [],
+				"dates": [
+					{
+						"date": "2021",
+						"dateType": "Issued",
+						"dateInformation": null
+					}
+				],
+				"language": null,
+				"types": {
+					"ris": "GEN",
+					"bibtex": "misc",
+					"citeproc": "article",
+					"schemaOrg": "Collection",
+					"resourceType": "ZIP archive",
+					"resourceTypeGeneral": "Collection"
+				},
+				"relatedIdentifiers": [
+					{
+						"schemeUri": null,
+						"schemeType": null,
+						"relationType": "IsSupplementTo",
+						"relatedIdentifier": "https://doi.org/10.5194/essd-13-2307-2021",
+						"resourceTypeGeneral": null,
+						"relatedIdentifierType": "URL",
+						"relatedMetadataScheme": null
+					}
+				],
+				"sizes": [],
+				"formats": [
+					"Collection of CSV files in a zip archive"
+				],
+				"version": "1.0",
+				"rightsList": [
+					{
+						"rights": "Creative Commons Attribution 4.0 International",
+						"rightsUri": "https://creativecommons.org/licenses/by/4.0/legalcode",
+						"schemeUri": "https://spdx.org/licenses/",
+						"rightsIdentifier": "cc-by-4.0",
+						"rightsIdentifierScheme": "SPDX"
+					}
+				],
+				"descriptions": [
+					{
+						"lang": null,
+						"description": "This is the data supplement presented in Nguyen et al. 2021 (submitted to ESSD) in which we present 20-year flask sample records of atmospheric CO2, δO2/N2 and APO from the stations Lutjewad (the Netherlands) and Mace Head (Ireland) and a 3-year record from Halley station (Antarctica), including details of the extensive calibration procedure and its stability over time. The results of our inter-comparison involving gas cylinders from various research laboratories worldwide also show that our calibration is of high quality and compatible with the internationally-recognised Scripps scale. The measurement records from Lutjewad and Mace Head show similar long-term trends during the period 2002-2018 of 2.31 ± 0.07 ppm yr-1 for CO2 and -21.2 ± 0.8 per meg yr-1 for δO2/N2 at Lutjewad, and 2.22 ± 0.04 ppm yr-1 for CO2 and -21.3 ± 0.9 per meg yr-1 for δO2/N2 at Mace Head. They also show similar δO2/N2 seasonal cycle with an amplitude of 54 ± 4 per meg at Lutjewad and 61 ± 5 per meg at Mace Head, while CO2 seasonal amplitude at Lutjewad (16.8 ± 0.5 ppm) is slightly higher than that at Mace Head (14.8 ± 0.3 ppm). We show that the observed trends and seasonal cycles are compatible with the measurements from various stations, especially the measurements from Weybourne Atmospheric Observatory (United Kingdom). However, there are remarkable differences in the progression of annual trends between the Mace Head and Lutjewad records for δO2/N2 and APO, which might in part be caused by sampling differences, but also by environmental effects, such as the North Atlantic Ocean oxygen ventilation changes to which Mace Head is more sensitive. The Halley record shows clear trends and seasonality in δO2/N2 and APO, where especially APO agrees well with the continuous measurements at Halley by the University of East Anglia, while CO2 and δO2/N2 present slight disagreements, most likely caused by small leakages during sampling. From our 2002-2018 records, we find good agreement for the global ocean sink: 2.0 ± 0.8 PgC yr-1 and 2.2 ± 0.9 PgC yr-1, based on Lutjewad and Mace Head, respectively.",
+						"descriptionType": "Abstract"
+					}
+				],
+				"geoLocations": [
+					{
+						"geoLocationPlace": "Lutjewad",
+						"geoLocationPoint": {
+							"pointLatitude": 6.3528,
+							"pointLongitude": 53.4036
+						}
+					},
+					{
+						"geoLocationPlace": "Mace Head",
+						"geoLocationPoint": {
+							"pointLatitude": -9.9036,
+							"pointLongitude": 53.3261
+						}
+					},
+					{
+						"geoLocationPlace": "Halley",
+						"geoLocationPoint": {
+							"pointLatitude": 5.48744,
+							"pointLongitude": 51.70338
+						}
+					}
+				],
+				"fundingReferences": [
+					{
+						"awardUri": null,
+						"awardTitle": null,
+						"funderName": "Nederlandse Organisatie voor Wetenschappelijk Onderzoek",
+						"awardNumber": null,
+						"funderIdentifier": "https://doi.org/10.13039/501100003246",
+						"funderIdentifierType": "Crossref Funder ID"
+					},
+					{
+						"awardUri": null,
+						"awardTitle": "Carbo-Ocean",
+						"funderName": "FP7 Environment",
+						"awardNumber": "511176",
+						"funderIdentifier": "https://doi.org/10.13039/100011268",
+						"funderIdentifierType": "Crossref Funder ID"
+					}
+				],
+				"url": "https://meta.icos-cp.eu/objects/lnf2-QrUOM4G7gObPa6tDXHA",
+				"contentUrl": null,
+				"metadataVersion": 11,
+				"schemaVersion": "http://datacite.org/schema/kernel-4",
+				"source": "fabricaForm",
+				"isActive": true,
+				"state": "findable",
+				"reason": null,
+				"viewCount": 0,
+				"downloadCount": 0,
+				"referenceCount": 1,
+				"citationCount": 0,
+				"partCount": 0,
+				"partOfCount": 0,
+				"versionCount": 0,
+				"versionOfCount": 0,
+				"created": "2021-06-14T13:51:00Z",
+				"registered": "2021-07-07T08:46:50Z",
+				"published": null,
+				"updated": "2021-07-07T11:12:18Z"
+			},
+			"relationships": {
+				"client": {
+					"data": {
+						"id": "snd.icos",
+						"type": "clients"
+					}
+				}
+			}
+		},
+		{
+			"id": "10.18160/r9x0-bw7t",
+			"type": "dois",
+			"attributes": {
+				"doi": "10.18160/r9x0-bw7t",
+				"identifiers": [],
+				"creators": [
+					{
+						"name": "Gerbig, Christoph",
+						"givenName": "Christoph",
+						"familyName": "Gerbig",
+						"affiliation": [
+							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+						],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-1112-8603",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"titles": [
+					{
+						"lang": "en-uk",
+						"title": "Parameters for the Vegetation Photosynthesis and Respiration Model VPRM"
+					}
+				],
+				"publisher": "ICOS-ERIC - Carbon Portal",
+				"container": {},
+				"publicationYear": 2021,
+				"subjects": [
+					{
+						"subject": "Biosphere modelling"
+					},
+					{
+						"subject": "Terrestrial Carbon Fluxes"
+					},
+					{
+						"subject": "Optimized model parameters"
+					},
+					{
+						"subject": "Biogeochemical cycles, processes, and modeling"
+					}
+				],
+				"contributors": [
+					{
+						"name": "Gerbig, Christoph",
+						"givenName": "Christoph",
+						"familyName": "Gerbig",
+						"affiliation": [
+							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+						],
+						"contributorType": "Producer",
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-1112-8603",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Koch, Frank-Thomas",
+						"givenName": "Frank-Thomas",
+						"familyName": "Koch",
+						"affiliation": [
+							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+						],
+						"contributorType": null,
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0001-5050-6702",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Karstens, Ute",
+						"givenName": "Ute",
+						"familyName": "Karstens",
+						"affiliation": [
+							"ICOS Carbon Portal, Lund University, Lund, Sweden"
+						],
+						"contributorType": "DataCurator",
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-8985-7742",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"dates": [
+					{
+						"date": "2021-07-01",
+						"dateType": "Issued"
+					}
+				],
+				"language": null,
+				"types": {
+					"ris": "DATA",
+					"bibtex": "misc",
+					"citeproc": "dataset",
+					"schemaOrg": "Dataset",
+					"resourceType": "Text file",
+					"resourceTypeGeneral": "Dataset"
+				},
+				"relatedIdentifiers": [],
+				"sizes": [],
+				"formats": [
+					"ascii text file"
+				],
+				"version": "1.0",
+				"rightsList": [
+					{
+						"rights": "Creative Commons Attribution 4.0 International",
+						"rightsUri": "https://creativecommons.org/licenses/by/4.0/legalcode",
+						"schemeUri": "https://spdx.org/licenses/",
+						"rightsIdentifier": "cc-by-4.0",
+						"rightsIdentifierScheme": "SPDX"
+					}
+				],
+				"descriptions": [
+					{
+						"lang": "en-uk",
+						"description": "Parameters for the Vegetation Photosynthesis and Respiration Model VPRM...",
+						"descriptionType": "Abstract"
+					}
+				],
+				"geoLocations": [],
+				"fundingReferences": [],
+				"url": "https://meta.icos-cp.eu/objects/QeqwvpdySQX-6F9lcTRCzgy_",
+				"contentUrl": null,
+				"metadataVersion": 1,
+				"schemaVersion": "http://datacite.org/schema/kernel-4",
+				"source": "mds",
+				"isActive": true,
+				"state": "findable",
+				"reason": null,
+				"viewCount": 0,
+				"downloadCount": 0,
+				"referenceCount": 0,
+				"citationCount": 0,
+				"partCount": 0,
+				"partOfCount": 0,
+				"versionCount": 0,
+				"versionOfCount": 0,
+				"created": "2021-07-01T17:45:25Z",
+				"registered": "2021-07-01T17:45:55Z",
+				"published": null,
+				"updated": "2021-07-01T17:45:58Z"
+			},
+			"relationships": {
+				"client": {
+					"data": {
+						"id": "snd.icos",
+						"type": "clients"
+					}
+				}
+			}
+		},
+		{
+			"id": "10.18160/vx78-hva1",
+			"type": "dois",
+			"attributes": {
+				"doi": "10.18160/vx78-hva1",
+				"identifiers": [],
+				"creators": [
+					{
+						"name": "Gerbig, Christoph",
+						"givenName": "Christoph",
+						"familyName": "Gerbig",
+						"affiliation": [
+							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+						],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-1112-8603",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Koch, Frank-Thomas",
+						"givenName": "Frank-Thomas",
+						"familyName": "Koch",
+						"affiliation": [
+							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+						],
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0001-5050-6702",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"titles": [
+					{
+						"lang": "en-uk",
+						"title": "Biosphere-atmosphere exchange fluxes for CO2 from the Vegetation Photosynthesis and Respiration Model VPRM for 2006-2020"
+					}
+				],
+				"publisher": "ICOS-ERIC - Carbon Portal",
+				"container": {},
+				"publicationYear": 2021,
+				"subjects": [
+					{
+						"subject": "Biogeochemical cycles, processes, and modeling"
+					},
+					{
+						"subject": "Terrestrial Carbon Fluxes"
+					},
+					{
+						"subject": "Biosphere modelling"
+					}
+				],
+				"contributors": [
+					{
+						"name": "Gerbig, Christoph",
+						"givenName": "Christoph",
+						"familyName": "Gerbig",
+						"affiliation": [
+							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+						],
+						"contributorType": "Producer",
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-1112-8603",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Koch, Frank-Thomas",
+						"givenName": "Frank-Thomas",
+						"familyName": "Koch",
+						"affiliation": [
+							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+						],
+						"contributorType": "ProjectMember",
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0001-5050-6702",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					},
+					{
+						"name": "Karstens, Ute",
+						"givenName": "Ute",
+						"familyName": "Karstens",
+						"affiliation": [
+							"ICOS Carbon Portal, Lund University, Lund, Sweden"
+						],
+						"contributorType": "DataCurator",
+						"nameIdentifiers": [
+							{
+								"schemeUri": "https://orcid.org",
+								"nameIdentifier": "https://orcid.org/0000-0002-8985-7742",
+								"nameIdentifierScheme": "ORCID"
+							}
+						]
+					}
+				],
+				"dates": [
+					{
+						"date": "2021-07-30",
+						"dateType": "Issued"
+					}
+				],
+				"language": null,
+				"types": {
+					"ris": "GEN",
+					"bibtex": "misc",
+					"citeproc": "article",
+					"schemaOrg": "Collection",
+					"resourceType": "NetCDF files",
+					"resourceTypeGeneral": "Collection"
+				},
+				"relatedIdentifiers": [],
+				"sizes": [],
+				"formats": [
+					"NetCDF files"
+				],
+				"version": "1.0",
+				"rightsList": [
+					{
+						"rights": "Creative Commons Attribution 4.0 International",
+						"rightsUri": "https://creativecommons.org/licenses/by/4.0/legalcode",
+						"schemeUri": "https://spdx.org/licenses/",
+						"rightsIdentifier": "cc-by-4.0",
+						"rightsIdentifierScheme": "SPDX"
+					}
+				],
+				"descriptions": [
+					{
+						"description": "VPRM biosphere model results in Europe...",
+						"descriptionType": "Abstract"
+					}
+				],
+				"geoLocations": [],
+				"fundingReferences": [],
+				"url": "https://meta.icos-cp.eu/collections/V57OCYUGanileRMTJDJ9yMfz",
+				"contentUrl": null,
+				"metadataVersion": 3,
+				"schemaVersion": "http://datacite.org/schema/kernel-4",
+				"source": "mds",
+				"isActive": true,
+				"state": "findable",
+				"reason": null,
+				"viewCount": 0,
+				"downloadCount": 0,
+				"referenceCount": 0,
+				"citationCount": 0,
+				"partCount": 0,
+				"partOfCount": 0,
+				"versionCount": 0,
+				"versionOfCount": 0,
+				"created": "2021-06-30T06:29:12Z",
+				"registered": "2021-06-30T06:30:26Z",
+				"published": null,
+				"updated": "2021-07-01T06:26:44Z"
+			},
+			"relationships": {
+				"client": {
+					"data": {
+						"id": "snd.icos",
+						"type": "clients"
+					}
+				}
+			}
+		},
+		{
+			"id": "10.18160/fzmy-pg92",
+			"type": "dois",
+			"attributes": {
+				"doi": "10.18160/fzmy-pg92",
+				"identifiers": [],
+				"creators": [
+					{
+						"name": "ICOS RI",
+						"nameType": null,
+						"givenName": null,
+						"familyName": null,
+						"affiliation": [],
+						"nameIdentifiers": []
+					}
+				],
+				"titles": [
+					{
+						"lang": null,
+						"title": "Ecosystem final quality (L2) product in ETC-Archive format - release 2021-1",
+						"titleType": null
+					}
+				],
+				"publisher": "ICOS ERIC - Carbon Portal",
+				"container": {},
+				"publicationYear": 2021,
+				"subjects": [
+					{
+						"subject": "Biogeochemical cycles, processes, and modeling"
+					},
+					{
+						"subject": "Troposphere: composition and chemistry"
+					},
+					{
+						"subject": "Carbon Cycle"
+					},
+					{
+						"subject": "CO2 biogenic exchange fluxes"
+					},
+					{
+						"subject": "Surface energy balance"
+					}
+				],
+				"contributors": [],
+				"dates": [
+					{
+						"date": "2021-05-06",
+						"dateType": "Issued",
+						"dateInformation": null
+					}
+				],
+				"language": null,
+				"types": {
+					"ris": "GEN",
+					"bibtex": "misc",
+					"citeproc": "article",
+					"schemaOrg": "Collection",
+					"resourceType": "ZIP archives",
+					"resourceTypeGeneral": "Collection"
+				},
+				"relatedIdentifiers": [
+					{
+						"schemeUri": null,
+						"schemeType": null,
+						"relationType": "IsNewVersionOf",
+						"relatedIdentifier": "10.18160/ABWE-HMV4",
+						"resourceTypeGeneral": "Collection",
+						"relatedIdentifierType": "DOI",
+						"relatedMetadataScheme": null
+					}
+				],
+				"sizes": [
+					"911 MB"
+				],
+				"formats": [
+					"Collection of ZIP archives with CSV files and PDF documents"
+				],
+				"version": "1.0",
+				"rightsList": [
+					{
+						"rights": "Creative Commons Attribution 4.0 International",
+						"rightsUri": "https://creativecommons.org/licenses/by/4.0/legalcode",
+						"schemeUri": "https://spdx.org/licenses/",
+						"rightsIdentifier": "cc-by-4.0",
+						"rightsIdentifierScheme": "SPDX"
+					}
+				],
+				"descriptions": [
+					{
+						"lang": null,
+						"description": "This is the 2021-1 release of the ICOS final quality ecosystem data product...",
+						"descriptionType": "TechnicalInfo"
+					}
+				],
+				"geoLocations": [],
+				"fundingReferences": [],
+				"url": "https://meta.icos-cp.eu/collections/Yljl66tHIJM-XlCmvTvMU3vi",
+				"contentUrl": null,
+				"metadataVersion": 1,
+				"schemaVersion": "http://datacite.org/schema/kernel-4",
+				"source": "fabricaForm",
+				"isActive": true,
+				"state": "findable",
+				"reason": null,
+				"viewCount": 0,
+				"downloadCount": 0,
+				"referenceCount": 0,
+				"citationCount": 0,
+				"partCount": 0,
+				"partOfCount": 0,
+				"versionCount": 0,
+				"versionOfCount": 0,
+				"created": "2021-05-06T08:55:43Z",
+				"registered": "2021-05-06T09:03:19Z",
+				"published": null,
+				"updated": "2021-06-29T13:57:32Z"
+			},
+			"relationships": {
+				"client": {
+					"data": {
+						"id": "snd.icos",
+						"type": "clients"
+					}
+				}
+			}
+		}
+	]
+}

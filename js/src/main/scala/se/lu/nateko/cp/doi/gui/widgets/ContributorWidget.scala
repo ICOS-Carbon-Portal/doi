@@ -15,10 +15,9 @@ class ContributorWidget(init: Contributor, protected val updateCb: Contributor =
 
 	private[this] val contributorTypeSelect = new SelectWidget[ContributorType](
 		SelectWidget.selectOptions(ContributorType, Some("Contributor type")),
-		Option(init.contributorType),
+		init.contributorType,
 		typeOpt => {
-			val contrType = typeOpt.getOrElse(null)
-			_contributor = _contributor.copy(contributorType = contrType)
+			_contributor = _contributor.copy(contributorType = typeOpt)
 			updateCb(_contributor)
 		}
 	)

@@ -20,9 +20,9 @@ class SubjectWidget(init: Subject, protected val updateCb: Subject => Unit) exte
 
 	private[this] val schemeInput = new SelectWidget[SubjectScheme](
 		SelectWidget.selectOptions(Some("Subject scheme"))(Dewey),
-		init.subjectScheme,
+		init.scheme,
 		schemeOpt => {
-			_subj = _subj.copy(subjectScheme = schemeOpt)
+			_subj = _subj.copy(scheme = schemeOpt)
 			updateCb(_subj)
 		}
 	)

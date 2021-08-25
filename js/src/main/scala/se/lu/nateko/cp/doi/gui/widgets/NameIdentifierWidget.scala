@@ -16,8 +16,8 @@ class NameIdentifierWidget(
 
 	private[this] def validate(): Unit = highlightError(idInput.element, _nameId.error)
 
-	private[this] val idInput = new TextInputWidget(init.id, newId => {
-		_nameId = _nameId.copy(id = newId)
+	private[this] val idInput = new TextInputWidget(init.nameIdentifier, newId => {
+		_nameId = _nameId.copy(nameIdentifier = newId)
 		validate()
 		updateCb(_nameId)
 	})

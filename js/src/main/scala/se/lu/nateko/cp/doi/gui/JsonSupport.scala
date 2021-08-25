@@ -22,6 +22,22 @@ object JsonSupport{
 		}
 	}
 
+	private def fieldConflatingFormat[T](vanillaF: OFormat[T], field: String, opt: Boolean = false) = new OFormat[T]{
+		def writes(obj: T): JsObject = {
+			val vanilla = vanillaF.writes(obj)
+			val innerFields = vanilla.value(field).as[JsObject]
+			vanilla - field ++ innerFields
+		}
+		def reads(js: JsValue) = {
+			val patchedJson = js.as[JsObject] + (field -> js)
+			vanillaF.reads(patchedJson) match{
+				case err: JsError if(opt) => vanillaF.reads(js)
+				case other => other
+			}
+		}
+	}
+
+
 	implicit val dateTypeFormat = enumFormat(DateType)
 	implicit val contrTypeFormat = enumFormat(ContributorType)
 	implicit val descriptionTypeFormat = enumFormat(DescriptionType)
@@ -40,9 +56,9 @@ object JsonSupport{
 		def reads(json: JsValue): JsResult[Doi] = parseDoi(json.as[String])
 	}
 	implicit val subjectShemeFormat = Json.format[SubjectScheme]
-	implicit val subjectFormat = Json.format[Subject]
+	implicit val subjectFormat = fieldConflatingFormat(Json.format[Subject], "scheme", opt = true)
 	implicit val nameIdentifierSchemeFormat = Json.format[NameIdentifierScheme]
-	implicit val nameIdentifierFormat = Json.format[NameIdentifier]
+	implicit val nameIdentifierFormat = fieldConflatingFormat(Json.format[NameIdentifier], "scheme")
 	implicit val genericNameFormat = Json.format[GenericName]
 	implicit val personalNameFormat = Json.format[PersonalName]
 
@@ -53,7 +69,7 @@ object JsonSupport{
 			case pn: PersonalName =>
 				personalNameFormat.writes(pn) ++ Json.obj("nameType" -> "Personal")
 		}
-		def reads(js: JsValue) = (js \ "givenName") match {
+		def reads(js: JsValue) = (js \ "familyName") match {
 			case JsDefined(JsString(_)) =>
 				personalNameFormat.reads(js)
 
@@ -62,33 +78,8 @@ object JsonSupport{
 		}
 	}
 
-	private val vanillaCreatorFormat = Json.format[Creator]
-
-	implicit val creatorFormat = new Format[Creator]{
-		def writes(c: Creator): JsValue = {
-			val nameJs = nameFormat.writes(c.name)
-			val vanilla = vanillaCreatorFormat.writes(c)
-
-			vanilla - "name" ++ nameJs
-		}
-		def reads(json: JsValue): JsResult[Creator] = {
-			val patchedJson = json.as[JsObject] + ("name" -> json)
-			vanillaCreatorFormat.reads(patchedJson)
-		}
-	}
-	private val vanillaContributorFormat = Json.format[Contributor]
-	implicit val contributorFormat = new Format[Contributor]{
-		def writes(c: Contributor): JsValue = {
-			val nameJs = nameFormat.writes(c.name)
-			val vanilla = vanillaContributorFormat.writes(c)
-
-			vanilla - "name" ++ nameJs
-		}
-		def reads(json: JsValue): JsResult[Contributor] = {
-			val patchedJson = json.as[JsObject] + ("name" -> json)
-			vanillaContributorFormat.reads(patchedJson)
-		}
-	}
+	implicit val creatorFormat = fieldConflatingFormat(Json.format[Creator], "name")
+	implicit val contributorFormat = fieldConflatingFormat(Json.format[Contributor], "name")
 	implicit val titleFormat = Json.format[Title]
 	implicit val resourceTypeFormat = Json.format[ResourceType]
 	implicit val dateFormat = Json.format[Date]

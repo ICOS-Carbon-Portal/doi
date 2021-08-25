@@ -34,7 +34,6 @@ object Doi{
 	}
 }
 
-//TODO Move Doi out of DoiMeta
 case class DoiMeta(
 	doi: Doi,
 	state: DoiPublicationState.Value = draft,

@@ -54,24 +54,24 @@ case class GenericName(name: String) extends Name{
 	override def toString = name
 }
 
-case class NameIdentifier(id: String, scheme: NameIdentifierScheme) extends SelfValidating{
+case class NameIdentifier(nameIdentifier: String, scheme: NameIdentifierScheme) extends SelfValidating{
 	import NameIdentifierScheme._
 
 	def error = joinErrors(
-		nonEmpty(id)("Name identifier must not be empty"),
+		nonEmpty(nameIdentifier)("Name identifier must not be empty"),
 		nonNull(scheme)("Name Identifier scheme must be provided"),
 		scheme.error,
 		scheme match {
 			case Orcid =>
-				if(id.matches("""^(\d{4}\-?){3}\d{3}[0-9X]$""")) None
+				if(nameIdentifier.matches("""^(\d{4}\-?){3}\d{3}[0-9X]$""")) None
 				else Some("Wrong ORCID ID format")
 
 			case Isni =>
-				if(id.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
+				if(nameIdentifier.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
 				else Some("Wrong ISNI ID format")
 
 			case Fluxnet =>
-				if(id.matches("""^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""")) None
+				if(nameIdentifier.matches("""^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""")) None
 				else Some("Wrong FLUXNET site id format")
 
 			case _ if(supported.contains(scheme)) => None
@@ -87,12 +87,12 @@ object NameIdentifier{
 	def isni(id: String) = NameIdentifier(id, NameIdentifierScheme.Isni)
 }
 
-case class NameIdentifierScheme(name: String, uri: Option[String]) extends SelfValidating{
+case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[String]) extends SelfValidating{
 	def error = joinErrors(
-		nonEmpty(name)("Name identifier scheme must have a name"),
-		uri.flatMap(validUri)
+		nonEmpty(nameIdentifierScheme)("Name identifier scheme must have a name"),
+		schemeUri.flatMap(validUri)
 	)
-	override def toString = name
+	override def toString = nameIdentifierScheme
 }
 
 object NameIdentifierScheme{
@@ -120,7 +120,7 @@ case class Contributor(
 	name: Name,
 	nameIdentifiers: Seq[NameIdentifier],
 	affiliation: Seq[String],
-	contributorType: ContributorType.Value
+	contributorType: Option[ContributorType.Value]
 ) extends Person{
 
 	override def error = joinErrors(
@@ -158,13 +158,13 @@ object SubjectScheme{
 case class Subject(
 	val subject: String,
 	val lang: Option[String] = None,
-	val subjectScheme: Option[SubjectScheme] = None,
+	val scheme: Option[SubjectScheme] = None,
 	val valueUri: Option[String] = None
 ) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(subject)("Subject must not be empty"),
 		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided")),
-		subjectScheme.flatMap(_.error),
+		scheme.flatMap(_.error),
 		valueUri.flatMap(validUri)
 	)
 }

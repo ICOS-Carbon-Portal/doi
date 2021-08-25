@@ -29,7 +29,7 @@ object DoiMetaExamples {
 				name = GenericName("Starr, Joan"),
 				affiliation = Seq("California Digital Library"),
 				nameIdentifiers = Seq(NameIdentifier.orcid("0000-0002-7285-027X")),
-				contributorType = ContributorType.ProjectLeader
+				contributorType = Some(ContributorType.ProjectLeader)
 			)
 		),
 		dates = Seq(Date("2014-10-17", DateType.Updated)),
