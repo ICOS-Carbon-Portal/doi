@@ -23,19 +23,6 @@ object ThunkActions {
 		dispatchFut(Backend.getFreshDoiList)
 	}
 
-	private def writeMeta(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
-		if(d.getState.isUpdatingMeta(meta.doi)){
-			val updatedFut = Backend.updateMeta(meta).map(_ => MetaUpdated(meta))
-			dispatchFut(updatedFut)
-			updatedFut.foreach{_ => andThen foreach d.dispatch}
-		}
-	}
-
-	def requestMetaUpdate(meta: DoiMeta, andThen: Option[ThunkAction]): ThunkAction = implicit d => {
-		d.dispatch(MetaUpdateRequest(meta))
-		d.dispatch(writeMeta(meta, andThen))
-	}
-
 	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {
 		result.onComplete{
 			case Success(a) => d.dispatch(a)

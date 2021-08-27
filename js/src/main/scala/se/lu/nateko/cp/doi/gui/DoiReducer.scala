@@ -24,12 +24,6 @@ object DoiReducer {
 			else
 				state.withSelected(doi)
 
-		case TargetUrlUpdateRequest(doi, _) => state.startUrlUpdate(doi)
-
-		case TargetUrlUpdated(doi, url) => state.updateUrl(doi, url).stopUrlUpdate(doi)
-
-		case MetaUpdateRequest(meta) => state.startMetaUpdate(meta.doi)
-
 		case DoiCloneRequest(meta) => {
 			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
 
@@ -42,8 +36,6 @@ object DoiReducer {
 				.withSelected(newDoi)
 				.withDoiInfo(newInfo)
 		}
-
-		case MetaUpdated(meta) => state.updateMeta(meta).stopMetaUpdate(meta.doi)
 
 		case EmptyDoiCreation(doi) => state.copy(
 				dois = DoiMeta(doi) +: state.dois

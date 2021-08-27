@@ -9,19 +9,26 @@ import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.gui.views.Constants
-
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.Seq
 
 import DoiMetaWidget._
+import scala.concurrent.Future
 
 class DoiMetaWidget(
 	init: DoiMeta,
-	protected val updateCb: DoiMeta => Unit,
+	updater: DoiMeta => Future[Unit],
 	cloneCb: DoiMeta => Unit,
 	deleteCb: Doi => Unit
-) extends EntityWidget[DoiMeta] {
+) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
+	def error = withUrlError(_meta.error)
+
+	protected val updateCb: DoiMeta => Unit = _ => ???//dummy, not used here
+
+	private def withUrlError(err: Option[String]): Option[String] =
+		joinErrors(err, _meta.url.flatMap(DoiTargetWidget.targetUrlError))
 
 	private def formElements: Seq[Div] = Seq(
 
@@ -63,60 +70,49 @@ class DoiMetaWidget(
 
 	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
 		_meta = upd(prop)(_meta)
-		_meta.state match {
-			case DoiPublicationState.draft => validateDraftMeta()
-			case _ => validateFindableMeta()
-		}
+		validateMeta()
 		resetButton.disabled = false
 	}
 
 	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
 
-	private[this] def validateDraftMeta(): Unit = {
-		val errors = _meta.draftError.toSeq.flatMap(_.split("\n"))
+	private def validateMeta(): Unit = {
+		val errors = error.toSeq.flatMap(_.split("\n"))
 
 		errorMessages.innerHTML = ""
 		errors.foreach(err => errorMessages.appendChild(p(err).render))
 
-		val canSave = errors.isEmpty && _meta != init
+		val canUpdate = _meta != init && {
+			if(_meta.state == DoiPublicationState.draft) withUrlError(_meta.draftError).isEmpty
+			else errors.isEmpty
+		}
 
-		updateButton.disabled = !canSave
-		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
+		updateButton.disabled = !canUpdate
+		publishButton.disabled = !errors.isEmpty
+		updateButton.className = "btn btn-" + (if(canUpdate) "primary" else "default")
 	}
 
-	private[this] def validateFindableMeta(): Boolean = {
-		val errors = _meta.error.toSeq.flatMap(_.split("\n"))
-
-		errorMessages.innerHTML = ""
-		errors.foreach(err => errorMessages.appendChild(p(err).render))
-
-		val canSave = errors.isEmpty && _meta != init
-
-		updateButton.disabled = !canSave
-		updateButton.className = "btn btn-" + (if(canSave) "primary" else "default")
-
-		canSave
-	}
-
-	private[this] def resetForms(): Unit = {
+	private def resetForms(): Unit = {
 		_meta = init
 		formElems.innerHTML = ""
 		formElements.foreach(formElems.appendChild)
-		validateDraftMeta()
+		validateMeta()
 		resetButton.disabled = true
 	}
 
 	private[this] val updateButton = button(tpe := "button", cls := "btn btn-primary", disabled := true)("Update").render
 	updateButton.onclick = (_: Event) => {
 		updateButton.disabled = true
-		updateCb(_meta)
+		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
 	}
 
 	private[this] val publishButton = button(tpe := "button", cls := "btn btn-default btn-publish")("Publish").render
 	publishButton.onclick = (_: Event) => {
 		publishButton.disabled = true
-		if (validateFindableMeta()) {
-			updateCb(_meta.copy(event = Some(DoiPublicationEvent.publish)))
+		updater(
+			_meta.copy(event = Some(DoiPublicationEvent.publish))
+		).failed.foreach{
+			_ => publishButton.disabled = false
 		}
 	}
 

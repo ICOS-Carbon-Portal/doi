@@ -23,30 +23,36 @@ object Backend {
 		.recoverWith(recovery("fetch DOI prefix"))
 		.map(parseTo[String])
 
-	def updateMeta(meta: DoiMeta) = Ajax
+	def updateMeta(meta: DoiMeta): Future[Unit] = Ajax
 		.post(
 			"/api/metadata",
 			Json.toJson(meta).toString,
 			headers = Map("content-type" -> "application/json")
 		)
+		.flatMap(checkResponse200)
 		.recoverWith(recovery("update DOI metadata"))
 
-	def getFreshDoiList: Future[FreshDoiList] = Ajax
+	def getFreshDoiList: Future[FreshDoiList] = {
+		//val startTime = System.currentTimeMillis()
+		Ajax
 		.get(s"/api/metalist")
-		.recoverWith(recovery("fetch DOI list from DataCite REST API"))
+		//.andThen{case _ => println(s"Got metalist response in ${System.currentTimeMillis() - startTime} ms")}
 		.map(parseTo[JsObject])
 		.map{jso =>
 			val dois = (jso \ "data").as[JsArray].value.map{jsv =>
 				(jsv \ "attributes").as[DoiMeta]
 			}
+			//println(s"Got metalist response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
 			FreshDoiList(dois)
 		}
+		.recoverWith(recovery("fetch DOI list from DataCite REST API"))
+	}
 
 		def delete(doi: Doi) = Ajax
 			.delete(s"/api/$doi/")
 			.recoverWith(recovery("delete DOI"))
 
-	private def recovery(hint: String): PartialFunction[Throwable, Future[XMLHttpRequest]] = {
+	private def recovery[T](hint: String): PartialFunction[Throwable, Future[T]] = {
 		case AjaxException(xhr) =>
 			val msg = if(xhr.responseText.isEmpty)
 				s"Got HTTP status ${xhr.status} when trying to $hint"
@@ -54,4 +60,8 @@ object Backend {
 
 			Future.failed(new Exception(msg))
 	}
+
+	private def checkResponse200(resp: XMLHttpRequest): Future[Unit] =
+		if(resp.status == 200) Future.successful(())
+		else Future.failed(new Exception(s"Got response ${resp.statusText} from the server"))
 }

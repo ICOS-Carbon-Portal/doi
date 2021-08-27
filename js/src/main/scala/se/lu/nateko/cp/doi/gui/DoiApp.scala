@@ -10,7 +10,6 @@ object DoiApp {
 		dois = Nil,
 		info = Map.empty,
 		selected = None,
-		ioState = IoState(None, None),
 		error = None
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)

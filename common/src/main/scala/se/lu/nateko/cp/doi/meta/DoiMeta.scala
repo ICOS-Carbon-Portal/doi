@@ -61,21 +61,12 @@ case class NameIdentifier(nameIdentifier: String, scheme: NameIdentifierScheme) 
 		nonEmpty(nameIdentifier)("Name identifier must not be empty"),
 		nonNull(scheme)("Name Identifier scheme must be provided"),
 		scheme.error,
-		scheme match {
-			case Orcid =>
-				if(nameIdentifier.matches("""^(\d{4}\-?){3}\d{3}[0-9X]$""")) None
-				else Some("Wrong ORCID ID format")
-
-			case Isni =>
-				if(nameIdentifier.matches("""^(\d{4} ?){3}\d{3}[0-9X]$""")) None
-				else Some("Wrong ISNI ID format")
-
-			case Fluxnet =>
-				if(nameIdentifier.matches("""^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""")) None
-				else Some("Wrong FLUXNET site id format")
-
-			case _ if(supported.contains(scheme)) => None
-			case _ =>
+		Regexes.get(scheme) match{
+			case Some(rex) =>
+				if(rex.matches(nameIdentifier)) None
+				else Some(s"Wrong ${scheme.nameIdentifierScheme} ID format")
+			case None if(supported.contains(scheme)) => None
+			case None =>
 				val supportedNames = supported.mkString(", ")
 				Some("Only the following name identifier schemes are supported: " + supportedNames)
 		}
@@ -98,8 +89,16 @@ case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
+	val Ror = NameIdentifierScheme("ROR", Some("https://ror.org"))
 	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
-	val supported = immutable.Seq(Orcid, Isni, Fluxnet)
+	val supported = immutable.Seq(Orcid, Isni, Ror, Fluxnet)
+
+	val Regexes = Map(
+		Orcid -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
+		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
+		Ror -> "^[a-z0-9]{9}$".r,
+		Fluxnet -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
+	)
 }
 
 sealed trait Person extends SelfValidating{
@@ -175,21 +174,31 @@ case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
 		nonEmpty(date)("Date must not be empty if specified"),
 		nonNull(dateType)("Date type must be specified for every date"),
 		if(date == null || date.isEmpty || !dateIsWrong(date)) None
-		else Some(s"Wrong date '$date', use format YYYY-MM-DD")
+		else Some(s"Wrong date '$date', use format YYYY[-MM-DD]")
 	)
 
 	private def dateIsWrong(date: String): Boolean = date match {
 		case dateRegex(yearStr, monthStr, dayStr) =>
-			val year = yearStr.toInt
 			val month = monthStr.toInt
 			val day = dayStr.toInt
-			year < 1900 || year > 3000 || month < 1 || month > 12 || day < 1 || day > 31
+			yearIsWrong(yearStr) || month < 1 || month > 12 || day < 1 || day > 31
+
+		case yearRegex(yearStr) => yearIsWrong(yearStr)
 		case _ => true
 	}
+
+	private def yearIsWrong(yearStr: String): Boolean =
+		try{
+			val year = yearStr.toInt
+			year < 1900 || year > 3000
+		}catch{
+			case _: Throwable => true
+		}
 }
 
 object Date{
 	private val dateRegex = """(\d{4})-(\d\d)-(\d\d)""".r
+	private val yearRegex = "(\\d{4})".r
 }
 
 case class Version(major: Int, minor: Int) extends SelfValidating{

@@ -39,7 +39,6 @@ class AkkaDoiHttp(
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
-
 	def putPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = {
 		val cType = ContentType.parse(contentType).getOrElse(
 			throw new Exception("Invalid content type: " + contentType)
