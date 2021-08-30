@@ -48,7 +48,7 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 
 	def delete(doi: Doi): Future[Unit] =
 		http.delete(metaUrl(doi)).flatMap(
-			analyzeResponse{case 204 => Future.successful(())}
+			analyzeResponse{case 204 | 404 => Future.successful(())}
 		)
 
 	private def analyzeResponse[T](pf: PartialFunction[Int, Future[T]])(resp: http.DoiResponse): Future[T] = {
