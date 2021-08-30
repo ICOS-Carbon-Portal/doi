@@ -78,3 +78,7 @@ case class DoiMeta(
 		draftErrors
 	)
 }
+
+case class DoiWrapper(attributes: DoiMeta)
+case class SingleDoiPayload(data: DoiWrapper)
+case class DoiListPayload(data: Seq[DoiWrapper])

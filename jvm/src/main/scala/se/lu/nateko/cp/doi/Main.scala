@@ -56,8 +56,12 @@ object Main{
 					authRouting.user{uid =>
 						doiRouting.writingRoute{doiMeta =>
 							if(admins.contains(uid)) Future.successful(true)
-							else client.getMetadataParsed(doiMeta.doi).map{currMeta =>
-								doiMeta.event.isEmpty && currMeta.state == DoiPublicationState.draft
+							else if(doiMeta.event.isDefined || doiMeta.state != DoiPublicationState.draft) Future.successful(false)
+							else client.getMetadataParsed(doiMeta.doi).map{
+								case Some(currMeta) =>
+									currMeta.state == DoiPublicationState.draft
+								case None =>
+									true
 							}
 						}
 					} ~
@@ -65,11 +69,16 @@ object Main{
 				} ~
 				delete{
 					authRouting.user{uid =>
-						doiRouting.deleteRoute{_ =>
-							admins.contains(uid)
-						}
+						if(admins.contains(uid)) {
+							pathPrefix(DoiClientRouting.DoiPath){doi =>
+								onSuccess(client.delete(doi)){
+									complete(StatusCodes.OK)
+								}
+							} ~
+							complete(StatusCodes.BadRequest -> "Expected URL path ending in a DOI")
+						} else complete(StatusCodes.Forbidden -> "Must be admin to delete DOIs")
 					} ~
-					complete((StatusCodes.Unauthorized, "Must be logged in"))
+					complete(StatusCodes.Unauthorized -> "Must be logged in")
 				} ~
 				path("doiprefix"){
 					get{complete(JsString(prefixInfo).compactPrint)}

@@ -7,21 +7,20 @@ import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.Doi
 
-class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: String => Unit) extends EntityWidget[String] {
+class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Option[String] => Unit) extends EntityWidget[Option[String]] {
 
-	private[this] var _target = init.getOrElse("")
+	private[this] var _target = init
 
-	private[this] val urlInput = input(tpe := "text", cls := "form-control", value := _target).render
+	private[this] val urlInput = input(tpe := "text", cls := "form-control", value := init.getOrElse("")).render
 
 	private[this] def validateTargetUrl(): Unit = {
-		val candidateUrl = Option(urlInput.value).getOrElse("")
+		_target = Option(urlInput.value).map(_.trim).filterNot(_.isEmpty)
 
-		val targetError = if(_target.isEmpty) None else targetUrlError(candidateUrl)
-		val canUpdate = targetError.isEmpty && _target != candidateUrl
+		val targetError = _target.flatMap(targetUrlError)
 
 		highlightError(urlInput, targetError)
 
-		if(canUpdate) updateCb(urlInput.value)
+		updateCb(_target)
 	}
 	validateTargetUrl()
 
@@ -52,8 +51,8 @@ object DoiTargetWidget{
 			if(allowed.contains(domain))
 				None
 			else
-				Some(s"Domain '$domain' is not allowed, must be one of: " + allowed.mkString(", "))
+				Some(s"Target-url domain '$domain' is not allowed, must be one of: " + allowed.mkString(", "))
 		case _ =>
-			Some("Must have format http[s]://[<subdomain>.]<domain>/[<path>]")
+			Some("Target url must have format http[s]://[<subdomain>.]<domain>/[<path>]")
 	}
 }

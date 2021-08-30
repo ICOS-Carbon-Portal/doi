@@ -13,17 +13,22 @@
 			font-size: 100%;
 			color: #000;
 		}
-		.btn-publish,
-		.published-controls,
-		.new-doi-input,
-		.draft-controls {
+		.is-not-admin .btn-changestate,
+		.is-not-admin .published-doi .doi-update,
+		.is-anonymous .new-doi-input,
+		.is-anonymous .draft-controls {
 			display: none;
 		}
-		.is-admin .btn-publish,
-		.is-admin .published-controls,
-		.is-logged-in .new-doi-input,
-		.is-logged-in .draft-controls {
-			display: block;
+		.is-not-admin .published-doi .panel input,
+		.is-not-admin .published-doi .panel button,
+		.is-not-admin .published-doi .panel select,
+		.is-anonymous .draft-doi .panel input,
+		.is-anonymous .draft-doi .panel button,
+		.is-anonymous .draft-doi .panel select{
+			pointer-events: none;
+		}
+		.is-not-admin .published-doi .panel-body input{
+			background-color: lightgrey;
 		}
 	</style>
 }{
@@ -57,9 +62,9 @@
 }
 
 @isAdminClass = @{
-	if(isAdmin) "is-admin" else ""
+	if(isAdmin) "is-admin" else "is-not-admin"
 }
 
 @isLoggedInClass = @{
-	if(isLoggedIn) "is-logged-in" else ""
+	if(isLoggedIn) "is-logged-in" else "is-anonymous"
 }

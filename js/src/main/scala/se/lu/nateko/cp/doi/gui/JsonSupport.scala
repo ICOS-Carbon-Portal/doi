@@ -100,4 +100,7 @@ object JsonSupport{
 	implicit val descriptionFormat = Json.format[Description]
 
 	implicit val doiMetaFormat = Json.format[DoiMeta]
+	implicit val doiWrapperFormat = Json.format[DoiWrapper]
+	implicit val singleDoiPayloadFormat = Json.format[SingleDoiPayload]
+	implicit val doiListPayloadFormat = Json.format[DoiListPayload]
 }

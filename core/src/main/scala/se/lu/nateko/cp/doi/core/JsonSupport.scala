@@ -1,6 +1,6 @@
 package se.lu.nateko.cp.doi.core
 
-import se.lu.nateko.cp.doi.{Doi, DoiMeta}
+import se.lu.nateko.cp.doi._
 import se.lu.nateko.cp.doi.meta._
 import spray.json._
 
@@ -100,4 +100,7 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	implicit val doiMetaFormat = jsonFormat16(DoiMeta)
 
+	implicit val doiWrapperFormat = jsonFormat1(DoiWrapper)
+	implicit val singleDoiPayloadFormat = jsonFormat1(SingleDoiPayload)
+	implicit val doiListPayloadFormat = jsonFormat1(DoiListPayload)
 }

@@ -36,7 +36,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	private val titleSpan = span(cls := "panel-title")().render
 	private val panelBody = div(cls := "panel-body").render
 
-	def panelClasses = "panel panel-" + (if(meta.state == DoiPublicationState.draft) "warning" else "info")
+	def panelClasses = "panel panel-" + (if(meta.state == DoiPublicationState.draft) "warning draft-doi" else "info published-doi")
 
 	val element = div(cls := panelClasses)(
 		div(cls := "panel-heading", onclick := selectDoi, cursor := "pointer")(

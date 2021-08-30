@@ -4,8 +4,8 @@ import java.net.URL
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import scala.io.Source
-import se.lu.nateko.cp.doi.DoiMeta
-import se.lu.nateko.cp.doi.Doi
+import se.lu.nateko.cp.doi.{Doi,DoiMeta,DoiWrapper}
+import se.lu.nateko.cp.doi.{SingleDoiPayload,DoiListPayload}
 import scala.util.Try
 import scala.collection.Seq
 import spray.json._
@@ -19,19 +19,27 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
 
-	def listDoisMeta: Future[String] = {
-		http.getJson(clientDois).map(response => response.body)
+	def listDoisMeta: Future[String] = http.getJson(clientDois).flatMap(
+		resp => analyzeResponse{case 200 => Future.successful(resp.body)}(resp)
+	)
+	def listDoisParsed: Future[Seq[DoiMeta]] = listDoisMeta.map{
+		_.parseJson.convertTo[DoiListPayload].data.map(_.attributes)
 	}
 
-	def getMetadata(doi: Doi): Future[String] = http.getJson(metaUrl(doi)).map(response => response.body)
-	def getMetadataParsed(doi: Doi): Future[DoiMeta] = getMetadata(doi).map{jsStr =>
-		jsStr.parseJson.asJsObject.fields("data").asJsObject.fields("attributes").convertTo[DoiMeta]
+	def getMetadata(doi: Doi): Future[Option[String]] = http.getJson(metaUrl(doi)).flatMap(
+		resp => analyzeResponse{
+			case 200 => Future.successful(Some(resp.body))
+			case 404 => Future.successful(None)
+		}(resp)
+	)
+	def getMetadataParsed(doi: Doi): Future[Option[DoiMeta]] = getMetadata(doi).map{
+		_.map(_.parseJson.convertTo[SingleDoiPayload].data.attributes)
 	}
 
 	def putMetadata(meta: DoiMeta): Future[Unit] = http
 		.putPayload(
 			metaUrl(meta.doi),
-			JsObject("data" -> JsObject("attributes" -> meta.toJson)).compactPrint,
+			SingleDoiPayload(DoiWrapper(meta)).toJson.compactPrint,
 			"application/vnd.api+json"
 		).flatMap(analyzeResponse{
 			case 200 | 201 => Future.successful(())

@@ -7,6 +7,7 @@ import play.api.libs.json._
 import se.lu.nateko.cp.doi.JsonSupport._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.DoiListPayload
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 
@@ -37,11 +38,9 @@ object Backend {
 		Ajax
 		.get(s"/api/metalist")
 		//.andThen{case _ => println(s"Got metalist response in ${System.currentTimeMillis() - startTime} ms")}
-		.map(parseTo[JsObject])
-		.map{jso =>
-			val dois = (jso \ "data").as[JsArray].value.map{jsv =>
-				(jsv \ "attributes").as[DoiMeta]
-			}
+		.map(parseTo[DoiListPayload])
+		.map{pl =>
+			val dois = pl.data.map(_.attributes)
 			//println(s"Got metalist response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
 			FreshDoiList(dois)
 		}

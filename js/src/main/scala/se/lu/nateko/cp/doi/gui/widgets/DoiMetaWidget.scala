@@ -64,7 +64,7 @@ class DoiMetaWidget(
 
 		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
 
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = Some(t)))).element
+		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element
 
 	)
 
@@ -89,7 +89,7 @@ class DoiMetaWidget(
 
 		updateButton.disabled = !canUpdate
 		publishButton.disabled = !errors.isEmpty
-		updateButton.className = "btn btn-" + (if(canUpdate) "primary" else "default")
+		updateButton.className = "btn doi-update btn-" + (if(canUpdate) "primary" else "default")
 	}
 
 	private def resetForms(): Unit = {
@@ -100,13 +100,13 @@ class DoiMetaWidget(
 		resetButton.disabled = true
 	}
 
-	private[this] val updateButton = button(tpe := "button", cls := "btn btn-primary", disabled := true)("Update").render
+	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
 	updateButton.onclick = (_: Event) => {
 		updateButton.disabled = true
 		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
 	}
 
-	private[this] val publishButton = button(tpe := "button", cls := "btn btn-default btn-publish")("Publish").render
+	private[this] val publishButton = button(tpe := "button", cls := "btn btn-default btn-changestate")("Publish").render
 	publishButton.onclick = (_: Event) => {
 		publishButton.disabled = true
 		updater(
@@ -119,7 +119,7 @@ class DoiMetaWidget(
 	private[this] val cloneButton = button(tpe := "button", cls := "btn btn-default")("Clone").render
 	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
-	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-default btn-delete")("Delete").render
+	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-default btn-changestate")("Delete").render
 	deleteButton.onclick = (_: Event) => {
 		deleteButton.disabled = true
 		deleteCb(_meta.doi)

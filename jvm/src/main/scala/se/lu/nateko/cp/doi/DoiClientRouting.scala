@@ -18,8 +18,11 @@ class DoiClientRouting(client: DoiClient) {
 		} ~
 		pathPrefix(DoiPath){doi =>
 			path("metadata"){
-				onSuccess(client.getMetadata(doi)){meta =>
-					complete(HttpEntity(ContentTypes.`application/json`, meta))
+				onSuccess(client.getMetadata(doi)){
+					case Some(meta) =>
+						complete(HttpEntity(ContentTypes.`application/json`, meta))
+					case None =>
+						complete(StatusCodes.NotFound -> s"No metadata found for DOI $doi")
 				}
 			} ~
 			complete(StatusCodes.NotFound)
@@ -43,21 +46,11 @@ class DoiClientRouting(client: DoiClient) {
 			complete(StatusCodes.BadRequest -> "Expected DoiMeta as payload")
 		}
 	}
-
-	def deleteRoute(authorizer: Doi => Boolean) = delete {
-		pathPrefix(DoiPath){doi =>
-			if(authorizer(doi)) {
-				onSuccess(client.delete(doi)){
-					complete(StatusCodes.OK)
-				}
-			} else forbid
-		}
-	}
 }
 
 object DoiClientRouting{
 
-	val forbid = complete(StatusCodes.Forbidden -> "You are not allowed to modify this DOI")
+	val forbid = complete(StatusCodes.Forbidden -> "You are not allowed to perform this operation")
 
 	val DoiPath = (Segment / Segment).tflatMap{
 		case (prefix, suffix) =>
