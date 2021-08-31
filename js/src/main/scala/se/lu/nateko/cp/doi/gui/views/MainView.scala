@@ -72,9 +72,18 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def supplyDoiList(dois: Seq[DoiMeta]): Unit = {
 		listElem.innerHTML = ""
-		doiViews.keys.toSeq.diff(dois).foreach(doiViews.remove)
+		doiViews.clear()
 
-		for(doi <- dois) {
+		if(dois.isEmpty) {
+			listElem.appendChild(h3("fetching DOI list...").render)
+			listElem.appendChild(
+				div(cls := "progress")(
+					div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
+						attr("aria-valuenow") := 100, style := "width: 100%"
+					)
+				).render
+			)
+		} else for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
 			doiView.updateContentVisibility()
 			listElem.appendChild(doiView.element)
