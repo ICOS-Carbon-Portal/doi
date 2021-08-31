@@ -23,8 +23,6 @@ class Renderer(mainView: MainView) extends StateListener {
 			mainView.resetDoiAdder()
 		}
 
-		val selectedInfo = state.selectedInfo
-
 		if(state.selected != oldState.selected){
 
 			state.selected.foreach(mainView.setSelected(_, true))

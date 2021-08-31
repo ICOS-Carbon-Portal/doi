@@ -2,7 +2,6 @@ package se.lu.nateko.cp.doi.gui.views
 
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
-import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.gui.DoiAction
 import org.scalajs.dom.Event
 import org.scalajs.dom.console

@@ -27,21 +27,14 @@ object DoiReducer {
 		case DoiCloneRequest(meta) => {
 			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
 
-			val newInfo = DoiInfo(
-				meta = meta.copy(doi = newDoi, titles = None),
-				target = None,
-				hasBeenSaved = false
-			)
 			state.copy(dois = DoiMeta(newDoi) +: state.dois.filter(_.doi != newDoi))
 				.withSelected(newDoi)
-				.withDoiInfo(newInfo)
 		}
 
 		case EmptyDoiCreation(doi) => state.copy(
 				dois = DoiMeta(doi) +: state.dois
 			)
 			.withSelected(doi)
-			.withDoiInfo(emptyInfo(doi))
 
 		case ReportError(msg) => state.copy(error = Some(msg))
 
@@ -51,25 +44,9 @@ object DoiReducer {
 
 		case DoiDeleted(doi) => state.copy(
 			dois = state.dois.filter(_.doi != doi),
-			info = state.info.filter(_._1 != doi),
 			selected = None
 		)
 
 	}
-
-	private def emptyInfo(doi: Doi) = DoiInfo(
-		meta = DoiMeta(
-			doi = doi,
-			state = DoiPublicationState.draft,
-			creators = Nil,
-			titles = None,
-			publisher = None,
-			publicationYear = None,
-			types = None,
-			url = None
-		),
-		target = None,
-		hasBeenSaved = false
-	)
 
 }

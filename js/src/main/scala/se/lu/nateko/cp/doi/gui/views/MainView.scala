@@ -5,7 +5,6 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.gui.DoiAction
 import se.lu.nateko.cp.doi.Doi
-import se.lu.nateko.cp.doi.gui.DoiInfo
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
@@ -75,7 +74,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 		doiViews.clear()
 
 		if(dois.isEmpty) {
-			listElem.appendChild(h3("fetching DOI list...").render)
+			listElem.appendChild(h3("fetching DOI list from DataCite...").render)
 			listElem.appendChild(
 				div(cls := "progress")(
 					div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
