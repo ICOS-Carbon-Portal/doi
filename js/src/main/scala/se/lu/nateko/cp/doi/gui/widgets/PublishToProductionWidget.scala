@@ -33,9 +33,9 @@ class PublishToProductionWidget(productionPrefix: String, init: Doi, protected v
 		validateDoi()
 	}
 
-	val element = Bootstrap.defaultPanel("Publish DOI with production prefix")(
+	val element = Bootstrap.defaultCard("Publish DOI with production prefix")(
 		div(cls := "input-group")(
-			span(cls := "input-group-addon")(productionPrefix),
+			span(cls := "input-group-text")(productionPrefix),
 			suffixInput,
 			div(cls := "input-group-btn")(
 				publishButton

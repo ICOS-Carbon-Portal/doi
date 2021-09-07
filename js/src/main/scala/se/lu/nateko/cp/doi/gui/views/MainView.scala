@@ -19,7 +19,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val listElem = ul(cls := "list-unstyled").render
 
-	private val prefixSpan = span(cls := "input-group-addon").render
+	private val prefixSpan = span(cls := "input-group-text").render
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
@@ -40,13 +40,13 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private def getPrefix = d.getState.prefix
 
 	private val makeSuffixButton = button(
-		cls := "btn btn-default",
+		cls := "btn btn-secondary",
 		tpe := "button",
 		onclick := (genSuffix _)
 	)("Generate suffix").render
 
 	private val addDoiButton = button(
-		cls := "btn btn-default",
+		cls := "btn btn-secondary",
 		tpe := "button",
 		disabled := true,
 		onclick := (addDoi _)
@@ -54,11 +54,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	val element = div(id := "main")(
 		div(cls := "new-doi-input")(
-			Bootstrap.basicPanel(
+			Bootstrap.basicCard(
 				div(cls := "input-group")(
 					prefixSpan,
 					suffixInput,
-					span(cls := "input-group-btn")(makeSuffixButton, addDoiButton)
+					makeSuffixButton,
+					addDoiButton
 				)
 			)
 		),

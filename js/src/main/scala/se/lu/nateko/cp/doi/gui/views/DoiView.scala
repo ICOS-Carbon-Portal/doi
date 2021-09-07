@@ -26,23 +26,24 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	private[this] var isSelected = false
 	private[this] var hasInitializedBody = false
 
-	private val doiListIcon = span(cls := doiListIconClass).render
+	private val doiListIcon = span(cls := doiListIconClass, style := "width: 1em").render
 
-	private def doiListIconClass = "glyphicon glyphicon-triangle-" +
-		(if(isSelected) "bottom" else "right")
+	private def doiListIconClass = "fas fa-caret-" +
+		(if(isSelected) "down" else "right")
 
 	private val selectDoi: Event => Unit = e => d.dispatch(SelectDoi(meta.doi))
-	private val titleSpan = span(cls := "panel-title")().render
-	private val panelBody = div(cls := "panel-body").render
+	private val titleSpan = span().render
+	private val cardBody = div(cls := "card-body").render
 
-	def panelClasses = "panel panel-" + (if(meta.state == DoiPublicationState.draft) "warning draft-doi" else "info published-doi")
+	def cardHeaderClasses = "card-header bg-opacity-50 bg-" + (if(meta.state == DoiPublicationState.draft) "warning" else "primary")
+	def cardClasses = "card " + (if(meta.state == DoiPublicationState.draft) "draft-doi" else "published-doi")
 
-	val element = div(cls := panelClasses)(
-		div(cls := "panel-heading", onclick := selectDoi, cursor := "pointer")(
+	val element = div(cls := cardClasses)(
+		div(cls := cardHeaderClasses, onclick := selectDoi, cursor := "pointer")(
 			doiListIcon,
 			titleSpan
 		),
-		panelBody
+		cardBody
 	).render
 
 	def updateContentVisibility(): Unit = {
@@ -54,14 +55,14 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		titleSpan.textContent = s" ${meta.doi} $title"
 
 		val display = if(isSelected) "block" else "none"
-		panelBody.style.display = display
-		element.className = panelClasses
+		cardBody.style.display = display
+		element.className = cardClasses
 	}
 
 	def setSelected(selected: Boolean): Unit = {
 		isSelected = selected
 		if(selected && !hasInitializedBody){
-			panelBody.appendChild(metaWidget.element)
+			cardBody.appendChild(metaWidget.element)
 			hasInitializedBody = true
 		}
 		doiListIcon.className = doiListIconClass
@@ -82,9 +83,9 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 			d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
 		case Success(_) =>
 			//recreate the DOI metadata widget with the updated metadata
-			panelBody.innerHTML = ""
+			cardBody.innerHTML = ""
 			meta = updated
-			panelBody.appendChild(metaWidget.element)
+			cardBody.appendChild(metaWidget.element)
 			updateContentVisibility()
 	}
 

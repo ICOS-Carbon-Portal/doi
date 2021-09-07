@@ -8,17 +8,17 @@ import org.scalajs.dom.html
 
 object Bootstrap {
 
-	def defaultPanel(title: String)(body: Modifier*): TypedTag[html.Div] =
-		div(cls := "panel panel-default")(
-			div(cls := "panel-heading")(
-				span(cls := "panel-title")(title)
+	def defaultCard(title: String)(body: Modifier*): TypedTag[html.Div] =
+		div(cls := "card")(
+			div(cls := "card-header")(
+				span(cls := "card-title")(title)
 			),
-			div(cls := "panel-body")(body)
+			div(cls := "card-body")(body)
 		)
 
-	def basicPanel(body: Modifier*): TypedTag[html.Div] =
-		div(cls := "panel panel-default")(
-			div(cls := "panel-body")(body)
+	def basicCard(body: Modifier*): TypedTag[html.Div] =
+		div(cls := "card")(
+			div(cls := "card-body")(body)
 		)
 
 	def propValueRow(propHtml: Modifier*)(valHtml: Modifier*) =
@@ -27,7 +27,7 @@ object Bootstrap {
 			div(cls := "col-md-11")(valHtml)
 		)
 
-	def basicPropValueWidget(name: String)(valHtml: Modifier*) = basicPanel{
+	def basicPropValueWidget(name: String)(valHtml: Modifier*) = basicCard{
 		propValueRow(strong(name))(valHtml)
 	}
 }

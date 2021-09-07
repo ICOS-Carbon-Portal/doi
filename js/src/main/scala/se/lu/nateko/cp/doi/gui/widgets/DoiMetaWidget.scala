@@ -89,7 +89,7 @@ class DoiMetaWidget(
 
 		updateButton.disabled = !canUpdate
 		publishButton.disabled = !errors.isEmpty
-		updateButton.className = "btn doi-update btn-" + (if(canUpdate) "primary" else "default")
+		updateButton.className = "btn doi-update btn-" + (if(canUpdate) "primary" else "secondary")
 	}
 
 	private def resetForms(): Unit = {
@@ -106,7 +106,7 @@ class DoiMetaWidget(
 		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
 	}
 
-	private[this] val publishButton = button(tpe := "button", cls := "btn btn-default btn-changestate")("Publish").render
+	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary btn-changestate")("Publish").render
 	publishButton.onclick = (_: Event) => {
 		publishButton.disabled = true
 		updater(
@@ -116,16 +116,16 @@ class DoiMetaWidget(
 		}
 	}
 
-	private[this] val cloneButton = button(tpe := "button", cls := "btn btn-default")("Clone").render
+	private[this] val cloneButton = button(tpe := "button", cls := "btn btn-secondary")("Clone").render
 	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
-	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-default btn-changestate")("Delete").render
+	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-secondary btn-changestate")("Delete").render
 	deleteButton.onclick = (_: Event) => {
 		deleteButton.disabled = true
 		deleteCb(_meta.doi)
 	}
 
-	private[this] val resetButton = button(tpe := "button", cls := "btn btn-default", disabled := true)("Reset").render
+	private[this] val resetButton = button(tpe := "button", cls := "btn btn-secondary", disabled := true)("Reset").render
 	resetButton.onclick = (_: Event) => resetForms()
 
 	private[this] val formElems = div.render
@@ -133,14 +133,14 @@ class DoiMetaWidget(
 	private[this] val buttons = {
 		_meta.state match {
 			case DoiPublicationState.draft =>
-				div()(
-					div(cls := "btn-group draft-controls")(deleteButton, resetButton),
-					div(cls := "btn-group draft-controls pull-right")(cloneButton, publishButton, updateButton)
+				div(cls := "row")(
+					div(cls := "col-auto me-auto btn-group draft-controls")(deleteButton, resetButton),
+					div(cls := "col-auto btn-group draft-controls ms-auto")(cloneButton, publishButton, updateButton)
 				)
 			case _ =>
-				div()(
-					div(cls := "btn-group draft-controls")(resetButton),
-					div(cls := "btn-group draft-controls pull-right")(cloneButton, updateButton)
+				div(cls := "row")(
+					div(cls := "col-auto me-auto btn-group draft-controls")(resetButton),
+					div(cls := "col-auto btn-group draft-controls pull-right")(cloneButton, updateButton)
 				)
 		}
 	}

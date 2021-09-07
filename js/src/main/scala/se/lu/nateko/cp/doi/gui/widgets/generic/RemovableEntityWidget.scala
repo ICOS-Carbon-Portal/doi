@@ -20,7 +20,7 @@ class RemovableEntityWidget[E](
 
 	private[this] val removeButton =
 		button(tpe := "button", cls := "btn btn-warning")(
-			span(cls := "glyphicon glyphicon-remove")
+			span(cls := "fas fa-trash")
 		).render
 
 	removeButton.onclick = (_: Event) => removeCb(this)
@@ -29,7 +29,7 @@ class RemovableEntityWidget[E](
 		removeButton.disabled = !removable
 	}
 
-	val element = Bootstrap.basicPanel(
+	val element = Bootstrap.basicCard(
 		div(cls := "row")(
 			div(cls := "col-md-11")(widget.element),
 			div(cls := "col-md-1 spacyrow")(removeButton)
