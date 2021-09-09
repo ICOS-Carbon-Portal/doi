@@ -19,17 +19,15 @@ object ThunkActions {
 		dispatchFut(Backend.getPrefixInfo.map(GotPrefixInfo(_)))
 	}
 
-	val DoiListRefreshRequest: ThunkAction = implicit d => {
-		dispatchFut(Backend.getFreshDoiList)
-		/* Useful in the future, when fetching will be done many times due to e.g. paging or search
+	def DoiListRefreshRequest(query: Option[String] = None): ThunkAction = implicit d => {
+		d.dispatch(StartLoading)
 		import scalajs.js.timers.{setTimeout, clearTimeout}
 		val handle = setTimeout(1000){
 			d.dispatch(FreshDoiList(Nil))
 		}
-		dispatchFut(Backend.getFreshDoiList.andThen{
+		dispatchFut(Backend.getFreshDoiList(query).andThen{
 			case _ => clearTimeout(handle)
 		})
-		*/
 	}
 
 	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {

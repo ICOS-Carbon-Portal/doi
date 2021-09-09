@@ -11,8 +11,8 @@ class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
 
 	val publicRoute = get{
-		path("metalist"){
-			onSuccess(client.listDoisMeta) { json =>
+		pathPrefix("list" / Segment.?){ query =>
+			onSuccess(client.listDoisMeta(query)) { json =>
 				complete(HttpEntity(ContentTypes.`application/json`, json))
 			}
 		} ~

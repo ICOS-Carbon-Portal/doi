@@ -9,7 +9,8 @@ object DoiApp {
 		prefix = "10.18160", //default init value; the actual one is fetched from backend
 		dois = Nil,
 		selected = None,
-		error = None
+		error = None,
+		isLoading = true
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 
@@ -23,7 +24,7 @@ object DoiApp {
 		mainWrapper.appendChild(mainView.element.render)
 
 		store.dispatch(ThunkActions.FetchPrefixInfo)
-		store.dispatch(ThunkActions.DoiListRefreshRequest)
+		store.dispatch(ThunkActions.DoiListRefreshRequest())
 	}
 
 }

@@ -19,7 +19,7 @@ class Renderer(mainView: MainView) extends StateListener {
 		}
 
 		if(state.dois.ne(oldState.dois) || state.dois.isEmpty){
-			mainView.supplyDoiList(state.dois)
+			mainView.supplyDoiList(state.dois, state.isLoading)
 			mainView.resetDoiAdder()
 		}
 

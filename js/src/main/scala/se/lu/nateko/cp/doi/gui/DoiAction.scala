@@ -9,6 +9,7 @@ sealed trait DoiAction
 
 case class GotPrefixInfo(info: String) extends DoiAction
 
+case object StartLoading extends DoiAction
 case class FreshDoiList(dois: Seq[DoiMeta]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction

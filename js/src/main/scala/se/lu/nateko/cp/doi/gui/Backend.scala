@@ -33,23 +33,23 @@ object Backend {
 		.flatMap(checkResponse200)
 		.recoverWith(recovery("update DOI metadata"))
 
-	def getFreshDoiList: Future[FreshDoiList] = {
+		def getFreshDoiList(query: Option[String]): Future[FreshDoiList] = {
 		//val startTime = System.currentTimeMillis()
 		Ajax
-		.get(s"/api/metalist")
-		//.andThen{case _ => println(s"Got metalist response in ${System.currentTimeMillis() - startTime} ms")}
-		.map(parseTo[DoiListPayload])
-		.map{pl =>
-			val dois = pl.data.map(_.attributes)
-			//println(s"Got metalist response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
-			FreshDoiList(dois)
-		}
-		.recoverWith(recovery("fetch DOI list from DataCite REST API"))
+			.get(s"/api/list/${query.getOrElse("")}")
+			//.andThen{case _ => println(s"Got list response in ${System.currentTimeMillis() - startTime} ms")}
+			.map(parseTo[DoiListPayload])
+			.map{pl =>
+				val dois = pl.data.map(_.attributes)
+				//println(s"Got list response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
+				FreshDoiList(dois)
+			}
+			.recoverWith(recovery("fetch DOI list from DataCite REST API"))
 	}
 
-		def delete(doi: Doi) = Ajax
-			.delete(s"/api/$doi/")
-			.recoverWith(recovery("delete DOI"))
+	def delete(doi: Doi) = Ajax
+		.delete(s"/api/$doi/")
+		.recoverWith(recovery("delete DOI"))
 
 	private def recovery[T](hint: String): PartialFunction[Throwable, Future[T]] = {
 		case AjaxException(xhr) =>

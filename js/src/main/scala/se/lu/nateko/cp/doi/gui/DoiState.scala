@@ -9,7 +9,8 @@ case class DoiState(
 	prefix: String,
 	dois: Seq[DoiMeta],
 	selected: Option[Doi],
-	error: Option[String]
+	error: Option[String],
+	isLoading: Boolean
 )
 
 object DoiStateUpgrades{

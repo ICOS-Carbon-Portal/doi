@@ -16,7 +16,9 @@ object DoiReducer {
 
 		case GotPrefixInfo(info) => state.copy(prefix = info)
 
-		case FreshDoiList(dois) => state.copy(dois = dois)
+		case StartLoading => state.copy(isLoading = true)
+
+		case FreshDoiList(dois) => state.copy(dois = dois, isLoading = false)
 
 		case SelectDoi(doi) =>
 			if(state.isSelected(doi))

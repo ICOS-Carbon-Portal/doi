@@ -1,6 +1,7 @@
 package se.lu.nateko.cp.doi.gui.views
 
 import org.scalajs.dom.console
+import org.scalajs.dom.{Event, KeyboardEvent, html}
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.gui.DoiAction
@@ -12,6 +13,7 @@ import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.gui.ThunkActions
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -52,9 +54,29 @@ class MainView(d: DoiRedux.Dispatcher) {
 		onclick := (addDoi _)
 	)("Add new DOI").render
 
+	private val searchInput = input(
+		tpe := "search", cls := "form-control",
+		placeholder := "Search DOI",
+		onsearch := (searchDoi _)
+	).render
+
+	private def searchDoi(): Unit = {
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value)))
+	}
+
+	private val searchSubmitButton = button(
+		cls := "btn btn-secondary",
+		onclick := (searchDoi _)
+	)("Search")
+
+	private val doiSearchForm = p(cls := "input-group")(
+		searchInput,
+		searchSubmitButton
+	)
+
 	val element = div(id := "main")(
 		div(cls := "new-doi-input")(
-			Bootstrap.basicCard(
+			p(
 				div(cls := "input-group")(
 					prefixSpan,
 					suffixInput,
@@ -63,6 +85,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 				)
 			)
 		),
+		doiSearchForm,
 		listElem
 	)
 
@@ -70,12 +93,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 		prefixSpan.textContent = getPrefix
 	}
 
-	def supplyDoiList(dois: Seq[DoiMeta]): Unit = {
+	def supplyDoiList(dois: Seq[DoiMeta], isLoading: Boolean): Unit = {
 		listElem.innerHTML = ""
 		doiViews.clear()
 
-		if(dois.isEmpty) {
-			listElem.appendChild(h3("fetching DOI list from DataCite...").render)
+		if(isLoading) {
+			listElem.appendChild(h3("Fetching DOI list from DataCite...").render)
 			listElem.appendChild(
 				div(cls := "progress")(
 					div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
@@ -83,6 +106,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 					)
 				).render
 			)
+		} else if(dois.isEmpty) {
+			listElem.appendChild(p("No DOIs found").render)
 		} else for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
 			doiView.updateContentVisibility()
