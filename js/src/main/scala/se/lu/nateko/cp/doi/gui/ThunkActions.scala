@@ -22,11 +22,13 @@ object ThunkActions {
 	def DoiListRefreshRequest(query: Option[String] = None): ThunkAction = implicit d => {
 		d.dispatch(StartLoading)
 		import scalajs.js.timers.{setTimeout, clearTimeout}
-		val handle = setTimeout(1000){
+		val handle = setTimeout(800){
 			d.dispatch(FreshDoiList(Nil))
 		}
 		dispatchFut(Backend.getFreshDoiList(query).andThen{
-			case _ => clearTimeout(handle)
+			case _ =>
+				clearTimeout(handle)
+				d.dispatch(StopLoading)
 		})
 	}
 

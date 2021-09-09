@@ -15,7 +15,8 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 
 	val metaBase: URL = new URL(config.restEndpoint, "dois")
 	def clientDois(query: String): URL = new URL(
-		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=500"
+		//TODO Move page size into the API, too
+		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=100"
 	)
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)

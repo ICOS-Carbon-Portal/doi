@@ -97,17 +97,18 @@ class MainView(d: DoiRedux.Dispatcher) {
 		listElem.innerHTML = ""
 		doiViews.clear()
 
-		if(isLoading) {
-			listElem.appendChild(h3("Fetching DOI list from DataCite...").render)
-			listElem.appendChild(
-				div(cls := "progress")(
-					div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
-						attr("aria-valuenow") := 100, style := "width: 100%"
-					)
-				).render
-			)
-		} else if(dois.isEmpty) {
-			listElem.appendChild(p("No DOIs found").render)
+		if(dois.isEmpty) {
+			if(!isLoading) listElem.appendChild(p("No DOIs found").render)
+			else{
+				listElem.appendChild(h3("Fetching DOI list from DataCite...").render)
+				listElem.appendChild(
+					div(cls := "progress")(
+						div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
+							attr("aria-valuenow") := 100, style := "width: 100%"
+						)
+					).render
+				)
+			}
 		} else for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
 			doiView.updateContentVisibility()
