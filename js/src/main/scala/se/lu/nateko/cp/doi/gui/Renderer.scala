@@ -21,6 +21,7 @@ class Renderer(mainView: MainView) extends StateListener {
 		if(state.dois.ne(oldState.dois) || state.dois.isEmpty){
 			mainView.supplyDoiList(state.dois, state.isLoading)
 			mainView.resetDoiAdder()
+			mainView.setPagination(state.listMeta)
 		}
 
 		if(state.selected != oldState.selected){

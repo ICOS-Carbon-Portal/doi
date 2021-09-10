@@ -19,7 +19,7 @@ object DoiReducer {
 		case StartLoading => state.copy(isLoading = true)
 		case StopLoading => state.copy(isLoading = false)
 
-		case FreshDoiList(dois) => state.copy(dois = dois)
+		case FreshDoiList(dois, listMeta) => state.copy(dois = dois, listMeta = listMeta)
 
 		case SelectDoi(doi) =>
 			if(state.isSelected(doi))

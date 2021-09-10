@@ -14,20 +14,18 @@ import JsonSupport._
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 
 	val metaBase: URL = new URL(config.restEndpoint, "dois")
-	def clientDois(query: String): URL = new URL(
+	def clientDois(query: String, page: Int): URL = new URL(
 		//TODO Move page size into the API, too
-		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=100"
+		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
 	)
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
 
-	def listDoisMeta(query: Option[String] = None): Future[String] = http.getJson(clientDois(query.getOrElse(""))).flatMap(
-		resp => analyzeResponse{case 200 => Future.successful(resp.body)}(resp)
-	)
-	def listDoisParsed: Future[Seq[DoiMeta]] = listDoisMeta().map{
-		_.parseJson.convertTo[DoiListPayload].data.map(_.attributes)
-	}
+	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[String] = http
+		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(
+			resp => analyzeResponse{case 200 => Future.successful(resp.body)}(resp)
+		)
 
 	def getMetadata(doi: Doi): Future[Option[String]] = http.getJson(metaUrl(doi)).flatMap(
 		resp => analyzeResponse{

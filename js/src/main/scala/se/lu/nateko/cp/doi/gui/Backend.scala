@@ -33,16 +33,16 @@ object Backend {
 		.flatMap(checkResponse200)
 		.recoverWith(recovery("update DOI metadata"))
 
-		def getFreshDoiList(query: Option[String]): Future[FreshDoiList] = {
+	def getFreshDoiList(query: Option[String], page: Option[Int]): Future[FreshDoiList] = {
 		//val startTime = System.currentTimeMillis()
 		Ajax
-			.get(s"/api/list/${query.getOrElse("")}")
+			.get(s"/api/list/?query=${query.getOrElse("")}&page=${page.getOrElse(1)}")
 			//.andThen{case _ => println(s"Got list response in ${System.currentTimeMillis() - startTime} ms")}
 			.map(parseTo[DoiListPayload])
 			.map{pl =>
 				val dois = pl.data.map(_.attributes)
 				//println(s"Got list response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
-				FreshDoiList(dois)
+				FreshDoiList(dois, Some(pl.meta))
 			}
 			.recoverWith(recovery("fetch DOI list from DataCite REST API"))
 	}

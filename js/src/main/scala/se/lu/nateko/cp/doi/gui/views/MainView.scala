@@ -14,6 +14,7 @@ import se.lu.nateko.cp.doi.gui.DoiWithTitle
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.DoiListMeta
 
 class MainView(d: DoiRedux.Dispatcher) {
 
@@ -57,7 +58,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val searchInput = input(
 		tpe := "search", cls := "form-control",
 		placeholder := "Search DOI",
-		onsearch := (searchDoi _)
+		onchange := (searchDoi _)
 	).render
 
 	private def searchDoi(): Unit = {
@@ -114,6 +115,36 @@ class MainView(d: DoiRedux.Dispatcher) {
 			doiView.updateContentVisibility()
 			listElem.appendChild(doiView.element)
 		}
+	}
+
+	def goToPage(event: Event, page: Int) = {
+		event.preventDefault()
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), Some(page)))
+	}
+
+	def setPagination(listMeta: Option[DoiListMeta]): Unit = {
+		listMeta.map(listMeta => {
+			val previousBtnClasses = "page-item " + (if(listMeta.page == 1) "disabled")
+			val nextBtnClasses = "page-item " + (if(listMeta.page >= listMeta.totalPages) "disabled")
+			listElem.appendChild(
+				ul(cls := "pagination justify-content-center")(
+					li(cls := previousBtnClasses)(
+						a(
+							cls := "page-link",
+							href := "#",
+							onclick := {(event) => goToPage(event, listMeta.page - 1) },
+						)("Previous")
+					),
+					li(cls := nextBtnClasses)(
+						a(
+							cls := "page-link",
+							href := "#",
+							onclick := {(event) => goToPage(event, listMeta.page + 1) }
+						)("Next")
+					)
+				).render
+			)
+		})
 	}
 
 	def setSelected(doi: Doi, isSelected: Boolean): Unit = {

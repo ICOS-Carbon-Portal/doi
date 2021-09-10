@@ -11,9 +11,11 @@ class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
 
 	val publicRoute = get{
-		pathPrefix("list" / Segment.?){ query =>
-			onSuccess(client.listDoisMeta(query)) { json =>
-				complete(HttpEntity(ContentTypes.`application/json`, json))
+		pathPrefix("list"){
+			parameters("query".optional, "page".as[Int].optional){ (query, page) =>
+				onSuccess(client.listDoisMeta(query, page)) { json =>
+					complete(HttpEntity(ContentTypes.`application/json`, json))
+				}
 			}
 		} ~
 		pathPrefix(DoiPath){doi =>

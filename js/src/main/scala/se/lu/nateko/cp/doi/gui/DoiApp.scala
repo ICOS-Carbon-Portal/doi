@@ -8,6 +8,7 @@ object DoiApp {
 	val initState = DoiState(
 		prefix = "10.18160", //default init value; the actual one is fetched from backend
 		dois = Nil,
+		listMeta = None,
 		selected = None,
 		error = None,
 		isLoading = true

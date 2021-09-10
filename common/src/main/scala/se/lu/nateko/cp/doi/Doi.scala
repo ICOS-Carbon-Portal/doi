@@ -81,4 +81,5 @@ case class DoiMeta(
 
 case class DoiWrapper(attributes: DoiMeta)
 case class SingleDoiPayload(data: DoiWrapper)
-case class DoiListPayload(data: Seq[DoiWrapper])
+case class DoiListMeta(total: Int, totalPages: Int, page: Int)
+case class DoiListPayload(data: Seq[DoiWrapper], meta: DoiListMeta)

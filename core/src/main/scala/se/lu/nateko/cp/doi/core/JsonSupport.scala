@@ -102,5 +102,6 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	implicit val doiWrapperFormat = jsonFormat1(DoiWrapper)
 	implicit val singleDoiPayloadFormat = jsonFormat1(SingleDoiPayload)
-	implicit val doiListPayloadFormat = jsonFormat1(DoiListPayload)
+	implicit val doiListMeta = jsonFormat3(DoiListMeta)
+	implicit val doiListPayloadFormat = jsonFormat2(DoiListPayload)
 }

@@ -19,13 +19,13 @@ object ThunkActions {
 		dispatchFut(Backend.getPrefixInfo.map(GotPrefixInfo(_)))
 	}
 
-	def DoiListRefreshRequest(query: Option[String] = None): ThunkAction = implicit d => {
+	def DoiListRefreshRequest(query: Option[String] = None, page: Option[Int] = None): ThunkAction = implicit d => {
 		d.dispatch(StartLoading)
 		import scalajs.js.timers.{setTimeout, clearTimeout}
 		val handle = setTimeout(800){
-			d.dispatch(FreshDoiList(Nil))
+			d.dispatch(FreshDoiList(Nil, None))
 		}
-		dispatchFut(Backend.getFreshDoiList(query).andThen{
+		dispatchFut(Backend.getFreshDoiList(query, page).andThen{
 			case _ =>
 				clearTimeout(handle)
 				d.dispatch(StopLoading)
