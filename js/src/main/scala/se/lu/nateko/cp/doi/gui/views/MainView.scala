@@ -70,23 +70,28 @@ class MainView(d: DoiRedux.Dispatcher) {
 		onclick := (searchDoi _)
 	)("Search")
 
-	private val doiSearchForm = p(cls := "input-group")(
-		searchInput,
-		searchSubmitButton
+	private val searchResultsStats = p.render
+
+	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
+		p(
+			div(cls := "input-group")(
+				searchInput,
+				searchSubmitButton
+			)
+		),
+		p(cls := "new-doi-input")(
+			div(cls := "input-group")(
+				prefixSpan,
+				suffixInput,
+				makeSuffixButton,
+				addDoiButton
+			)
+		),
 	)
 
 	val element = div(id := "main")(
-		div(cls := "new-doi-input")(
-			p(
-				div(cls := "input-group")(
-					prefixSpan,
-					suffixInput,
-					makeSuffixButton,
-					addDoiButton
-				)
-			)
-		),
-		doiSearchForm,
+		searchCreateControls,
+		searchResultsStats,
 		listElem
 	)
 
@@ -126,6 +131,16 @@ class MainView(d: DoiRedux.Dispatcher) {
 		listMeta.map(listMeta => {
 			val previousBtnClasses = "page-item " + (if(listMeta.page == 1) "disabled")
 			val nextBtnClasses = "page-item " + (if(listMeta.page >= listMeta.totalPages) "disabled")
+
+			val searchResultsCountText = if (listMeta.total > 1) "DOIs" else "DOI"
+			searchResultsStats.innerHTML = ""
+			searchResultsStats.appendChild(
+				div(cls := "d-flex justify-content-between")(
+					span(s"${listMeta.total} $searchResultsCountText"),
+					span(s"Page ${listMeta.page}/${listMeta.totalPages}")
+				).render
+			)
+
 			listElem.appendChild(
 				ul(cls := "pagination justify-content-center")(
 					li(cls := previousBtnClasses)(
