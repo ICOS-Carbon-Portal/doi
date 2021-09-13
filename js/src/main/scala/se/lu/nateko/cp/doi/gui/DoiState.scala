@@ -21,6 +21,13 @@ object DoiStateUpgrades{
 
 		def withSelected(doi: Doi): DoiState = state.copy(selected = Some(doi))
 		def isSelected(doi: Doi): Boolean = state.selected.contains(doi)
+		private def withListMeta(lmCopy: DoiListMeta => DoiListMeta): DoiState = state.copy(listMeta = state.listMeta.map(lmCopy))
+		def incrementTotal: DoiState = withListMeta(
+			lmeta => lmeta.copy(total = lmeta.total + 1)
+		)
+		def decrementTotal: DoiState = withListMeta(
+			lmeta => lmeta.copy(total = lmeta.total - 1)
+		)
 	}
 
 }

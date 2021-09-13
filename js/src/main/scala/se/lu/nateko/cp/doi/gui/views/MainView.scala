@@ -129,10 +129,10 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def setPagination(listMeta: Option[DoiListMeta]): Unit = {
 		listMeta.map(listMeta => {
-			val previousBtnClasses = "page-item " + (if(listMeta.page == 1) "disabled")
-			val nextBtnClasses = "page-item " + (if(listMeta.page >= listMeta.totalPages) "disabled")
+			val previousBtnClasses = "page-item" + (if(listMeta.page == 1) " disabled" else "")
+			val nextBtnClasses = "page-item" + (if(listMeta.page >= listMeta.totalPages) " disabled" else "")
 
-			val searchResultsCountText = if (listMeta.total > 1) "DOIs" else "DOI"
+			val searchResultsCountText = if (listMeta.total == 1) "DOI" else "DOIs"
 			searchResultsStats.innerHTML = ""
 			searchResultsStats.appendChild(
 				div(cls := "d-flex justify-content-between")(

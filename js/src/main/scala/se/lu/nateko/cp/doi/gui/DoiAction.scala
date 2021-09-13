@@ -18,7 +18,6 @@ case class SelectDoi(doi: Doi) extends DoiAction
 
 case class DoiCloneRequest(meta: DoiMeta) extends DoiAction
 
-case class DeleteDoi(doi: Doi) extends DoiAction
 case class DoiDeleted(doi: Doi) extends DoiAction
 case class EmptyDoiCreation(doi: Doi) extends DoiAction
 

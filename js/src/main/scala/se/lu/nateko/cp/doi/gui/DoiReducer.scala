@@ -29,26 +29,25 @@ object DoiReducer {
 
 		case DoiCloneRequest(meta) => {
 			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
+			val newMeta = meta.copy(doi = newDoi, titles = None, state = DoiPublicationState.draft)
 
-			state.copy(dois = DoiMeta(newDoi) +: state.dois.filter(_.doi != newDoi))
+			state.copy(dois = newMeta +: state.dois)
 				.withSelected(newDoi)
+				.incrementTotal
 		}
 
-		case EmptyDoiCreation(doi) => state.copy(
-				dois = DoiMeta(doi) +: state.dois
-			)
+		case EmptyDoiCreation(doi) => state.copy(dois = DoiMeta(doi) +: state.dois)
+			.incrementTotal
 			.withSelected(doi)
 
 		case ReportError(msg) => state.copy(error = Some(msg))
 
 		case ResetErrors => state.copy(error = None)
 
-		case DeleteDoi(doi) => state
-
 		case DoiDeleted(doi) => state.copy(
 			dois = state.dois.filter(_.doi != doi),
 			selected = None
-		)
+		).decrementTotal
 
 	}
 
