@@ -37,6 +37,12 @@
 		.is-not-admin .published-doi .card-body input{
 			background-color: lightgrey;
 		}
+		a[target="_blank"]::after {
+			font-family: "Font Awesome 5 Free";
+			content: "\f35d";
+			font-weight: 900;
+			margin: 0 0.3rem;
+		}
 	</style>
 }{
 	<div class="row">
@@ -53,6 +59,11 @@
 			<p>
 				<div>🔵 Published DOIs are in blue.</div>
 				<div>🟡 Drafts are in yellow.</div>
+			</p>
+			<p>
+				<a href="https://support.datacite.org/docs/datacite-search-user-documentation#1-search-the-for-a-specific-publisher" target="_blank">
+					Read about advanced search queries
+				</a>
 			</p>
 		</div>
 	</div>
