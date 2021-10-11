@@ -41,12 +41,11 @@ object Main{
 				complete((StatusCodes.InternalServerError, e.getMessage))
 		}
 
-		def isAdmin(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
-		def isLoggedIn(uidOpt: Option[UserId]): Boolean = uidOpt.map(admins.contains).getOrElse(false)
-
+		def isAdmin(uid: UserId): Boolean = admins.exists(auid => auid.email.equalsIgnoreCase(uid.email))
+		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
 		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isAdmin(uidOpt), development, authConf.authHost))
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development, authConf.authHost))
 		}
 
 		val route = handleExceptions(exceptionHandler){
@@ -55,7 +54,7 @@ object Main{
 				post{
 					authRouting.user{uid =>
 						doiRouting.writingRoute{doiMeta =>
-							if(admins.contains(uid)) Future.successful(true)
+							if(isAdmin(uid)) Future.successful(true)
 							else if(doiMeta.event.isDefined || doiMeta.state != DoiPublicationState.draft) Future.successful(false)
 							else client.getMetadataParsed(doiMeta.doi).map{
 								case Some(currMeta) =>
@@ -69,7 +68,7 @@ object Main{
 				} ~
 				delete{
 					authRouting.user{uid =>
-						if(admins.contains(uid)) {
+						if(isAdmin(uid)) {
 							pathPrefix(DoiClientRouting.DoiPath){doi =>
 								onSuccess(client.delete(doi)){
 									complete(StatusCodes.OK)
@@ -93,7 +92,7 @@ object Main{
 				path("whoami"){
 					authRouting.userOpt{uidOpt =>
 						val email = uidOpt.map(uid => "\"" + uid.email + "\"").getOrElse("null")
-						complete(s"""{"email": $email, "isAdmin": ${isAdmin(uidOpt)}}""")
+						complete(s"""{"email": $email, "isAdmin": ${isOptAdmin(uidOpt)}}""")
 					}
 				} ~
 				path("logout"){
