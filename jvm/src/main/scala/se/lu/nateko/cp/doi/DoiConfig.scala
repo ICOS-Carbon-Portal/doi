@@ -9,11 +9,19 @@ import se.lu.nateko.cp.cpauth.core.UserId
 import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.collection.Seq
 
+case class EmailConfig(
+	smtpServer: String,
+	username: String,
+	password: String,
+	fromAddress: String
+)
+
 case class DoiConfig(
 	client: DoiClientConfig,
 	prefixInfo: String,
 	auth: PublicAuthConfig,
-	admins: Seq[UserId]
+	admins: Seq[UserId],
+	mailing: EmailConfig,
 )
 
 object DoiConfig {
@@ -25,7 +33,8 @@ object DoiConfig {
 			client = getClientConfig(doiConf),
 			prefixInfo = doiConf.getString("prefix"),
 			auth = getAuthConfig(allConf),
-			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_))
+			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)),
+			mailing = getMailingConfig(doiConf)
 		)
 	}
 
@@ -50,6 +59,16 @@ object DoiConfig {
 			authCookieDomain = auth.getString("authCookieDomain"),
 			authHost = auth.getString("authHost"),
 			publicKeyPath = auth.getString("publicKeyPath")
+		)
+	}
+
+	private def getMailingConfig(allConf: Config): EmailConfig = {
+		val mailing = allConf.getConfig("mailing")
+		EmailConfig(
+			smtpServer = mailing.getString("smtpServer"),
+			username = mailing.getString("username"),
+			password = mailing.getString("password"),
+			fromAddress = mailing.getString("fromAddress")
 		)
 	}
 }

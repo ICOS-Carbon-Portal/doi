@@ -15,6 +15,7 @@ import se.lu.nateko.cp.cpauth.core.UserId
 import spray.json.JsString
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import scala.concurrent.Future
+import scala.util.Try
 
 object Main{
 
@@ -25,7 +26,7 @@ object Main{
 		implicit val system = ActorSystem()
 		import system.dispatcher
 
-		val DoiConfig(clientConf, prefixInfo, authConf, admins) = DoiConfig.getConfig
+		val DoiConfig(clientConf, prefixInfo, authConf, admins, emailConfig) = DoiConfig.getConfig
 
 		val authRouting = new AuthRouting(authConf)
 
@@ -35,6 +36,7 @@ object Main{
 		}
 		val doiRouting = new DoiClientRouting(client)
 
+		val emailSender = new Mailer(emailConfig)
 
 		val exceptionHandler = ExceptionHandler{
 			case e: Exception =>
@@ -62,6 +64,18 @@ object Main{
 								case None =>
 									true
 							}
+						} ~
+						pathPrefix("submit"){
+							path(DoiClientRouting.DoiPath){doi =>
+								onSuccess(Future(emailSender.send(
+									admins.map(_.email).toSeq,
+									"DOI submitted for publication",
+									views.html.doi.DoiSubmissionEmail(uid, doi).body
+								))){
+									complete(StatusCodes.OK)
+								}
+							} ~
+							complete(StatusCodes.BadRequest -> "Expected URL path ending in a DOI")
 						}
 					} ~
 					complete((StatusCodes.Unauthorized, "Must be logged in"))

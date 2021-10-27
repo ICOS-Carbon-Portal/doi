@@ -1,0 +1,7 @@
+@import se.lu.nateko.cp.cpauth.core.UserId
+@import se.lu.nateko.cp.doi._
+
+@(uid: UserId, doi: Doi)
+
+<p>@{uid.email} submitted a draft DOI for publication: <span>@{doi}</span></p>
+<p>You can review it at <a href="https://doi.icos-cp.eu">https://doi.icos-cp.eu</a>.</p>

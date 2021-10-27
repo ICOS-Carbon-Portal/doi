@@ -14,12 +14,15 @@ import scala.collection.Seq
 
 import DoiMetaWidget._
 import scala.concurrent.Future
+import scala.util.Failure
+import scala.util.Success
 
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
 	cloneCb: DoiMeta => Unit,
-	deleteCb: Doi => Unit
+	deleteCb: Doi => Unit,
+	submitForPublication: Doi => Future[Unit]
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
@@ -89,6 +92,7 @@ class DoiMetaWidget(
 
 		updateButton.disabled = !canUpdate
 		publishButton.disabled = !errors.isEmpty
+		submitButton.disabled = !errors.isEmpty
 		updateButton.className = "btn doi-update btn-" + (if(canUpdate) "primary" else "secondary")
 	}
 
@@ -104,6 +108,23 @@ class DoiMetaWidget(
 	updateButton.onclick = (_: Event) => {
 		updateButton.disabled = true
 		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
+	}
+
+	private[this] val submitButton = button(tpe := "button", cls := "btn btn-secondary btn-submit")("Submit for publication").render
+	submitButton.onclick = (_: Event) => {
+		val originalText = submitButton.textContent
+		submitButton.textContent = "Loading..."
+		submitButton.disabled = true
+		submitForPublication(
+			_meta.doi
+		).andThen{
+			case Failure(exc) =>
+				submitButton.textContent = originalText
+				submitButton.disabled = false
+				errorMessages.appendChild(p(exc.getMessage()).render)
+			case Success(_) =>
+				submitButton.textContent = "Submitted"
+		}
 	}
 
 	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary btn-changestate")("Publish").render
@@ -135,7 +156,7 @@ class DoiMetaWidget(
 			case DoiPublicationState.draft =>
 				div(cls := "row")(
 					div(cls := "col-auto me-auto btn-group draft-controls")(deleteButton, resetButton),
-					div(cls := "col-auto btn-group draft-controls ms-auto")(cloneButton, publishButton, updateButton)
+					div(cls := "col-auto btn-group draft-controls ms-auto")(cloneButton, publishButton, submitButton, updateButton)
 				)
 			case _ =>
 				div(cls := "row")(

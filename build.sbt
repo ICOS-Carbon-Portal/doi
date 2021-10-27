@@ -80,6 +80,9 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-http"            % "10.2.6",
 			"com.typesafe.akka" %% "akka-http-spray-json" % "10.2.6",
 			"com.typesafe.akka" %% "akka-stream"          % "2.6.16",
+			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.16",
+			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
+			"com.sun.mail"       % "javax.mail"           % "1.6.2",
 			"se.lu.nateko.cp"   %% "views-core"           % "0.4.7",
 			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.4"
 		),

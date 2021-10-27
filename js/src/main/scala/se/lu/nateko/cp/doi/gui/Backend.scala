@@ -51,6 +51,11 @@ object Backend {
 		.delete(s"/api/$doi/")
 		.recoverWith(recovery("delete DOI"))
 
+	def submitForPublication(doi: Doi): Future[Unit] = Ajax
+		.post(s"/api/submit/$doi")
+		.flatMap(checkResponse200)
+		.recoverWith(recovery("submit DOI for publication"))
+
 	private def recovery[T](hint: String): PartialFunction[Throwable, Future[T]] = {
 		case AjaxException(xhr) =>
 			val msg = if(xhr.responseText.isEmpty)
