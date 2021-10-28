@@ -50,6 +50,14 @@ object Main{
 			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development, authConf.authHost))
 		}
 
+		def sendEmail(uid: UserId, doi: Doi) = Future(
+			emailSender.send(
+				admins,
+				"DOI submitted for publication",
+				views.html.doi.DoiSubmissionEmail(uid, doi).body
+			)
+		)(ExecutionContext.Implicits.global)
+
 		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
 				doiRouting.publicRoute ~
@@ -67,11 +75,7 @@ object Main{
 						} ~
 						pathPrefix("submit"){
 							path(DoiClientRouting.DoiPath){doi =>
-								onSuccess(Future(emailSender.send(
-									admins.map(_.email).toSeq,
-									"DOI submitted for publication",
-									views.html.doi.DoiSubmissionEmail(uid, doi).body
-								))){
+								onSuccess(sendEmail(uid, doi)){
 									complete(StatusCodes.OK)
 								}
 							} ~

@@ -9,6 +9,7 @@ import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.gui.views.Constants
+import se.lu.nateko.cp.doi.gui.Backend
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.collection.Seq
 
@@ -21,8 +22,7 @@ class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
 	cloneCb: DoiMeta => Unit,
-	deleteCb: Doi => Unit,
-	submitForPublication: Doi => Future[Unit]
+	deleteCb: Doi => Unit
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
@@ -113,9 +113,9 @@ class DoiMetaWidget(
 	private[this] val submitButton = button(tpe := "button", cls := "btn btn-secondary btn-submit")("Submit for publication").render
 	submitButton.onclick = (_: Event) => {
 		val originalText = submitButton.textContent
-		submitButton.textContent = "Loading..."
+		submitButton.textContent = "Submitting..."
 		submitButton.disabled = true
-		submitForPublication(
+		Backend.submitForPublication(
 			_meta.doi
 		).andThen{
 			case Failure(exc) =>

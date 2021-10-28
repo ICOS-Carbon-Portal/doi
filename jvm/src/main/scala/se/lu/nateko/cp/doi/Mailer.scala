@@ -7,12 +7,13 @@ import java.util.Properties
 import org.slf4j.LoggerFactory
 import scala.util.Try
 import scala.util.Success
+import se.lu.nateko.cp.cpauth.core.UserId
 
 class Mailer(config: EmailConfig) {
 
 	private val log = LoggerFactory.getLogger(getClass)
 
-	def send(to: Seq[String], subject: String, body: String): Unit = {
+	def send(to: Seq[UserId], subject: String, body: String): Unit = {
 
 		try{
 			val message: Message = {
@@ -29,7 +30,7 @@ class Mailer(config: EmailConfig) {
 
 			message.setFrom(new InternetAddress(config.fromAddress))
 			message.setReplyTo(Array(new InternetAddress("do_not_reply@icos-cp.eu")))
-			to.foreach(r => message.addRecipient(Message.RecipientType.TO, new InternetAddress(r)))
+			to.foreach(r => message.addRecipient(Message.RecipientType.TO, new InternetAddress(r.email)))
 
 			message.setSentDate(new Date())
 			message.setSubject(subject)

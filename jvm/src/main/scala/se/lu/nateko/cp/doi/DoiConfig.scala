@@ -7,7 +7,6 @@ import java.net.URL
 import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
 import se.lu.nateko.cp.cpauth.core.UserId
 import scala.jdk.CollectionConverters.ListHasAsScala
-import scala.collection.Seq
 
 case class EmailConfig(
 	smtpServer: String,
@@ -33,7 +32,7 @@ object DoiConfig {
 			client = getClientConfig(doiConf),
 			prefixInfo = doiConf.getString("prefix"),
 			auth = getAuthConfig(allConf),
-			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)),
+			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf)
 		)
 	}

@@ -75,8 +75,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		meta => d.dispatch(DoiCloneRequest(meta)),
 		doi => {
 			d.dispatch(ThunkActions.requestDoiDeletion(doi))
-		},
-		submitForPublication
+		}
 	)
 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = Backend.updateMeta(updated).andThen{
@@ -89,7 +88,5 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 			cardBody.appendChild(metaWidget.element)
 			updateContentVisibility()
 	}
-
-	private def submitForPublication(doi: Doi): Future[Unit] = Backend.submitForPublication(doi)
 
 }
