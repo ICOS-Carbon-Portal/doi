@@ -69,7 +69,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.jsSettings(
 		name := "doi-js",
 		libraryDependencies ++= Seq(
-			"com.lihaoyi" %%% "scalatags" % "0.9.4",
+			"com.lihaoyi" %%% "scalatags" % "0.10.0",
 			"com.typesafe.play" %%% "play-json" % "2.9.2"
 		),
 		scalaJSUseMainModuleInitializer := true
