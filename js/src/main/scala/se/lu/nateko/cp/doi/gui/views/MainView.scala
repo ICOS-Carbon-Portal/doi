@@ -166,6 +166,10 @@ class MainView(d: DoiRedux.Dispatcher) {
 		doiViews.get(doi).foreach(_.setSelected(isSelected))
 	}
 
+	def setSearchQuery(text: String): Unit = {
+		searchInput.value = text
+	}
+
 	private[this] val errorView = new ErrorView(400, 300, d)
 
 	def appendError(msg: String): Unit = errorView.appendError(msg)

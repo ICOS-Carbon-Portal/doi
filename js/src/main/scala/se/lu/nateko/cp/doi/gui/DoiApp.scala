@@ -1,6 +1,8 @@
 package se.lu.nateko.cp.doi.gui
 
 import org.scalajs.dom.document
+import org.scalajs.dom.URL
+import org.scalajs.dom.window
 import se.lu.nateko.cp.doi.gui.views.MainView
 
 object DoiApp {
@@ -23,9 +25,12 @@ object DoiApp {
 
 		val mainWrapper = document.getElementById("main-wrapper")
 		mainWrapper.appendChild(mainView.element.render)
+		val url = new URL(window.location.href)
+		val searchQuery = Option(url.searchParams.get("q")).filter(_.nonEmpty)
+		searchQuery.map(q => mainView.setSearchQuery(q))
 
 		store.dispatch(ThunkActions.FetchPrefixInfo)
-		store.dispatch(ThunkActions.DoiListRefreshRequest())
+		store.dispatch(ThunkActions.DoiListRefreshRequest(searchQuery))
 	}
 
 }
