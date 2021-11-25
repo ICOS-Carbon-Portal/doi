@@ -98,7 +98,7 @@ object Main{
 					complete(StatusCodes.Unauthorized -> "Must be logged in")
 				} ~
 				path("doiprefix"){
-					get{complete(JsString(prefixInfo).compactPrint)}
+					get{complete(prefixInfo)}
 				}
 			} ~
 			get{
