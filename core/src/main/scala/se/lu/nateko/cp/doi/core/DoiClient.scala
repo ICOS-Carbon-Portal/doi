@@ -56,7 +56,7 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 		pf.applyOrElse(
 			resp.status,
 			(status: Int) => {
-				val msg = s"""Problem communicating with DateCite:
+				val msg = s"""Problem communicating with DataCite:
 					|HTTP status code: $status
 					|Response message: ${resp.message}
 					|Response content: ${resp.body}""".stripMargin

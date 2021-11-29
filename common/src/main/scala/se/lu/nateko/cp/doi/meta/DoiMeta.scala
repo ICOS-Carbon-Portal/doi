@@ -101,24 +101,26 @@ object NameIdentifierScheme{
 	)
 }
 
+case class Affiliation(name: String)
+
 sealed trait Person extends SelfValidating{
 	val name: Name
 	val nameIdentifiers: Seq[NameIdentifier]
-	val affiliation: Seq[String]
+	val affiliation: Seq[Affiliation]
 
 	def error = joinErrors(
 		name.error,
 		allGood(nameIdentifiers),
-		eachNonEmpty(affiliation)("Affiliation is not required but must not be empty if provided")
+		eachNonEmpty(affiliation.map(_.name))("Affiliation is not required but must not be empty if provided")
 	)
 }
 
-case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[String]) extends Person
+case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[Affiliation]) extends Person
 
 case class Contributor(
 	name: Name,
 	nameIdentifiers: Seq[NameIdentifier],
-	affiliation: Seq[String],
+	affiliation: Seq[Affiliation],
 	contributorType: Option[ContributorType.Value]
 ) extends Person{
 

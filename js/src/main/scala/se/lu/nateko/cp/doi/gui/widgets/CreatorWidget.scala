@@ -2,6 +2,7 @@ package se.lu.nateko.cp.doi.gui.widgets
 
 import se.lu.nateko.cp.doi.meta.Creator
 import se.lu.nateko.cp.doi.meta.NameIdentifier
+import se.lu.nateko.cp.doi.meta.Affiliation
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 
@@ -47,7 +48,7 @@ object CreatorWidget{
 	}
 
 
-	class AffiliationsInput(init: Seq[String], updateCb: Seq[String] => Unit) extends
-		MultiStringsWidget(init, updateCb, "Affiliation")("Affiliations")
+	class AffiliationsInput(init: Seq[Affiliation], updateCb: Seq[Affiliation] => Unit) extends
+		MultiStringsWidget(init.map(_.name), (aff => updateCb(aff.map(Affiliation))), "Affiliation")("Affiliations")
 
 }

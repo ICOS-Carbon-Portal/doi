@@ -11,7 +11,7 @@ object DoiMetaExamples {
 			Creator(
 				PersonalName("Elizabeth", "Miller"),
 				Seq(NameIdentifier.orcid("0000-0001-5000-0007")),
-				Seq("DataCite")
+				Seq(Affiliation("DataCite"))
 			)
 		),
 		titles = Some(Seq(
@@ -27,7 +27,7 @@ object DoiMetaExamples {
 		contributors = Seq(
 			Contributor(
 				name = GenericName("Starr, Joan"),
-				affiliation = Seq("California Digital Library"),
+				affiliation = Seq(Affiliation("California Digital Library")),
 				nameIdentifiers = Seq(NameIdentifier.orcid("0000-0002-7285-027X")),
 				contributorType = Some(ContributorType.ProjectLeader)
 			)

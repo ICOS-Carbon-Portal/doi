@@ -80,6 +80,7 @@ object JsonSupport extends DefaultJsonProtocol{
 		}
 	}
 
+	implicit val affiliationFormat = jsonFormat1(Affiliation)
 	implicit val creatorFormat = fieldConflatingFormat(jsonFormat3(Creator), "name")
 	implicit val contributorFormat = fieldConflatingFormat(jsonFormat4(Contributor), "name")
 	implicit val titleFormat = jsonFormat3(Title)

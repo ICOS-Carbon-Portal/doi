@@ -78,6 +78,12 @@ object JsonSupport{
 		}
 	}
 
+	implicit val affiliationFormat = new Format[Affiliation]{
+		def writes(affiliation: Affiliation): JsValue = Json.obj(
+			"name" -> JsString(affiliation.name)
+		)
+		def reads(json: JsValue): JsResult[Affiliation] = json.validate[String].map(Affiliation)
+	}
 	implicit val creatorFormat = fieldConflatingFormat(Json.format[Creator], "name")
 	implicit val contributorFormat = fieldConflatingFormat(Json.format[Contributor], "name")
 	implicit val titleFormat = Json.format[Title]

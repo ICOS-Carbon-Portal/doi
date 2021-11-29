@@ -44,7 +44,7 @@ object Playground {
 				name = PersonalName("Oleg", "Mirzov"),
 				// name = "Oleg Mirzov",
 				nameIdentifiers = Seq(NameIdentifier.orcid("0000-0002-4742-958X")),
-				affiliation = Seq("Lund University")
+				affiliation = Seq(Affiliation("Lund University"))
 			)
 		),
 		contributors = Nil,
