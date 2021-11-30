@@ -115,9 +115,9 @@ class DoiMetaWidget(
 		val originalText = submitButton.textContent
 		submitButton.textContent = "Submitting..."
 		submitButton.disabled = true
-		Backend.submitForPublication(
-			_meta.doi
-		).andThen{
+		updater(_meta).map{ _ =>
+			Backend.submitForPublication(_meta.doi)
+		}.andThen{
 			case Failure(exc) =>
 				submitButton.textContent = originalText
 				submitButton.disabled = false
