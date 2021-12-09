@@ -46,7 +46,7 @@ case class PersonalName(givenName: String, familyName: String) extends Name{
 		nonEmpty(givenName)("Given name is required"),
 		nonEmpty(familyName)("Family name is required")
 	)
-	override def toString = familyName + ", " + givenName
+	override def toString = givenName + " " + familyName
 }
 
 case class GenericName(name: String) extends Name{

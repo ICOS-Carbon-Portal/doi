@@ -78,7 +78,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 				searchSubmitButton
 			)
 		),
-		p(cls := "new-doi-input")(
+		p(cls := "edit-control")(
 			div(cls := "input-group")(
 				prefixSpan,
 				suffixInput,

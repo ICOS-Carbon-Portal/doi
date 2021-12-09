@@ -11,6 +11,7 @@ import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.DoiWithTitle
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import se.lu.nateko.cp.doi.DoiMeta
+import se.lu.nateko.cp.doi.gui.DoiMetaViewer
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
 import se.lu.nateko.cp.doi.gui.DoiCloneRequest
 import se.lu.nateko.cp.doi.gui.Backend
@@ -62,17 +63,21 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	def setSelected(selected: Boolean): Unit = {
 		isSelected = selected
 		if(selected && !hasInitializedBody){
-			cardBody.appendChild(metaWidget.element)
+			cardBody.appendChild(metaViewer.element)
 			hasInitializedBody = true
 		}
 		doiListIcon.className = doiListIconClass
 		updateContentVisibility()
 	}
 
+	private def metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, editDoi, meta => d.dispatch(DoiCloneRequest(meta)))
+
+	private def editDoi = () => cardBody.replaceChildren(metaWidget.element)
+
 	private def metaWidget = new DoiMetaWidget(
 		meta,
 		updateDoiMeta,
-		meta => d.dispatch(DoiCloneRequest(meta)),
+		() => cardBody.replaceChildren(metaViewer.element),
 		doi => {
 			d.dispatch(ThunkActions.requestDoiDeletion(doi))
 		}

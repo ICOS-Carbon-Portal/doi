@@ -21,7 +21,7 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	cloneCb: DoiMeta => Unit,
+	viewCb: () => Unit,
 	deleteCb: Doi => Unit
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
@@ -93,7 +93,7 @@ class DoiMetaWidget(
 		updateButton.disabled = !canUpdate
 		publishButton.disabled = !errors.isEmpty
 		submitButton.disabled = !errors.isEmpty
-		updateButton.className = "btn doi-update btn-" + (if(canUpdate) "primary" else "secondary")
+		updateButton.className = "btn btn-update-doi btn-" + (if(canUpdate) "primary" else "secondary")
 	}
 
 	private def resetForms(): Unit = {
@@ -127,7 +127,7 @@ class DoiMetaWidget(
 		}
 	}
 
-	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary btn-changestate")("Publish").render
+	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Publish").render
 	publishButton.onclick = (_: Event) => {
 		publishButton.disabled = true
 		updater(
@@ -137,10 +137,7 @@ class DoiMetaWidget(
 		}
 	}
 
-	private[this] val cloneButton = button(tpe := "button", cls := "btn btn-secondary")("Clone").render
-	cloneButton.onclick = (_: Event) => cloneCb(_meta)
-
-	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-secondary btn-changestate")("Delete").render
+	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Delete").render
 	deleteButton.onclick = (_: Event) => {
 		deleteButton.disabled = true
 		deleteCb(_meta.doi)
@@ -155,18 +152,33 @@ class DoiMetaWidget(
 		_meta.state match {
 			case DoiPublicationState.draft =>
 				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group draft-controls")(deleteButton, resetButton),
-					div(cls := "col-auto btn-group draft-controls ms-auto")(cloneButton, publishButton, submitButton, updateButton)
+					div(cls := "col-auto me-auto btn-group edit-control")(deleteButton, resetButton),
+					div(cls := "col-auto btn-group edit-control ms-auto")(publishButton, submitButton, updateButton)
 				)
 			case _ =>
 				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group draft-controls")(resetButton),
-					div(cls := "col-auto btn-group draft-controls pull-right")(cloneButton, updateButton)
+					div(cls := "col-auto me-auto btn-group edit-control")(resetButton),
+					div(cls := "col-auto btn-group edit-control")(updateButton)
 				)
 		}
 	}
 
+	private[this] val viewButton = button(tpe := "button", cls := "nav-link")("View").render
+	viewButton.onclick = (_: Event) => viewCb()
+
+	private[this] val tabs = p(
+		ul(cls := "nav nav-tabs")(
+			li(cls := "nav-item")(
+				viewButton
+			),
+			li(cls := "nav-item")(
+				button(cls := "nav-link active", tpe := "button", role := "tab")("Edit")
+			)
+		)
+	)
+
 	val element = div(
+		tabs,
 		formElems,
 		errorMessages,
 		buttons
