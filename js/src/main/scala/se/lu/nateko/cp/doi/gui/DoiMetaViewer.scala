@@ -4,23 +4,12 @@ import se.lu.nateko.cp.doi.DoiMeta
 import scalatags.JsDom.all._
 import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.meta.Person
+import se.lu.nateko.cp.doi.gui.widgets.EditorTab
+import se.lu.nateko.cp.doi.gui.widgets.TabWidget
 
-class DoiMetaViewer(meta: DoiMeta, editCb: () => Unit, cloneCb: DoiMeta => Unit) {
+class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab.Value, () => Unit], cloneCb: DoiMeta => Unit) {
 
-	private val editButton = button(tpe := "button", cls := "nav-link")("Edit").render
-	editButton.onclick = (_: Event) => editCb()
-
-	private val tabs = p(cls := "nav-edit edit-control")(
-		ul(cls := "nav nav-tabs")(
-			li(cls := "nav-item")(
-				button(cls := "nav-link active", tpe := "button", role := "tab")("View")
-			),
-			li(cls := "nav-item")(
-				editButton
-			)
-		)
-	)
-
+	private val tabs = new TabWidget(EditorTab.view, tabsCb).element
 	private val titles = meta.titles.fold[Seq[String]](Seq())(_.map(_.title).toSeq).map(h2(cls := "fs-3")(_))
 	private val subtitleProperties =
 		Seq(

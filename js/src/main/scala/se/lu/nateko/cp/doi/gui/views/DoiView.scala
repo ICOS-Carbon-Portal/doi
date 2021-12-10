@@ -20,6 +20,8 @@ import se.lu.nateko.cp.doi.gui.ReportError
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Success
+import se.lu.nateko.cp.doi.gui.DoiJsonEditor
+import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 
 class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
@@ -70,17 +72,23 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		updateContentVisibility()
 	}
 
-	private def metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, editDoi, meta => d.dispatch(DoiCloneRequest(meta)))
-
-	private def editDoi = () => cardBody.replaceChildren(metaWidget.element)
+	private def metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, tabsCb, meta => d.dispatch(DoiCloneRequest(meta)))
 
 	private def metaWidget = new DoiMetaWidget(
 		meta,
 		updateDoiMeta,
-		() => cardBody.replaceChildren(metaViewer.element),
+		tabsCb,
 		doi => {
 			d.dispatch(ThunkActions.requestDoiDeletion(doi))
 		}
+	)
+
+	private def metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, tabsCb)
+
+	private val tabsCb: Map[EditorTab.Value, () => Unit] = Map(
+		EditorTab.view -> {() => cardBody.replaceChildren(metaViewer.element)},
+		EditorTab.edit -> {() => cardBody.replaceChildren(metaWidget.element)},
+		EditorTab.json -> {() => cardBody.replaceChildren(metaJsonEditor.element)},
 	)
 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = Backend.updateMeta(updated).andThen{

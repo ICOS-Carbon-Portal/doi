@@ -21,7 +21,7 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	viewCb: () => Unit,
+	tabsCb: Map[EditorTab.Value, () => Unit],
 	deleteCb: Doi => Unit
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
@@ -163,19 +163,7 @@ class DoiMetaWidget(
 		}
 	}
 
-	private[this] val viewButton = button(tpe := "button", cls := "nav-link")("View").render
-	viewButton.onclick = (_: Event) => viewCb()
-
-	private[this] val tabs = p(
-		ul(cls := "nav nav-tabs")(
-			li(cls := "nav-item")(
-				viewButton
-			),
-			li(cls := "nav-item")(
-				button(cls := "nav-link active", tpe := "button", role := "tab")("Edit")
-			)
-		)
-	)
+	private val tabs = new TabWidget(EditorTab.edit, tabsCb).element
 
 	val element = div(
 		tabs,
