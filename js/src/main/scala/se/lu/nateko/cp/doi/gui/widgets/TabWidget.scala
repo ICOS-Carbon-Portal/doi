@@ -30,7 +30,7 @@ class TabWidget(activeTab: EditorTab.Value, cb: Map[EditorTab.Value, () => Unit]
 			li(cls := "nav-item")(
 				editButton
 			),
-			li(cls := "nav-item admin-control")(
+			li(cls := "nav-item")(
 				editJsonButton
 			)
 		)
