@@ -80,7 +80,20 @@ object JsonSupport extends DefaultJsonProtocol{
 		}
 	}
 
-	implicit val affiliationFormat = jsonFormat1(Affiliation)
+	implicit val affiliationFormat = new JsonFormat[Affiliation]{
+		def write(affiliation: Affiliation) = JsObject(
+			"name" -> JsString(affiliation.name)
+		)
+
+		def read(json: JsValue): Affiliation = json match {
+			case JsObject(fields) => fields.get("name") match {
+				case Some(JsString(name)) => Affiliation(name)
+				case _ => deserializationError("Expected affiliation name")
+			}
+			case JsString(name) => Affiliation(name)
+			case _ => deserializationError("Expected affiliation")
+		}
+	}
 	implicit val creatorFormat = fieldConflatingFormat(jsonFormat3(Creator), "name")
 	implicit val contributorFormat = fieldConflatingFormat(jsonFormat4(Contributor), "name")
 	implicit val titleFormat = jsonFormat3(Title)

@@ -82,7 +82,10 @@ object JsonSupport{
 		def writes(affiliation: Affiliation): JsValue = Json.obj(
 			"name" -> JsString(affiliation.name)
 		)
-		def reads(json: JsValue): JsResult[Affiliation] = json.validate[String].map(Affiliation)
+		def reads(json: JsValue): JsResult[Affiliation] = (json \ "name") match {
+			case JsDefined(JsString(name)) => JsSuccess(Affiliation(name))
+			case _ => json.validate[String].map(Affiliation)
+		}
 	}
 	implicit val creatorFormat = fieldConflatingFormat(Json.format[Creator], "name")
 	implicit val contributorFormat = fieldConflatingFormat(Json.format[Contributor], "name")
