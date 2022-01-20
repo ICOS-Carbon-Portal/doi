@@ -16,11 +16,11 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	val metaBase: URL = new URL(config.restEndpoint, "dois")
 	def clientDois(query: String, page: Int): URL = new URL(
 		//TODO Move page size into the API, too
-		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
+		s"${config.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page&affiliation=true"
 	)
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
-	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
+	def metaUrl(doi: Doi) = new URL(s"$metaBase/${doi}?affiliation=true")
 
 	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[String] = http
 		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(
