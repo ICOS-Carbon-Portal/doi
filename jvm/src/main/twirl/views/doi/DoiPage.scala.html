@@ -1,7 +1,7 @@
 @import views.html.CpCommonPage
 
 @(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false, cpauthHost: String)
-@CpCommonPage("Carbon Portal's DOI minting service", cpauthHostOpt = Some(cpauthHost), bootstrapVersion = Some(5)){
+@CpCommonPage("Carbon Portal's DOI minting service", authHost = cpauthHost, dataHost = "data.icos-cp.eu"){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
 			.spacyrow{

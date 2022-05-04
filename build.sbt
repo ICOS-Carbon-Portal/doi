@@ -83,7 +83,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.16",
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "javax.mail"           % "1.6.2",
-			"se.lu.nateko.cp"   %% "views-core"           % "0.4.7",
+			"se.lu.nateko.cp"   %% "views-core"           % "0.5.0",
 			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.4"
 		),
 		reStart / baseDirectory  := {
