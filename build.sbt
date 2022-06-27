@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.13.6"
+ThisBuild / scalaVersion := "3.2.0-RC1"
 ThisBuild / organization := "se.lu.nateko.cp"
 
 val commonSettings = Seq(
@@ -6,15 +6,9 @@ val commonSettings = Seq(
 		"-encoding", "UTF-8",
 		"-unchecked",
 		"-feature",
-		"-deprecation",
-		"-Wdead-code",
-		"-Wnumeric-widen"
+		"-deprecation"
 	),
-	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % "test"
-)
-
-val jvmOnlySettings = Seq(
-	scalacOptions += "-target:jvm-1.11"
+	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test" exclude("org.scala-lang.modules", "scala-xml_3")
 )
 
 val publishSettings = Seq(
@@ -37,24 +31,23 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi-common",
-		version := "0.2.0",
+		version := "0.2.1",
 		cpDeploy := {
 			sys.error("Please switch to project appJVM for deployment")
 		}
 	)
-	.jvmSettings(jvmOnlySettings: _*)
 	.settings(publishSettings: _*)
 
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
 	.in(file("core"))
 	.dependsOn(common.jvm)
-	.settings(commonSettings ++ jvmOnlySettings ++ publishSettings: _*)
-	.enablePlugins(SbtTwirl)
+	.settings(commonSettings ++ publishSettings: _*)
 	.settings(
 		name := "doi-core",
-		libraryDependencies += "io.spray" %%  "spray-json" % "1.3.6",
-		version := "0.2.0"
+		libraryDependencies += "io.spray" %%  "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13,
+		libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.0.1" % "test",
+		version := "0.2.1"
 	)
 
 //the DOI minting web app itself
@@ -63,28 +56,27 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.2.0"
+		version := "0.2.1"
 	)
-	.jvmSettings(jvmOnlySettings: _*)
 	.jsSettings(
 		name := "doi-js",
 		libraryDependencies ++= Seq(
-			"com.lihaoyi" %%% "scalatags" % "0.10.0",
-			"com.typesafe.play" %%% "play-json" % "2.9.2"
+			"com.lihaoyi"       %%% "scalatags" % "0.11.1",
+			"com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
 		),
 		scalaJSUseMainModuleInitializer := true
 	)
 	.jvmSettings(
 		name := "doi-jvm",
+
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http"            % "10.2.6",
-			"com.typesafe.akka" %% "akka-http-spray-json" % "10.2.6",
-			"com.typesafe.akka" %% "akka-stream"          % "2.6.16",
-			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.16",
+			"com.typesafe.akka" %% "akka-http-spray-json" % "10.2.9" cross CrossVersion.for3Use2_13,
+			"com.typesafe.akka" %% "akka-stream"          % "2.6.19" cross CrossVersion.for3Use2_13,
+			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
-			"com.sun.mail"       % "javax.mail"           % "1.6.2",
-			"se.lu.nateko.cp"   %% "views-core"           % "0.5.0",
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.4"
+			"com.sun.mail"       % "jakarta.mail"         % "1.6.7" exclude("com.sun.activation", "jakarta.activation"),
+			"se.lu.nateko.cp"   %% "views-core"           % "0.5.4" cross CrossVersion.for3Use2_13,
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.5" cross CrossVersion.for3Use2_13,
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
@@ -106,6 +98,14 @@ lazy val appJvm = app.jvm
 	.settings(
 		cpDeployTarget := "doi",
 		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
+
+		libraryDependencies := {
+			libraryDependencies.value.map{
+				case m if m.name.startsWith("twirl-api") =>
+					m.cross(CrossVersion.for3Use2_13)
+				case m => m
+			}
+		},
 
 		Compile / resources ++= {
 			val jsFile = (appJs / Compile / fastOptJS).value.data
