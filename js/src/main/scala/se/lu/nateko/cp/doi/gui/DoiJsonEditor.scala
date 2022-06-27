@@ -3,7 +3,7 @@ package se.lu.nateko.cp.doi.gui
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import play.api.libs.json.Json
-import se.lu.nateko.cp.doi.JsonSupport._
+import se.lu.nateko.cp.doi.JsonSupport.given
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextAreaWidget
 import org.scalajs.dom.Event
 import scala.concurrent.Future

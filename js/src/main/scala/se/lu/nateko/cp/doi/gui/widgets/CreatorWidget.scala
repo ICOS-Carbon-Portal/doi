@@ -49,6 +49,6 @@ object CreatorWidget{
 
 
 	class AffiliationsInput(init: Seq[Affiliation], updateCb: Seq[Affiliation] => Unit) extends
-		MultiStringsWidget(init.map(_.name), (aff => updateCb(aff.map(Affiliation))), "Affiliation")("Affiliations")
+		MultiStringsWidget(init.map(_.name), (aff => updateCb(aff.map(Affiliation.apply))), "Affiliation")("Affiliations")
 
 }

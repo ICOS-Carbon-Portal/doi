@@ -4,7 +4,7 @@ import scala.concurrent.Future
 import org.scalajs.dom.ext.Ajax
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import play.api.libs.json._
-import se.lu.nateko.cp.doi.JsonSupport._
+import se.lu.nateko.cp.doi.JsonSupport.given
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.DoiListPayload

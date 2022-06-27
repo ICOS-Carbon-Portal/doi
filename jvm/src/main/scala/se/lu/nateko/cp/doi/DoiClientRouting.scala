@@ -4,7 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
-import core.JsonSupport.doiMetaFormat
+import core.JsonSupport.given
 import scala.concurrent.Future
 
 class DoiClientRouting(client: DoiClient) {

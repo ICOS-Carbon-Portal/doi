@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
 import scala.concurrent.ExecutionContext
@@ -16,10 +17,11 @@ import spray.json.JsString
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import scala.concurrent.Future
 import scala.util.Try
+import play.twirl.api.Html
 
 object Main{
 
-	private[this] implicit val pageMarsh = TemplatePageMarshalling.marshaller
+	private given ToResponseMarshaller[Html] = TemplatePageMarshalling.marshaller
 
 	def main(args: Array[String]): Unit = {
 
@@ -129,7 +131,7 @@ object Main{
 					sys.addShutdownHook{
 						val doneFuture = binding.unbind()
 							.flatMap(_ => system.terminate())(ExecutionContext.Implicits.global)
-						Await.result(doneFuture, 3 seconds)
+						Await.result(doneFuture, 3.seconds)
 					}
 					system.log.info(s"Started CP DOI service: $binding")
 

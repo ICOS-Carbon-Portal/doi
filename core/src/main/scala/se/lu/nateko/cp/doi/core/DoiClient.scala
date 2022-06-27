@@ -9,7 +9,7 @@ import se.lu.nateko.cp.doi.{SingleDoiPayload,DoiListPayload}
 import scala.util.Try
 import scala.collection.Seq
 import spray.json._
-import JsonSupport._
+import JsonSupport.given
 
 class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: ExecutionContext) {
 

@@ -1,12 +1,12 @@
 package se.lu.nateko.cp.doi.gui.widgets.generic
 
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Event, html}
 import scalatags.JsDom.all._
 
 
 class IntInputWidget(init: Int, protected val updateCb: Int => Unit) extends EntityWidget[Int] {
 
-	val element = input(tpe := "text", cls := "form-control", value := init.toString).render
+	val element: html.Input = input(tpe := "text", cls := "form-control", value := init.toString).render
 
 	element.onkeyup = (_: Event) => {
 		try{

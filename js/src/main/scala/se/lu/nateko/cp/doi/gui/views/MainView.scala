@@ -146,14 +146,14 @@ class MainView(d: DoiRedux.Dispatcher) {
 						a(
 							cls := "page-link",
 							href := "#",
-							onclick := {(event) => goToPage(event, listMeta.page - 1) },
+							onclick := {goToPage(_, listMeta.page - 1) },
 						)("Previous")
 					),
 					li(cls := nextBtnClasses)(
 						a(
 							cls := "page-link",
 							href := "#",
-							onclick := {(event) => goToPage(event, listMeta.page + 1) }
+							onclick := {goToPage(_, listMeta.page + 1) }
 						)("Next")
 					)
 				).render

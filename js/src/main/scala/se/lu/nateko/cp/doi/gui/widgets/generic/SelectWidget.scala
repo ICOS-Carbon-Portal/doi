@@ -1,8 +1,10 @@
 package se.lu.nateko.cp.doi.gui.widgets.generic
 
 import org.scalajs.dom.Event
+import org.scalajs.dom.html
 import scalatags.JsDom.all._
 import SelectWidget._
+
 
 case class SelectOption[T](value: Option[T], id: String, label: String)
 
@@ -12,7 +14,7 @@ class SelectWidget[T](
 	protected val updateCb: Option[T] => Unit
 ) extends EntityWidget[Option[T]] {
 
-	val element = select(cls := "form-control")(options.map(optionElem)).render
+	val element: html.Select = select(cls := "form-control")(options.map(optionElem)).render
 
 	element.onchange = (_: Event) => updateCb(options(element.selectedIndex).value)
 
@@ -25,9 +27,9 @@ object SelectWidget{
 		option(value := optInfo.id)(optInfo.label)
 	}
 
-	def selectOptions(enum: Enumeration, noValueLabelOpt: Option[String]): IndexedSeq[SelectOption[enum.Value]] = {
-		noValueLabelOpt.map(SelectOption[enum.Value](None, "", _)).toIndexedSeq ++
-		enum.values.toIndexedSeq.map(v =>
+	def selectOptions(optEnum: Enumeration, noValueLabelOpt: Option[String]): IndexedSeq[SelectOption[optEnum.Value]] = {
+		noValueLabelOpt.map(SelectOption[optEnum.Value](None, "", _)).toIndexedSeq ++
+		optEnum.values.toIndexedSeq.map(v =>
 			SelectOption(Some(v), v.toString, v.toString)
 		)
 	}

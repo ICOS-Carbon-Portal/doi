@@ -1,7 +1,7 @@
 package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Event, html}
 import DoiTargetWidget._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.views.Bootstrap
@@ -28,7 +28,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 
 	private val doiUrl = "https://doi.org/" + doi
 
-	val element = Bootstrap.defaultCard("DOI Target")(
+	val element: html.Div = Bootstrap.defaultCard("DOI Target")(
 		p(
 			span(strong("Test the DOI: ")),
 			a(href := doiUrl, target := "_blank")(doiUrl),

@@ -4,7 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.DoiMeta
-import se.lu.nateko.cp.doi.JsonSupport._
+import se.lu.nateko.cp.doi.JsonSupport.given
 import se.lu.nateko.cp.doi.meta.Subject
 class JsonSupportTest extends AnyFunSuite{
 

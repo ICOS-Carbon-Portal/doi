@@ -8,7 +8,7 @@ import se.lu.nateko.cp.doi.meta._
 
 object Playground {
 
-	implicit val system = ActorSystem("doi-playground")
+	given system: ActorSystem = ActorSystem("doi-playground")
 	import system.dispatcher
 
 	val config = DoiConfig.getConfig.client

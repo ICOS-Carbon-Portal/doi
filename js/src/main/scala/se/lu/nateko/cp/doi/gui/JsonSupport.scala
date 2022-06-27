@@ -9,11 +9,11 @@ spray-json based JsonSupport from core project to common project
 */
 object JsonSupport{
 
-	private def enumFormat[T <: Enumeration](enum: T) = new Format[enum.Value]{
-		def writes(v: enum.Value) = JsString(v.toString)
-		def reads(js: JsValue): JsResult[enum.Value] = js match{
+	private def enumFormat[T <: Enumeration](libEnum: T) = new Format[libEnum.Value]{
+		def writes(v: libEnum.Value) = JsString(v.toString)
+		def reads(js: JsValue): JsResult[libEnum.Value] = js match{
 			case JsString(s) => try{
-					JsSuccess(enum.withName(s.toString))
+					JsSuccess(libEnum.withName(s.toString))
 				} catch{
 					case _: NoSuchElementException =>
 						JsError(s"No such value: $s")
@@ -38,31 +38,31 @@ object JsonSupport{
 	}
 
 
-	implicit val dateTypeFormat = enumFormat(DateType)
-	implicit val contrTypeFormat = enumFormat(ContributorType)
-	implicit val descriptionTypeFormat = enumFormat(DescriptionType)
-	implicit val resourceTypeGeneralFormat = enumFormat(ResourceTypeGeneral)
-	implicit val titleTypeFormat = enumFormat(TitleType)
-	implicit val DoiStateEnumFormat = enumFormat(DoiPublicationState)
-	implicit val DoiEventEnumFormat = enumFormat(DoiPublicationEvent)
+	given dateTypeFormat: Format[DateType.Value] = enumFormat(DateType)
+	given contrTypeFormat: Format[ContributorType.Value] = enumFormat(ContributorType)
+	given descriptionTypeFormat: Format[DescriptionType.Value] = enumFormat(DescriptionType)
+	given resourceTypeGeneralFormat: Format[ResourceTypeGeneral.Value] = enumFormat(ResourceTypeGeneral)
+	given titleTypeFormat: Format[TitleType.Value] = enumFormat(TitleType)
+	given doiStateEnumFormat: Format[DoiPublicationState.Value] = enumFormat(DoiPublicationState)
+	given doiEventEnumFormat: Format[DoiPublicationEvent.Value] = enumFormat(DoiPublicationEvent)
 
 	private def parseDoi(doiTxt: String): JsResult[Doi] = Doi.parse(doiTxt).fold(
 		err => JsError("DOI cannot be parsed: " + err.getMessage),
 		doi => JsSuccess(doi)
 	)
 
-	implicit val doiFormat = new Format[Doi]{
+	given Format[Doi] with{
 		def writes(doi: Doi): JsValue = JsString(doi.toString)
 		def reads(json: JsValue): JsResult[Doi] = parseDoi(json.as[String])
 	}
-	implicit val subjectShemeFormat = Json.format[SubjectScheme]
-	implicit val subjectFormat = fieldConflatingFormat(Json.format[Subject], "scheme", opt = true)
-	implicit val nameIdentifierSchemeFormat = Json.format[NameIdentifierScheme]
-	implicit val nameIdentifierFormat = fieldConflatingFormat(Json.format[NameIdentifier], "scheme")
-	implicit val genericNameFormat = Json.format[GenericName]
-	implicit val personalNameFormat = Json.format[PersonalName]
+	given OFormat[SubjectScheme] = Json.format[SubjectScheme]
+	given OFormat[Subject] = fieldConflatingFormat(Json.format[Subject], "scheme", opt = true)
+	given OFormat[NameIdentifierScheme] = Json.format[NameIdentifierScheme]
+	given OFormat[NameIdentifier] = fieldConflatingFormat(Json.format[NameIdentifier], "scheme")
+	given genericNameFormat: OFormat[GenericName] = Json.format[GenericName]
+	given personalNameFormat: OFormat[PersonalName] = Json.format[PersonalName]
 
-	implicit val nameFormat = new OFormat[Name]{
+	given OFormat[Name] with{
 		def writes(name: Name) = name match{
 			case gn: GenericName =>
 				genericNameFormat.writes(gn) ++ Json.obj("nameType" -> "Organizational")
@@ -78,26 +78,26 @@ object JsonSupport{
 		}
 	}
 
-	implicit val affiliationFormat = new Format[Affiliation]{
+	given Format[Affiliation] with{
 		def writes(affiliation: Affiliation): JsValue = Json.obj(
 			"name" -> JsString(affiliation.name)
 		)
 		def reads(json: JsValue): JsResult[Affiliation] = (json \ "name") match {
 			case JsDefined(JsString(name)) => JsSuccess(Affiliation(name))
-			case _ => json.validate[String].map(Affiliation)
+			case _ => json.validate[String].map(Affiliation.apply)
 		}
 	}
-	implicit val creatorFormat = fieldConflatingFormat(Json.format[Creator], "name")
-	implicit val contributorFormat = fieldConflatingFormat(Json.format[Contributor], "name")
-	implicit val titleFormat = Json.format[Title]
-	implicit val resourceTypeFormat = Json.format[ResourceType]
-	implicit val dateFormat = Json.format[Date]
+	given OFormat[Creator] = fieldConflatingFormat(Json.format[Creator], "name")
+	given OFormat[Contributor] = fieldConflatingFormat(Json.format[Contributor], "name")
+	given OFormat[Title] = Json.format[Title]
+	given OFormat[ResourceType] = Json.format[ResourceType]
+	given OFormat[Date] = Json.format[Date]
 
 	def parseVersion(versionTxt: String): JsResult[Version] = Version.parse(versionTxt).fold(
 		err => JsError("Version cannot be parsed. " + err.getMessage),
 		v => JsSuccess(v)
 	)
-	implicit val versionFormat = new Format[Version]{
+	given Format[Version] with{
 		def writes(o: Version): JsValue = {
 			JsString(o.toString)
 		}
@@ -105,12 +105,12 @@ object JsonSupport{
 			parseVersion(json.as[String])
 		}
 	}
-	implicit val rightsFormat = Json.format[Rights]
-	implicit val descriptionFormat = Json.format[Description]
+	given OFormat[Rights] = Json.format[Rights]
+	given OFormat[Description] = Json.format[Description]
 
-	implicit val doiMetaFormat = Json.format[DoiMeta]
-	implicit val doiWrapperFormat = Json.format[DoiWrapper]
-	implicit val singleDoiPayloadFormat = Json.format[SingleDoiPayload]
-	implicit val doiListMetaFormat = Json.format[DoiListMeta]
-	implicit val doiListPayloadFormat = Json.format[DoiListPayload]
+	given OFormat[DoiMeta] = Json.format[DoiMeta]
+	given OFormat[DoiWrapper] = Json.format[DoiWrapper]
+	given OFormat[SingleDoiPayload] = Json.format[SingleDoiPayload]
+	given OFormat[DoiListMeta] = Json.format[DoiListMeta]
+	given OFormat[DoiListPayload] = Json.format[DoiListPayload]
 }

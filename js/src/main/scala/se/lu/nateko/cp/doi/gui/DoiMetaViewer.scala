@@ -46,7 +46,7 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab.Value, () => Unit], clo
 	).render
 
 	private def listPeople(list: Seq[Person], label: String): Option[String] = {
-		 Option(list.map(c => c.name.toString))
+		Option(list.map(c => c.name.toString))
 			.filter(_.nonEmpty)
 			.map(_.mkString(label + ": ", ", ", ""))
 	}
