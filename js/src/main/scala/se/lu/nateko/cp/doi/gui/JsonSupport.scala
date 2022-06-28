@@ -2,6 +2,7 @@ package se.lu.nateko.cp.doi
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
+import scala.reflect.Enum
 
 /**
 TODO When/if spray-json gets published for ScalaJS, retire this code by moving
@@ -9,14 +10,14 @@ spray-json based JsonSupport from core project to common project
 */
 object JsonSupport{
 
-	private def enumFormat[T <: Enumeration](libEnum: T) = new Format[libEnum.Value]{
-		def writes(v: libEnum.Value) = JsString(v.toString)
-		def reads(js: JsValue): JsResult[libEnum.Value] = js match{
+	private def enumFormat[T <: Enum](valueOf: String => T) = new Format[T]{
+		def writes(v: T) = JsString(v.toString)
+		def reads(js: JsValue): JsResult[T] = js match{
 			case JsString(s) => try{
-					JsSuccess(libEnum.withName(s.toString))
-				} catch{
-					case _: NoSuchElementException =>
-						JsError(s"No such value: $s")
+					JsSuccess(valueOf(s))
+				}catch{
+					case _: IllegalArgumentException =>
+						JsError(s"No such enum value: $s")
 				}
 			case _ => JsError("Expected a string")
 		}
@@ -38,13 +39,13 @@ object JsonSupport{
 	}
 
 
-	given dateTypeFormat: Format[DateType.Value] = enumFormat(DateType)
-	given contrTypeFormat: Format[ContributorType.Value] = enumFormat(ContributorType)
-	given descriptionTypeFormat: Format[DescriptionType.Value] = enumFormat(DescriptionType)
-	given resourceTypeGeneralFormat: Format[ResourceTypeGeneral.Value] = enumFormat(ResourceTypeGeneral)
-	given titleTypeFormat: Format[TitleType.Value] = enumFormat(TitleType)
-	given doiStateEnumFormat: Format[DoiPublicationState.Value] = enumFormat(DoiPublicationState)
-	given doiEventEnumFormat: Format[DoiPublicationEvent.Value] = enumFormat(DoiPublicationEvent)
+	given dateTypeFormat: Format[DateType] = enumFormat(DateType.valueOf)
+	given contrTypeFormat: Format[ContributorType] = enumFormat(ContributorType.valueOf)
+	given descriptionTypeFormat: Format[DescriptionType] = enumFormat(DescriptionType.valueOf)
+	given resourceTypeGeneralFormat: Format[ResourceTypeGeneral] = enumFormat(ResourceTypeGeneral.valueOf)
+	given titleTypeFormat: Format[TitleType] = enumFormat(TitleType.valueOf)
+	given doiStateEnumFormat: Format[DoiPublicationState] = enumFormat(DoiPublicationState.valueOf)
+	given doiEventEnumFormat: Format[DoiPublicationEvent] = enumFormat(DoiPublicationEvent.valueOf)
 
 	private def parseDoi(doiTxt: String): JsResult[Doi] = Doi.parse(doiTxt).fold(
 		err => JsError("DOI cannot be parsed: " + err.getMessage),

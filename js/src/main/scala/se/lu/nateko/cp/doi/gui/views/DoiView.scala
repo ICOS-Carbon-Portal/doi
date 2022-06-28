@@ -85,7 +85,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private def metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, tabsCb)
 
-	private val tabsCb: Map[EditorTab.Value, () => Unit] = Map(
+	private val tabsCb: Map[EditorTab, () => Unit] = Map(
 		EditorTab.view -> {() => cardBody.replaceChildren(metaViewer.element)},
 		EditorTab.edit -> {() => cardBody.replaceChildren(metaWidget.element)},
 		EditorTab.json -> {() => cardBody.replaceChildren(metaJsonEditor.element)},

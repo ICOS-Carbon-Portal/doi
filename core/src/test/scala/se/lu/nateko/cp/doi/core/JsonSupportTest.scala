@@ -2,7 +2,7 @@ package se.lu.nateko.cp.doi.core
 
 import org.scalatest.funsuite.AnyFunSuite
 
-import JsonSupport._
+import JsonSupport.given
 import spray.json._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.Subject

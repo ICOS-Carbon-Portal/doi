@@ -3,19 +3,20 @@ package se.lu.nateko.cp.doi.core
 import se.lu.nateko.cp.doi._
 import se.lu.nateko.cp.doi.meta._
 import spray.json._
+import scala.reflect.ClassTag
 
 object JsonSupport extends DefaultJsonProtocol{
 
-	def enumFormat[T <: Enumeration](libEnum: T) = new RootJsonFormat[libEnum.Value] {
-		def write(v: libEnum.Value) = JsString(v.toString)
+	def enumFormat[T <: reflect.Enum](valueOf: String => T)(using ctg: ClassTag[T]) = new RootJsonFormat[T] {
+		def write(v: T) = JsString(v.toString)
 
-		def read(value: JsValue): libEnum.Value = value match{
+		def read(value: JsValue): T = value match{
 			case JsString(s) =>
 				try{
-					libEnum.withName(s)
+					valueOf(s)
 				}catch{
-					case _: NoSuchElementException => deserializationError(
-						"Expected one of: " + libEnum.values.map(_.toString).mkString("'", "', '", "'")
+					case _: IllegalArgumentException => deserializationError(
+						s"No such $ctg enum value: $s"
 					)
 				}
 			case _ => deserializationError("Expected a string")
@@ -42,13 +43,13 @@ object JsonSupport extends DefaultJsonProtocol{
 		}
 	}
 
-	given dateTypeFormat: RootJsonFormat[DateType.Value] = enumFormat(DateType)
-	given contrTypeFormat: RootJsonFormat[ContributorType.Value] = enumFormat(ContributorType)
-	given descriptionTypeFormat: RootJsonFormat[DescriptionType.Value] = enumFormat(DescriptionType)
-	given resourceTypeGeneralFormat: RootJsonFormat[ResourceTypeGeneral.Value] = enumFormat(ResourceTypeGeneral)
-	given titleTypeFormat: RootJsonFormat[TitleType.Value] = enumFormat(TitleType)
-	given doiStateEnumFormat: RootJsonFormat[DoiPublicationState.Value] = enumFormat(DoiPublicationState)
-	given doiEventEnumFormat: RootJsonFormat[DoiPublicationEvent.Value] = enumFormat(DoiPublicationEvent)
+	given dateTypeFormat: RootJsonFormat[DateType] = enumFormat(DateType.valueOf)
+	given contrTypeFormat: RootJsonFormat[ContributorType] = enumFormat(ContributorType.valueOf)
+	given descriptionTypeFormat: RootJsonFormat[DescriptionType] = enumFormat(DescriptionType.valueOf)
+	given resourceTypeGeneralFormat: RootJsonFormat[ResourceTypeGeneral] = enumFormat(ResourceTypeGeneral.valueOf)
+	given titleTypeFormat: RootJsonFormat[TitleType] = enumFormat(TitleType.valueOf)
+	given doiStateEnumFormat: RootJsonFormat[DoiPublicationState] = enumFormat(DoiPublicationState.valueOf)
+	given doiEventEnumFormat: RootJsonFormat[DoiPublicationEvent] = enumFormat(DoiPublicationEvent.valueOf)
 
 	private val doiRegex = """^(10\.\d+)/(.+)$""".r
 
@@ -59,9 +60,9 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
-	given RootJsonFormat[SubjectScheme] = jsonFormat2(SubjectScheme.apply)
+	given RootJsonFormat[SubjectScheme] = enumFormat(SubjectScheme.valueOf)
 	given RootJsonFormat[Subject] = fieldConflatingFormat(jsonFormat4(Subject.apply), "scheme", opt = true)
-	given RootJsonFormat[NameIdentifierScheme] = jsonFormat2(NameIdentifierScheme.apply)
+	given RootJsonFormat[NameIdentifierScheme] = enumFormat(NameIdentifierScheme.valueOf)
 	given RootJsonFormat[NameIdentifier] = fieldConflatingFormat(jsonFormat2(NameIdentifier.apply), "scheme")
 
 	given genericNameFormat: RootJsonFormat[GenericName] = jsonFormat1(GenericName.apply)

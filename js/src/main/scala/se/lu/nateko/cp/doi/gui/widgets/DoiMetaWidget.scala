@@ -21,7 +21,7 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	tabsCb: Map[EditorTab.Value, () => Unit],
+	tabsCb: Map[EditorTab, () => Unit],
 	deleteCb: Doi => Unit
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
