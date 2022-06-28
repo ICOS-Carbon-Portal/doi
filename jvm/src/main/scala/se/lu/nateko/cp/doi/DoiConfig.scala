@@ -16,6 +16,8 @@ case class EmailConfig(
 )
 
 case class DoiConfig(
+	httpBindInterface: String,
+	httpBindPort: Int,
 	client: DoiClientConfig,
 	prefixInfo: String,
 	auth: PublicAuthConfig,
@@ -29,6 +31,8 @@ object DoiConfig {
 		val allConf = getAppConfig
 		val doiConf = allConf.getConfig("cpdoi")
 		DoiConfig(
+			httpBindInterface = doiConf.getString("httpBindInterface"),
+			httpBindPort = doiConf.getInt("httpBindPort"),
 			client = getClientConfig(doiConf),
 			prefixInfo = doiConf.getString("prefix"),
 			auth = getAuthConfig(allConf),

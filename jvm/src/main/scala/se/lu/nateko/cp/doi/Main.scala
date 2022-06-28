@@ -28,37 +28,37 @@ object Main{
 		implicit val system = ActorSystem()
 		import system.dispatcher
 
-		val DoiConfig(clientConf, prefixInfo, authConf, admins, emailConfig) = DoiConfig.getConfig
+		val conf = DoiConfig.getConfig
 
-		val authRouting = new AuthRouting(authConf)
+		val authRouting = new AuthRouting(conf.auth)
 
 		val client = {
-			val http = new AkkaDoiHttp(clientConf.symbol, clientConf.password)
-			new DoiClient(clientConf, http)
+			val http = new AkkaDoiHttp(conf.client.symbol, conf.client.password)
+			new DoiClient(conf.client, http)
 		}
 		val doiRouting = new DoiClientRouting(client)
 
-		val emailSender = new Mailer(emailConfig)
+		val emailSender = new Mailer(conf.mailing)
 
 		val exceptionHandler = ExceptionHandler{
 			case e: Exception =>
 				complete((StatusCodes.InternalServerError, e.getMessage))
 		}
 
-		def isAdmin(uid: UserId): Boolean = admins.exists(auid => auid.email.equalsIgnoreCase(uid.email))
+		def isAdmin(uid: UserId): Boolean = conf.admins.exists(auid => auid.email.equalsIgnoreCase(uid.email))
 		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
 		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development, authConf.authHost))
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development, conf.auth.authHost))
 		}
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(
 			emailSender.send(
-				admins,
+				conf.admins,
 				"DOI submitted for publication",
 				views.html.doi.DoiSubmissionEmail(uid, doi).body
 			)
-		)(ExecutionContext.Implicits.global)
+		)(using ExecutionContext.Implicits.global)
 
 		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
@@ -100,7 +100,7 @@ object Main{
 					complete(StatusCodes.Unauthorized -> "Must be logged in")
 				} ~
 				path("doiprefix"){
-					get{complete(prefixInfo)}
+					get{complete(conf.prefixInfo)}
 				}
 			} ~
 			get{
@@ -116,7 +116,7 @@ object Main{
 					}
 				} ~
 				path("logout"){
-					deleteCookie(authConf.authCookieName, domain = authConf.authCookieDomain, path = "/"){
+					deleteCookie(conf.auth.authCookieName, domain = conf.auth.authCookieDomain, path = "/"){
 						complete(StatusCodes.OK)
 					}
 				} ~
@@ -124,13 +124,14 @@ object Main{
 			}
 		}
 
-		Http().newServerAt("127.0.0.1", port = 8079)
+		Http().newServerAt(conf.httpBindInterface, port = conf.httpBindPort)
 			.bindFlow(route)
 			.onComplete{
 				case Success(binding) =>
 					sys.addShutdownHook{
-						val doneFuture = binding.unbind()
-							.flatMap(_ => system.terminate())(ExecutionContext.Implicits.global)
+						val doneFuture = binding.unbind().map{_ =>
+							system.log.info("DOI service down")
+						}
 						Await.result(doneFuture, 3.seconds)
 					}
 					system.log.info(s"Started CP DOI service: $binding")
