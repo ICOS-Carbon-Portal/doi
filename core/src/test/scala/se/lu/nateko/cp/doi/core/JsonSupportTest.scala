@@ -2,8 +2,8 @@ package se.lu.nateko.cp.doi.core
 
 import org.scalatest.funsuite.AnyFunSuite
 
-import JsonSupport._
-import spray.json._
+import JsonSupport.given
+import spray.json.*
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta.Subject
 import java.nio.file.Files

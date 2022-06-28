@@ -8,7 +8,7 @@ val commonSettings = Seq(
 		"-feature",
 		"-deprecation"
 	),
-	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test" exclude("org.scala-lang.modules", "scala-xml_3")
+	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test"
 )
 
 val publishSettings = Seq(
@@ -46,7 +46,6 @@ lazy val core = project
 	.settings(
 		name := "doi-core",
 		libraryDependencies += "io.spray" %%  "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13,
-		libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.0.1" % "test",
 		version := "0.2.1"
 	)
 
@@ -75,7 +74,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7" exclude("com.sun.activation", "jakarta.activation"),
-			"se.lu.nateko.cp"   %% "views-core"           % "0.5.4" cross CrossVersion.for3Use2_13,
+			"se.lu.nateko.cp"   %% "views-core"           % "0.5.4" exclude("org.scala-lang.modules", "scala-xml_2.13") cross CrossVersion.for3Use2_13,
 			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.5" cross CrossVersion.for3Use2_13,
 		),
 		reStart / baseDirectory  := {
@@ -102,7 +101,7 @@ lazy val appJvm = app.jvm
 		libraryDependencies := {
 			libraryDependencies.value.map{
 				case m if m.name.startsWith("twirl-api") =>
-					m.cross(CrossVersion.for3Use2_13)
+					m.exclude("org.scala-lang.modules", "scala-xml_2.13").cross(CrossVersion.for3Use2_13)
 				case m => m
 			}
 		},
