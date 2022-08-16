@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "3.2.0-RC1"
+ThisBuild / scalaVersion := "3.2.0-RC3"
 ThisBuild / organization := "se.lu.nateko.cp"
 
 //should be consistent with the scalatest module version below (manually controlled)
