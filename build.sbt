@@ -37,7 +37,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 		name := "doi-common",
 		version := "0.2.1",
 		cpDeploy := {
-			sys.error("Please switch to project appJVM for deployment")
+			sys.error("Please switch to project doiJVM for deployment")
 		}
 	)
 	.settings(publishSettings: _*)
@@ -58,7 +58,7 @@ lazy val core = project
 	)
 
 //the DOI minting web app itself
-lazy val app = crossProject(JSPlatform, JVMPlatform)
+lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.in(file("."))
 	.settings(commonSettings)
 	.settings(
@@ -99,12 +99,19 @@ lazy val app = crossProject(JSPlatform, JVMPlatform)
 	.jsConfigure(_.dependsOn(common.js))
 	.jvmConfigure(_.dependsOn(core))
 
-lazy val appJs = app.js
-lazy val appJvm = app.jvm
+lazy val doiJs = doi.js
+lazy val doiJvm = doi.jvm
 	.enablePlugins(IcosCpSbtDeployPlugin, SbtTwirl)
 	.settings(
 		cpDeployTarget := "doi",
 		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
+		cpDeployPreAssembly := Def.sequential(
+			common.jvm / Test / test,
+			common.js / Test / test,
+			core / Test / test,
+			doiJs / Test / test,
+			Test / test
+		).value,
 
 		libraryDependencies := {
 			libraryDependencies.value.map{
@@ -114,14 +121,14 @@ lazy val appJvm = app.jvm
 		},
 
 		Compile / resources ++= {
-			val jsFile = (appJs / Compile / fastOptJS).value.data
+			val jsFile = (doiJs / Compile / fastOptJS).value.data
 			val srcMap = new java.io.File(jsFile.getAbsolutePath + ".map")
 			Seq(jsFile, srcMap)
 		},
 
-		watchSources ++= (appJs / Compile / watchSources).value,
+		watchSources ++= (doiJs / Compile / watchSources).value,
 		assembly / assembledMappings := {
-			val finalJsFile = (appJs / Compile / fullOptJS).value.data
+			val finalJsFile = (doiJs / Compile / fullOptJS).value.data
 			(assembly / assembledMappings).value :+ sbtassembly.MappingSet(None, Vector((finalJsFile, finalJsFile.getName)))
 		}
 	)
