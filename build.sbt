@@ -3,7 +3,6 @@ ThisBuild / organization := "se.lu.nateko.cp"
 
 //should be consistent with the scalatest module version below (manually controlled)
 val scala3Xml: ModuleID = "org.scala-lang.modules" % "scala-xml_3" % "2.1.0" % "test"
-val playJsonVersion = "2.10.0-RC6"
 
 val commonSettings = Seq(
 	scalacOptions ++= Seq(
@@ -42,11 +41,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 		}
 	)
 	.settings(publishSettings: _*)
-	.jvmSettings(
-		libraryDependencies ++= Seq(
-			scala3Xml,
-		)
-	)
+	.jvmSettings(libraryDependencies += scala3Xml)
 
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
@@ -69,7 +64,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.settings(
 		name := "doi",
 		version := "0.2.1",
-		libraryDependencies += "com.typesafe.play" %%% "play-json" % playJsonVersion,
+		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
 	)
 	.jsSettings(
 		name := "doi-js",

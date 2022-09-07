@@ -3,11 +3,6 @@ package se.lu.nateko.cp.doi
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
 
-/**
-TODO When/if spray-json gets published for ScalaJS, retire this code by moving
-spray-json based JsonSupport from core project to common project
-*/
-
 
 object JsonSupport{
 	

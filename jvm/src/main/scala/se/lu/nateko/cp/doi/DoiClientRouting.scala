@@ -18,17 +18,6 @@ class DoiClientRouting(client: DoiClient) {
 				}
 			}
 		} ~
-		pathPrefix(DoiPath){doi =>
-			path("metadata"){
-				onSuccess(client.getMetadata(doi)){
-					case Some(meta) =>
-						complete(HttpEntity(ContentTypes.`application/json`, meta))
-					case None =>
-						complete(StatusCodes.NotFound -> s"No metadata found for DOI $doi")
-				}
-			} ~
-			complete(StatusCodes.NotFound)
-		} ~
 		pathPrefix(Segment / Segment){(prefix, suffix) =>
 			complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
 		}

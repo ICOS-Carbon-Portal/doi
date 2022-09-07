@@ -166,18 +166,16 @@ sealed trait Person extends SelfValidating{
 
 case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[Affiliation]) extends Person
 
-case class FundingReference(funderName: Option[String], funderIdentifier: Option[FunderIdentifier],
-	awardNumber: Option[String],
-	awardTitle: Option[String], awardUri: Option[String]) extends SelfValidating {
+case class FundingReference(
+	funderName: Option[String], funderIdentifier: Option[FunderIdentifier],
+	awardNumber: Option[String], awardTitle: Option[String], awardUri: Option[String]
+) extends SelfValidating {
 
 		def error = joinErrors(
 				nonEmpty(funderName)("Funder must have a name"),
-				awardUri.flatMap(aUri => {
-					Try(new URI(aUri)) match {
-						case Success(_) => None
-						case Failure(_) => Some("Invalid URI: " + aUri)
-					}
-				}),
+				awardUri.flatMap(aUri =>
+					Try(new URI(aUri)).failed.toOption.map(_ => s"Invalid funder award URI: $aUri")
+				),
 				allGood(funderIdentifier),
 			)
 }
@@ -196,12 +194,10 @@ case class Contributor(
 
 
 case class Title(title: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
-	def error = {
-		joinErrors(
+	def error = joinErrors(
 		nonEmpty(title)("Title must not be empty"),
 		lang.flatMap(l => nonEmpty(l)("Title language is not required but must not be empty if provided"))
 	)
-	}
 }
 
 case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral.Value]) extends SelfValidating{

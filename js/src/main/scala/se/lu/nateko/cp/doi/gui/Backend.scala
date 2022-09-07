@@ -12,7 +12,6 @@ import org.scalajs.dom
 import scala.scalajs.js
 import scala.scalajs.js.Thenable.Implicits._
 
-case class DoiWithTitle(doi: Doi, title: String)
 
 object Backend {
 

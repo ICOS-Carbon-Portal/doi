@@ -68,7 +68,7 @@ object Main{
 						doiRouting.writingRoute{doiMeta =>
 							if(isAdmin(uid)) Future.successful(true)
 							else if(doiMeta.event.isDefined || doiMeta.state != DoiPublicationState.draft) Future.successful(false)
-							else client.getMetadataParsed(doiMeta.doi).map{
+							else client.getMetadata(doiMeta.doi).map{
 								case Some(currMeta) =>
 									currMeta.state == DoiPublicationState.draft
 								case None =>

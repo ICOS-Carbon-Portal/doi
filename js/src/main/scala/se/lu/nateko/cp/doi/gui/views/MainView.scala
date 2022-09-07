@@ -9,7 +9,6 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
-import se.lu.nateko.cp.doi.gui.DoiWithTitle
 
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
