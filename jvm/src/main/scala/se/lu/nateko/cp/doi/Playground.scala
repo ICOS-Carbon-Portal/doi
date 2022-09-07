@@ -5,6 +5,9 @@ import java.net.URL
 import akka.actor.ActorSystem
 import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.meta._
+//import se.lu.nateko.cp.doi.core.JsonSupport.given
+import spray.json.*
+import scala.concurrent.Future
 
 object Playground {
 
@@ -60,4 +63,15 @@ object Playground {
 	def testCreate = client.putMetadata(example)
 	def testCreate2 = client.putMetadata(example2)
 	def testMeta = client.getMetadata(testDoi)
+
+	def printPrettyJson(suffix: String): Unit = {
+		val doi = client.doi(suffix)
+		val fut = client.getMetadata(doi).map{_
+			.getOrElse(throw new Exception(s"doi not found: $doi"))
+			.parseJson
+			.prettyPrint
+		} 
+		fut foreach println
+		fut.failed.foreach(err => println(err.getMessage))
+	}
 }

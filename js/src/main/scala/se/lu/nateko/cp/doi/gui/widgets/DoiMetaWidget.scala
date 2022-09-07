@@ -67,7 +67,9 @@ class DoiMetaWidget(
 
 		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
 
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element
+		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
+
+		new FundingEditWidget(init.fundingReferences.getOrElse((Seq())), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render
 
 	)
 
@@ -242,4 +244,11 @@ object DoiMetaWidget{
 		protected def defaultValue = Description("", null, None)
 	}
 
+	class FundingEditWidget(init: Seq[FundingReference], cb: Seq[FundingReference] => Unit) extends
+		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Funding"){
+
+			protected def makeWidget(value: FundingReference, updateCb: FundingReference => Unit) = new FundingWidget(value, updateCb)
+
+			protected def defaultValue = FundingReference(None, None, None, None, None)
+		}
 }

@@ -1,8 +1,9 @@
-ThisBuild / scalaVersion := "3.2.0-RC3"
+ThisBuild / scalaVersion := "3.2.0"
 ThisBuild / organization := "se.lu.nateko.cp"
 
 //should be consistent with the scalatest module version below (manually controlled)
 val scala3Xml: ModuleID = "org.scala-lang.modules" % "scala-xml_3" % "2.1.0" % "test"
+val playJsonVersion = "2.10.0-RC6"
 
 val commonSettings = Seq(
 	scalacOptions ++= Seq(
@@ -41,7 +42,11 @@ val common = crossProject(JSPlatform, JVMPlatform)
 		}
 	)
 	.settings(publishSettings: _*)
-	.jvmSettings(libraryDependencies += scala3Xml)
+	.jvmSettings(
+		libraryDependencies ++= Seq(
+			scala3Xml,
+		)
+	)
 
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
@@ -54,7 +59,7 @@ lazy val core = project
 			"io.spray" %%  "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13,
 			scala3Xml
 		),
-		version := "0.2.1"
+		version := "0.3.0"
 	)
 
 //the DOI minting web app itself
@@ -63,13 +68,13 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.2.1"
+		version := "0.2.1",
+		libraryDependencies += "com.typesafe.play" %%% "play-json" % playJsonVersion,
 	)
 	.jsSettings(
 		name := "doi-js",
 		libraryDependencies ++= Seq(
 			"com.lihaoyi"       %%% "scalatags" % "0.11.1",
-			"com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
 		),
 		scalaJSUseMainModuleInitializer := true
 	)
@@ -77,7 +82,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 		name := "doi-jvm",
 
 		libraryDependencies ++= Seq(
-			"com.typesafe.akka" %% "akka-http-spray-json" % "10.2.9" cross CrossVersion.for3Use2_13,
+			"de.heikoseeberger" %% "akka-http-play-json"  % "1.39.2" cross CrossVersion.for3Use2_13 exclude("com.typesafe.play", "play-json_2.13"),
 			"com.typesafe.akka" %% "akka-stream"          % "2.6.19" cross CrossVersion.for3Use2_13,
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",

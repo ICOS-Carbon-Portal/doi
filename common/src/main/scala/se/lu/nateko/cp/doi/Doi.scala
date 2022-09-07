@@ -50,7 +50,8 @@ case class DoiMeta(
 	version: Option[Version] = None,
 	rightsList: Option[Seq[Rights]] = None,
 	descriptions: Seq[Description] = Nil,
-	url: Option[String] = None
+	url: Option[String] = None,
+	fundingReferences: Option[Seq[FundingReference]] = None
 ) extends SelfValidating{
 
 	def draftError: Option[String] = joinErrors(draftErrors)
@@ -66,7 +67,8 @@ case class DoiMeta(
 		eachNonEmpty(formats)("Format is not required but must not be empty if specified"),
 		version.flatMap(_.error),
 		rightsList.flatMap(r => allGood(r)),
-		allGood(descriptions)
+		allGood(descriptions),
+		fundingReferences.flatMap(allGood)
 	)
 
 	def error: Option[String] = joinErrors(

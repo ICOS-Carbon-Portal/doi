@@ -5,6 +5,7 @@ import scala.collection.immutable
 import scala.util.Success
 import scala.util.Try
 import scala.util.Failure
+import java.net.URI
 
 trait SelfValidating{
 	def error: Option[String]
@@ -86,12 +87,60 @@ case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[
 	override def toString = nameIdentifierScheme
 }
 
+case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[FunderIdentifierScheme]) extends SelfValidating {
+	import FunderIdentifierScheme._
+
+	def error = joinErrors(
+		funderIdentifier.collect{
+			case fi if !fi.isEmpty && scheme.isEmpty => "Funder Identifier scheme must be provided"
+		},
+		scheme.flatMap{scheme =>
+			Regexes.get(scheme).fold{
+				val supportedNames = Regexes.keys.mkString(", ")
+				Some("Only the following funder identifier schemes are supported: " + supportedNames)
+			}{rex =>
+				funderIdentifier.fold(Some("Empty funder identifier")){fid =>
+					if(rex.matches(fid)) None
+					else if(fid.isEmpty) Some("Empty funder identifier")
+					else Some(s"Wrong $scheme ID format")
+				}
+			}
+	})
+}
+
+object FunderIdentifier{
+	def default = FunderIdentifier(Some(""), None)
+}
+
+case class FunderIdentifierScheme(funderIdentifierType: String, SchemeURI: Option[String]) {
+	override def toString = funderIdentifierType
+}
+
+object FunderIdentifierScheme{
+	val Crossref = FunderIdentifierScheme("Crossref Funder ID", Some("https://www.crossref.org/services/funder-registry/"))
+	val Grid = FunderIdentifierScheme("GRID", Some("https://www.grid.ac/"))
+	val Isni = FunderIdentifierScheme("ISNI", Some("http://www.isni.org/"))
+	val Ror = FunderIdentifierScheme("ROR", Some("https://ror.org/"))
+	val Other = FunderIdentifierScheme("Other", None)
+
+	val Regexes = Map(
+		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
+		Ror -> "^(https://ror.org/)?[a-z0-9]{9}$".r,
+		Crossref -> "^(https://doi.org/[0-9]{1,2}.[0-9]{5}/)?[1-9]\\d+".r,
+		Grid -> "grid.\\d{4,6}.[0-9a-f]{1,2}".r,
+		Other -> "^(.+)$".r
+	)
+
+	def lookup(funderIdentifierType: String): Option[FunderIdentifierScheme] = {
+		Regexes.keys.find(_.funderIdentifierType == funderIdentifierType)
+	}
+}
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
-	val Ror = NameIdentifierScheme("ROR", Some("https://ror.org"))
+	val Ror = NameIdentifierScheme("ROR", Some("https://ror.org/"))
 	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
-	val supported = immutable.Seq(Orcid, Isni, Ror, Fluxnet)
+	def supported = Regexes.keys.toSeq
 
 	val Regexes = Map(
 		Orcid -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
@@ -117,6 +166,21 @@ sealed trait Person extends SelfValidating{
 
 case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[Affiliation]) extends Person
 
+case class FundingReference(funderName: Option[String], funderIdentifier: Option[FunderIdentifier],
+	awardNumber: Option[String],
+	awardTitle: Option[String], awardUri: Option[String]) extends SelfValidating {
+
+		def error = joinErrors(
+				nonEmpty(funderName)("Funder must have a name"),
+				awardUri.flatMap(aUri => {
+					Try(new URI(aUri)) match {
+						case Success(_) => None
+						case Failure(_) => Some("Invalid URI: " + aUri)
+					}
+				}),
+				allGood(funderIdentifier),
+			)
+}
 case class Contributor(
 	name: Name,
 	nameIdentifiers: Seq[NameIdentifier],
@@ -132,10 +196,12 @@ case class Contributor(
 
 
 case class Title(title: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
-	def error = joinErrors(
+	def error = {
+		joinErrors(
 		nonEmpty(title)("Title must not be empty"),
 		lang.flatMap(l => nonEmpty(l)("Title language is not required but must not be empty if provided"))
 	)
+	}
 }
 
 case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral.Value]) extends SelfValidating{

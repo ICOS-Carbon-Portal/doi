@@ -1,11 +1,11 @@
 package se.lu.nateko.cp.doi
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import se.lu.nateko.cp.doi.core.DoiClient
-import core.JsonSupport.given
+import se.lu.nateko.cp.doi.JsonSupport.given
 import scala.concurrent.Future
+import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport.*
 
 class DoiClientRouting(client: DoiClient) {
 	import DoiClientRouting._
@@ -13,8 +13,8 @@ class DoiClientRouting(client: DoiClient) {
 	val publicRoute = get{
 		pathPrefix("list"){
 			parameters("query".optional, "page".as[Int].optional){ (query, page) =>
-				onSuccess(client.listDoisMeta(query, page)) { json =>
-					complete(HttpEntity(ContentTypes.`application/json`, json))
+				onSuccess(client.listDoisMeta(query, page)) { payload =>
+					complete(payload)
 				}
 			}
 		} ~

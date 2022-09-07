@@ -22,29 +22,36 @@ class DoiClient(config: DoiClientConfig, http: DoiHttp)(implicit ctxt: Execution
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
 
-	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[String] = http
-		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(
-			resp => analyzeResponse{case 200 => Future.successful(resp.body)}(resp)
+	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[DoiListPayload] = http
+		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(resp =>
+			analyzeResponse{
+				case 200 => Future.successful(resp.body.parseJson.convertTo[DoiListPayload])
+			}(resp)
 		)
 
-	def getMetadata(doi: Doi): Future[Option[String]] = http.getJson(metaUrl(doi)).flatMap(
-		resp => analyzeResponse{
+	def getMetadata(doi: Doi): Future[Option[String]] = http.getJson(metaUrl(doi)).flatMap{
+		resp => {
+		println("resp: " + resp.body)
+		analyzeResponse{
 			case 200 => Future.successful(Some(resp.body))
 			case 404 => Future.successful(None)
-		}(resp)
-	)
+		}(resp)}
+	}
 	def getMetadataParsed(doi: Doi): Future[Option[DoiMeta]] = getMetadata(doi).map{
 		_.map(_.parseJson.convertTo[SingleDoiPayload].data.attributes)
 	}
 
-	def putMetadata(meta: DoiMeta): Future[Unit] = http
+	def putMetadata(meta: DoiMeta): Future[Unit] = {
+		http
 		.putPayload(
 			metaUrl(meta.doi),
 			SingleDoiPayload(DoiWrapper(meta)).toJson.compactPrint,
 			"application/vnd.api+json"
-		).flatMap(analyzeResponse{
-			case 200 | 201 => Future.successful(())
-		})
+		).flatMap{
+			println(meta)
+			analyzeResponse{
+				case 200 | 201 => Future.successful(())
+		}}}
 
 
 	def delete(doi: Doi): Future[Unit] =

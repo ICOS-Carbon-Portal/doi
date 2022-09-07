@@ -112,7 +112,23 @@ object JsonSupport extends DefaultJsonProtocol{
 	given RootJsonFormat[Rights] = jsonFormat2(Rights.apply)
 	given RootJsonFormat[Description] = jsonFormat3(Description.apply)
 
-	given RootJsonFormat[DoiMeta] = jsonFormat16(DoiMeta.apply)
+	val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
+	given RootJsonFormat[FunderIdentifierScheme] with {
+
+		def write(fs: FunderIdentifierScheme): JsValue = funderIdentifierSchemeFormat.write(fs)
+
+		def read(json: JsValue) = {
+			val dataCiteVersion = funderIdentifierSchemeFormat.read(json)
+
+			FunderIdentifierScheme.lookup(dataCiteVersion.funderIdentifierType).getOrElse(dataCiteVersion)
+			}
+	}
+
+
+	given RootJsonFormat[FunderIdentifier] = fieldConflatingFormat(jsonFormat2(FunderIdentifier.apply), "scheme", true)
+
+	given RootJsonFormat[FundingReference] = fieldConflatingFormat(jsonFormat5(FundingReference.apply), "funderIdentifier", true)
+	given RootJsonFormat[DoiMeta] = jsonFormat17(DoiMeta.apply)
 
 	given RootJsonFormat[DoiWrapper] = jsonFormat1(DoiWrapper.apply)
 	given RootJsonFormat[SingleDoiPayload] = jsonFormat1(SingleDoiPayload.apply)
