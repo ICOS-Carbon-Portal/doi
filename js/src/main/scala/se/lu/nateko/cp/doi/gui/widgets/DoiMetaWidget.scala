@@ -67,9 +67,9 @@ class DoiMetaWidget(
 
 		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
 
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
+		new FundingEditWidget(init.fundingReferences.getOrElse((Seq())), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
 
-		new FundingEditWidget(init.fundingReferences.getOrElse((Seq())), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render
+		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
 
 	)
 
