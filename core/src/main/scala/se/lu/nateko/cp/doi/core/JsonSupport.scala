@@ -61,7 +61,19 @@ object JsonSupport extends DefaultJsonProtocol{
 	}
 	given RootJsonFormat[SubjectScheme] = jsonFormat2(SubjectScheme.apply)
 	given RootJsonFormat[Subject] = fieldConflatingFormat(jsonFormat4(Subject.apply), "scheme", opt = true)
-	given RootJsonFormat[NameIdentifierScheme] = jsonFormat2(NameIdentifierScheme.apply)
+	private val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
+
+	given RootJsonFormat[NameIdentifierScheme] with {
+
+		def write(ns: NameIdentifierScheme): JsValue = nameIdentifierSchemeFormat.write(ns)
+
+		def read(json: JsValue) = {
+			val dataCiteVersion = nameIdentifierSchemeFormat.read(json)
+
+			NameIdentifierScheme.lookup(dataCiteVersion.nameIdentifierScheme).getOrElse(dataCiteVersion)
+		}
+	}
+
 	given RootJsonFormat[NameIdentifier] = fieldConflatingFormat(jsonFormat2(NameIdentifier.apply), "scheme")
 
 	given genericNameFormat: RootJsonFormat[GenericName] = jsonFormat1(GenericName.apply)
