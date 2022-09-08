@@ -6,6 +6,7 @@ import scala.util.Success
 import scala.util.Try
 import scala.util.Failure
 import java.net.URI
+import scala.util.matching.Regex
 
 trait SelfValidating{
 	def error: Option[String]
@@ -62,7 +63,7 @@ case class NameIdentifier(nameIdentifier: String, scheme: NameIdentifierScheme) 
 		nonEmpty(nameIdentifier)("Name identifier must not be empty"),
 		nonNull(scheme)("Name Identifier scheme must be provided"),
 		scheme.error,
-		Regexes.get(scheme) match{
+		lookupRegex(scheme.nameIdentifierScheme) match{
 			case Some(rex) =>
 				if(rex.matches(nameIdentifier)) None
 				else Some(s"Wrong ${scheme.nameIdentifierScheme} ID format")
@@ -95,9 +96,8 @@ case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[Fun
 			case fi if !fi.isEmpty && scheme.isEmpty => "Funder Identifier scheme must be provided"
 		},
 		scheme.flatMap{scheme =>
-			Regexes.get(scheme).fold{
-				val supportedNames = Regexes.keys.mkString(", ")
-				Some("Only the following funder identifier schemes are supported: " + supportedNames)
+			lookupRegex(scheme.funderIdentifierType).fold{
+				Some("Only the following funder identifier schemes are supported: " + supported.mkString(", "))
 			}{rex =>
 				funderIdentifier.fold(Some("Empty funder identifier")){fid =>
 					if(rex.matches(fid)) None
@@ -123,7 +123,7 @@ object FunderIdentifierScheme{
 	val Ror = FunderIdentifierScheme("ROR", Some("https://ror.org/"))
 	val Other = FunderIdentifierScheme("Other", None)
 
-	val Regexes = Map(
+	private val Regexes = Map(
 		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
 		Ror -> "^(https://ror.org/)?[a-z0-9]{9}$".r,
 		Crossref -> "^(https://doi.org/[0-9]{1,2}.[0-9]{5}/)?[1-9]\\d+".r,
@@ -131,18 +131,29 @@ object FunderIdentifierScheme{
 		Other -> "^(.+)$".r
 	)
 
-	def lookup(funderIdentifierType: String): Option[FunderIdentifierScheme] = {
+	def supported = Regexes.keys.toSeq
+
+	def lookup(funderIdentifierType: String): Option[FunderIdentifierScheme] =
 		Regexes.keys.find(_.funderIdentifierType == funderIdentifierType)
-	}
+
+	def lookupRegex(funderIdentifierType: String): Option[Regex] =
+		lookup(funderIdentifierType).flatMap(Regexes.get)
 }
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
 	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
 	val Ror = NameIdentifierScheme("ROR", Some("https://ror.org/"))
 	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
+
 	def supported = Regexes.keys.toSeq
 
-	val Regexes = Map(
+	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
+		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
+
+	def lookupRegex(nameIdentifierScheme: String): Option[Regex] =
+		lookup(nameIdentifierScheme).flatMap(Regexes.get)
+
+	private val Regexes = Map(
 		Orcid -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
 		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
 		Ror -> "^[a-z0-9]{9}$".r,
