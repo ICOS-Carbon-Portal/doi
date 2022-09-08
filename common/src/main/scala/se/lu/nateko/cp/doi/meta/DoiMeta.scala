@@ -96,14 +96,10 @@ case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[Fun
 			case fi if !fi.isEmpty && scheme.isEmpty => "Funder Identifier scheme must be provided"
 		},
 		scheme.flatMap{scheme =>
-			lookupRegex(scheme.funderIdentifierType).fold{
-				Some("Only the following funder identifier schemes are supported: " + supported.mkString(", "))
-			}{rex =>
-				funderIdentifier.fold(Some("Empty funder identifier")){fid =>
-					if(rex.matches(fid)) None
-					else if(fid.isEmpty) Some("Empty funder identifier")
-					else Some(s"Wrong $scheme ID format")
-				}
+			val validator = lookupValidator(scheme.funderIdentifierType)
+
+			validator.fold{Some("Only the following funder identifier schemes are supported: " + supported.mkString(", "))}{fIdVal =>
+				fIdVal.produceErrorMessage(funderIdentifier)
 			}
 	})
 }
@@ -123,21 +119,52 @@ object FunderIdentifierScheme{
 	val Ror = FunderIdentifierScheme("ROR", Some("https://ror.org/"))
 	val Other = FunderIdentifierScheme("Other", None)
 
-	private val Regexes = Map(
-		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
-		Ror -> "^(https://ror.org/)?[a-z0-9]{9}$".r,
-		Crossref -> "^(https://doi.org/[0-9]{1,2}.[0-9]{5}/)?[1-9]\\d+".r,
-		Grid -> "grid.\\d{4,6}.[0-9a-f]{1,2}".r,
-		Other -> "^(.+)$".r
+	private val Validators = Map(
+		Isni -> FunderIdentifierValidator(
+			Isni,
+			"""^((http|https):\/\/(www.)?isni.org\/(isni\/)?)?(\d{4} ?){3}\d{3}[0-9X]$""".r,
+			"http://www.isni.org/isni/000000012146438X or https://isni.org/isni/000000012146438X or https://isni.org/000000012146438X or 000000012146438X"
+			),
+		Ror -> FunderIdentifierValidator(
+			Ror,
+			"^(https://ror.org/)?[a-z0-9]{9}$".r, "https://ror.org/03yrm5c26 or 03yrm5c26"
+			),
+		Crossref -> FunderIdentifierValidator(
+			Crossref,
+			"^(https://doi.org/[0-9]{1,2}.[0-9]{5}/)?[1-9]\\d+".r,
+			"10.1006/abc or https://doi.org/10.1006/abc"
+			),
+		Grid -> FunderIdentifierValidator(
+			Grid,
+			"grid.\\d{4,6}.[0-9a-f]{1,2}".r,
+			"grid.238252"
+			),
+		Other -> FunderIdentifierValidator(
+			Other,
+			"^(.+)$".r
+			)
 	)
 
-	def supported = Regexes.keys.toSeq
+	def supported = Validators.keys.toSeq
 
 	def lookup(funderIdentifierType: String): Option[FunderIdentifierScheme] =
-		Regexes.keys.find(_.funderIdentifierType == funderIdentifierType)
+		Validators.keys.find(_.funderIdentifierType == funderIdentifierType)
 
-	def lookupRegex(funderIdentifierType: String): Option[Regex] =
-		lookup(funderIdentifierType).flatMap(Regexes.get)
+	def lookupValidator(funderIdentifierType: String): Option[FunderIdentifierValidator] = {
+		lookup(funderIdentifierType).flatMap(t => Validators.get(t))
+	}
+}
+
+
+case class FunderIdentifierValidator(scheme: FunderIdentifierScheme, regex: Regex, expectedFormat: String = ""){
+
+	def produceErrorMessage(funderIdentifier: Option[String]): Option[String] = {
+		funderIdentifier.fold(Some("Empty funder identifier")){fid =>
+			if(regex.matches(fid)) None
+			else if(fid.isEmpty) Some("Empty funder identifier")
+			else Some(s"Wrong $scheme ID format, examples of accepted IDs: ${expectedFormat}")
+		}
+	}
 }
 object NameIdentifierScheme{
 	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
