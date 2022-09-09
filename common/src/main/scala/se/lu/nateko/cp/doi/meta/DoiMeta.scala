@@ -127,16 +127,17 @@ object FunderIdentifierScheme{
 			),
 		Ror -> FunderIdentifierValidator(
 			Ror,
-			"^(https://ror.org/)?[a-z0-9]{9}$".r, "https://ror.org/03yrm5c26 or 03yrm5c26"
+			"^(https://ror.org/)?[a-z0-9]{9}$".r,
+			"https://ror.org/03yrm5c26 or 03yrm5c26"
 			),
 		Crossref -> FunderIdentifierValidator(
 			Crossref,
-			"^(https://doi.org/[0-9]{1,2}.[0-9]{5}/)?[1-9]\\d+".r,
-			"10.1006/abc or https://doi.org/10.1006/abc"
+			"""^(http://(dx.)?doi.org/)?10.13039/\d{9,12}$""".r,
+			"10.13039/100013829 or http://dx.doi.org/10.13039/100013829"
 			),
 		Grid -> FunderIdentifierValidator(
 			Grid,
-			"grid.\\d{4,6}.[0-9a-f]{1,2}".r,
+			"""grid.\d{4,6}.[0-9a-f]{1,2}""".r,
 			"grid.238252"
 			),
 		Other -> FunderIdentifierValidator(
