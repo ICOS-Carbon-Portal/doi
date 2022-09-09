@@ -25,7 +25,7 @@ class FunderIdentifierWidget(
 	}, "Funder identifier")
 
 	private[this] val schemeInput = new SelectWidget[FunderIdentifierScheme](
-		SelectWidget.selectOptions(Some("Funder id scheme"))(FunderIdentifierScheme.supported: _*),
+		SelectWidget.selectOptions(Some("Funder ID scheme"))(FunderIdentifierScheme.supported: _*),
 		init.scheme,
 		schemeOpt => {
 			_funderId = _funderId.copy(scheme = schemeOpt)
@@ -35,7 +35,9 @@ class FunderIdentifierWidget(
 
 	val element = 
 		div(cls := "row")(
-		div(cls := "col-md-6")(idInput.element),
-		div(cls := "col-md-6")(schemeInput.element)
+		div(cls := "col-md-2")(strong("Funder identifier:")),
+		div(cls := "col-md-4")(idInput.element),
+		div(cls := "col-md-2")(strong("Scheme:")),
+		div(cls := "col-md-4")(schemeInput.element)
 	).render
 }
