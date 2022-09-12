@@ -4,13 +4,17 @@ import se.lu.nateko.cp.doi.meta.Description
 import se.lu.nateko.cp.doi.meta.DescriptionType
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic._
+import org.scalajs.dom.HTMLElement
 
 class DescriptionWidget(init: Description, protected val updateCb: Description => Unit) extends EntityWidget[Description] {
 
 	private[this] var _descr = init
 
-	private[this] val descrInput = new TextAreaWidget(init.description, v => {
+	private def validate(element: HTMLElement) = highlightError(element, _descr.error)
+
+	private[this] val descrInput: TextAreaWidget = new TextAreaWidget(init.description, v => {
 		_descr = _descr.copy(description = v)
+		validate(descrInput.element)
 		updateCb(_descr)
 	})(overflowY := "scroll", rows := 5)
 
@@ -21,6 +25,7 @@ class DescriptionWidget(init: Description, protected val updateCb: Description =
 		Option(init.descriptionType),
 		dtOpt => {
 			_descr = _descr.copy(descriptionType = dtOpt.getOrElse(null))
+			validate(descrInput.element)
 			updateCb(_descr)
 		}
 	)
@@ -41,5 +46,7 @@ class DescriptionWidget(init: Description, protected val updateCb: Description =
 			div(cls := "row spacyrow")(div(cls := "col-md-12")(languageInput.element))
 		)
 	).render
+
+	validate(descrInput.element)
 }
 

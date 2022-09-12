@@ -205,16 +205,23 @@ sealed trait Person extends SelfValidating{
 
 case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[Affiliation]) extends Person
 
+case class Award(awardNumber: Option[String], awardTitle: Option[String], awardUri: Option[String]) extends SelfValidating{
+	def error = awardUri.flatMap(aUri =>
+					Try(new URI(aUri)).failed.toOption.map(_ => s"Invalid funder award URI: $aUri")
+				)
+}
+
+object Award{
+	def default = Award(Some(""), None, None)
+}
+
 case class FundingReference(
-	funderName: Option[String], funderIdentifier: Option[FunderIdentifier],
-	awardNumber: Option[String], awardTitle: Option[String], awardUri: Option[String]
+	funderName: Option[String], funderIdentifier: Option[FunderIdentifier], award: Option[Award]
 ) extends SelfValidating {
 
 		def error = joinErrors(
 				nonEmpty(funderName)("Funder must have a name"),
-				awardUri.flatMap(aUri =>
-					Try(new URI(aUri)).failed.toOption.map(_ => s"Invalid funder award URI: $aUri")
-				),
+				allGood(award),
 				allGood(funderIdentifier),
 			)
 }

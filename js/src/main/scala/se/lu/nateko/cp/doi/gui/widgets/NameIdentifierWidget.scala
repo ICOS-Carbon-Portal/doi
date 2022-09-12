@@ -20,7 +20,7 @@ class NameIdentifierWidget(
 		_nameId = _nameId.copy(nameIdentifier = newId)
 		validate()
 		updateCb(_nameId)
-	})
+	}, required = true)
 
 	private[this] val schemeInput = new SelectWidget[NameIdentifierScheme](
 		SelectWidget.selectOptions(None)(NameIdentifierScheme.supported: _*),

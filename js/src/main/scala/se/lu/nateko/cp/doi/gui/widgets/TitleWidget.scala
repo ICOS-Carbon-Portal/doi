@@ -13,7 +13,7 @@ class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends En
 	private[this] val titleInput = new TextInputWidget(init.title, v => {
 		_title = _title.copy(title = v)
 		updateCb(_title)
-	}, "Title")
+	}, "Title", required = true)
 
 	private[this] val titleTypeInput = new SelectWidget[TitleType.Value](
 		SelectWidget.selectOptions(TitleType, Some("Title type")),

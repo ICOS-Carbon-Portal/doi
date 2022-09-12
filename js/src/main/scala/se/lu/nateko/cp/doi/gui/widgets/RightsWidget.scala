@@ -12,13 +12,13 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 	private[this] val statementInput = new TextInputWidget(init.rights, rs => {
 		_rights = _rights.copy(rights = rs)
 		updateCb(_rights)
-	}, "Rights management statement")
+	}, "Rights management statement", required = true)
 
 	private[this] val urlInput = new TextInputWidget(init.rightsUri.getOrElse(""), uri => {
 		val uriOpt = if(uri.isEmpty) None else Some(uri)
 		_rights = _rights.copy(rightsUri = uriOpt)
 		updateCb(_rights)
-	}, "Licence URI")
+	}, "Licence URI", required = true)
 
 	val element = div(cls := "row")(
 		div(cls := "col-md-6")(statementInput.element),

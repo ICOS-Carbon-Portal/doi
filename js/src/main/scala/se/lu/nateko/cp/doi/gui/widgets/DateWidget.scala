@@ -18,7 +18,7 @@ class DateWidget(init: Date, protected val updateCb: Date => Unit) extends Entit
 		_date = _date.copy(date = newDate)
 		validate()
 		updateCb(_date)
-	}, "YYYY-MM-DD").element
+	}, "YYYY-MM-DD", required = true).element
 
 	private[this] def validate(): Unit = highlightError(dateInput, _date.error)
 

@@ -17,7 +17,7 @@ class ResourceTypeWidget(
 	private[this] val rtInput = new TextInputWidget(init.resourceType.getOrElse(""), rt => {
 		_resType = _resType.copy(resourceType = Some(rt))
 		updateCb(_resType)
-	}, "Specific resource type")
+	}, "Specific resource type", required = true)
 
 	private[this] val rtGenInput = new SelectWidget[ResourceTypeGeneral](
 		SelectWidget.selectOptions(ResourceTypeGeneral, Some("General resource type")),

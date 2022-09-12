@@ -12,9 +12,9 @@ trait EntityWidget[E]{
 	def highlightError(elem: HTMLElement, errorOpt: Option[String]): Unit = errorOpt match{
 		case Some(err) =>
 			elem.title = err
-			elem.style.background = Constants.errorInputBackground
+			elem.className = "form-control is-invalid"
 		case None =>
 			elem.title = ""
-			elem.style.background = ""
+			elem.className = "form-control is-valid"
 	}
 }

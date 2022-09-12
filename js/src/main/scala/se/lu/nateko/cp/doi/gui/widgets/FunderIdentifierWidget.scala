@@ -33,8 +33,7 @@ class FunderIdentifierWidget(
 			updateCb(_funderId)
 		})
 
-	val element = 
-		div(cls := "row")(
+	val element = div(cls := "row")(
 		div(cls := "col-md-2")(strong("Funder identifier:")),
 		div(cls := "col-md-4")(idInput.element),
 		div(cls := "col-md-2")(strong("Scheme:")),

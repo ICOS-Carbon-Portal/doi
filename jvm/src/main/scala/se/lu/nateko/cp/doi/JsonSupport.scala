@@ -58,6 +58,7 @@ object JsonSupport{
 	given OFormat[DoiListMeta] = Json.format[DoiListMeta]
 	given OFormat[DoiListPayload] = Json.format[DoiListPayload]
 
+	given OFormat[Award] = Json.format[Award]
 	given OFormat[FunderIdentifierScheme] = Json.format[FunderIdentifierScheme]
 	given OFormat[FunderIdentifier] =  Json.format[FunderIdentifier]
 	given OFormat[FundingReference] = Json.format[FundingReference]

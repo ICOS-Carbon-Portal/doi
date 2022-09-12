@@ -27,7 +27,7 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 		case gn: GenericName => new TextInputWidget(gn.name, newGn => {
 				_name = GenericName(newGn)
 				updateCb(_name)
-			}).element
+			}, required = true).element
 	}
 
 	private var nameElem = getNameElem

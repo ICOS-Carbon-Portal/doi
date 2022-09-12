@@ -14,12 +14,11 @@ import se.lu.nateko.cp.doi.meta.FunderIdentifier
 import se.lu.nateko.cp.doi.meta.FunderIdentifierScheme
 import se.lu.nateko.cp.doi.meta.FundingReference
 import se.lu.nateko.cp.doi.meta.GenericName
+import se.lu.nateko.cp.doi.meta.Award
 
 class FundingWidget(init: FundingReference, protected val updateCb: FundingReference => Unit) extends EntityWidget[FundingReference] {
 
 	private var _fundingRef = init
-
-	private[this] def validate(): Unit = highlightError(awardUriInput.element, _fundingRef.error)
 
 	private val funderIdsInput = new FunderIdentifierWidget(
 		init.funderIdentifier.getOrElse(FunderIdentifier.default),
@@ -29,21 +28,18 @@ class FundingWidget(init: FundingReference, protected val updateCb: FundingRefer
 		}
 	)
 
-	private val funderNameInput  = fundTextWidget(init.funderName,  textOpt => _fundingRef.copy(funderName  = textOpt), "Funder name")
-	private val awardTitleInput  = fundTextWidget(init.awardTitle,  textOpt => _fundingRef.copy(awardTitle  = textOpt), "Award title")
-	private val awardNumberInput = fundTextWidget(init.awardNumber, textOpt => _fundingRef.copy(awardNumber = textOpt), "Award number")
-	private val awardUriInput    = fundTextWidget(init.awardUri,    textOpt => _fundingRef.copy(awardUri    = textOpt), "Award URI")
-
-	private def fundTextWidget(init: Option[String], update: Option[String] => FundingReference, placeHolder: String) =
-		new TextInputWidget(
-			init.getOrElse(""),
-			str => {
-				_fundingRef = update(Option(str.trim).filterNot(_.isEmpty))
-				if (placeHolder == "Award URI") validate()
+	private val funderNameInput  = new TextInputWidget(init.funderName.getOrElse(""), str => {
+				_fundingRef = _fundingRef.copy(funderName = Option(str.trim).filterNot(_.isEmpty))
 				updateCb(_fundingRef)
 			},
-			placeHolder
-		)
+			"Funder name",
+			required = true)
+			
+	private val awardInput = new AwardWidget(init.award.getOrElse(Award.default), a => {
+			_fundingRef = _fundingRef.copy(award = Some(a))
+			updateCb(_fundingRef)
+		}
+	)
 
 	val element = div(cls := "row")(
 		div(cls := "row spacyrow")(
@@ -51,16 +47,7 @@ class FundingWidget(init: FundingReference, protected val updateCb: FundingRefer
 			div(cls := "col-md-3")(funderNameInput.element)(paddingBottom := 15),
 			div(cls := "col-md-8")(funderIdsInput.element)(paddingBottom := 15)
 		),
-		div(cls := "row spacyrow")(
-			div(cls := "col-md-1")(strong("Award title:")),
-			div(cls := "col-md-3")(awardTitleInput.element),
-			div(cls := "col-md-8")(div(cls := "row")(
-				div(cls := "col-md-2")(strong("Award number:")),
-				div(cls := "col-md-4")(awardNumberInput.element),
-				div(cls := "col-md-2")(strong("Award URI:")),
-				div(cls := "col-md-4")(awardUriInput.element)
-			))
-		)
+		awardInput.element
 	).render
 
 }

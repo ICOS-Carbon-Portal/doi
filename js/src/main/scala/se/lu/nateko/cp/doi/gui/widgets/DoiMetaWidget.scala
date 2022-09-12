@@ -40,7 +40,7 @@ class DoiMetaWidget(
 		new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element.render,
 
 		Bootstrap.basicPropValueWidget("Publisher")(
-			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub)))).element
+			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
 		).render,
 
 		Bootstrap.basicPropValueWidget("Publication year")(
@@ -224,7 +224,7 @@ object DoiMetaWidget{
 
 
 	class FormatsEditWidget(init: Seq[String], cb: Seq[String] => Unit) extends
-		MultiStringsWidget(init, cb, "Format")("Formats")
+		MultiStringsWidget(init, cb, "Format", required = true)("Formats")
 
 
 	class RightsEditWidget(init: Seq[Rights], cb: Seq[Rights] => Unit) extends
@@ -249,6 +249,6 @@ object DoiMetaWidget{
 
 			protected def makeWidget(value: FundingReference, updateCb: FundingReference => Unit) = new FundingWidget(value, updateCb)
 
-			protected def defaultValue = FundingReference(None, None, None, None, None)
+			protected def defaultValue = FundingReference(None, None, None )
 		}
 }

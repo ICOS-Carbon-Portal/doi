@@ -12,12 +12,12 @@ class PersonalNameWidget(init: PersonalName, protected val updateCb: PersonalNam
 	private[this] val fnameInput = new TextInputWidget(init.givenName, gn => {
 		_name = _name.copy(givenName = gn)
 		updateCb(_name)
-	})
+	}, required = true)
 
 	private[this] val lnameInput = new TextInputWidget(init.familyName, fn => {
 		_name = _name.copy(familyName = fn)
 		updateCb(_name)
-	})
+	}, required = true)
 
 	val element = div(cls := "row")(
 		div(cls := "col-md-2")(strong("Given name:")),
