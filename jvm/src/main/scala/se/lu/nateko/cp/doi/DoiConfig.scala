@@ -23,6 +23,7 @@ case class DoiConfig(
 	auth: PublicAuthConfig,
 	admins: Seq[UserId],
 	mailing: EmailConfig,
+	metaHost: String
 )
 
 object DoiConfig {
@@ -37,7 +38,8 @@ object DoiConfig {
 			prefixInfo = doiConf.getString("prefix"),
 			auth = getAuthConfig(allConf),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
-			mailing = getMailingConfig(doiConf)
+			mailing = getMailingConfig(doiConf),
+			metaHost = doiConf.getString("metaHost")
 		)
 	}
 

@@ -6,8 +6,9 @@ import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.JsonSupport.given
 import scala.concurrent.Future
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport.*
+import akka.actor.ActorSystem
 
-class DoiClientRouting(client: DoiClient) {
+class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 	import DoiClientRouting._
 
 	val publicRoute = get{
@@ -29,6 +30,11 @@ class DoiClientRouting(client: DoiClient) {
 				onSuccess(authorizer(meta)){allowed =>
 					if(allowed)
 						onSuccess(client.putMetadata(meta)){
+							//TODO make http call to meta's api for DOI citation cache invalidation
+							// use akka's http client call singleHttpRequest
+							import meta.doi.{prefix, suffix}
+							//pseudocode:
+							//Http().singleHttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = POST)
 							complete(StatusCodes.OK)
 						}
 					else forbid
