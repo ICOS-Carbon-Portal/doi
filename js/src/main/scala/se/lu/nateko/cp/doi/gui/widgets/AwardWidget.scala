@@ -25,7 +25,6 @@ class AwardWidget(
 			init.getOrElse(""),
 			str => {
 				_award = update(Option(str.trim).filterNot(_.isEmpty))
-				println("str empty? " + str.isEmpty)
 				if (placeHolder == "Award URI") validate()
 				updateCb(_award)
 			},
