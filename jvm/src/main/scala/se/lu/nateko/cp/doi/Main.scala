@@ -36,7 +36,7 @@ object Main{
 			val http = new AkkaDoiHttp(conf.client.symbol, conf.client.password)
 			new DoiClient(conf.client, http)
 		}
-		val doiRouting = new DoiClientRouting(client)
+		val doiRouting = new DoiClientRouting(client, conf)
 
 		val emailSender = new Mailer(conf.mailing)
 

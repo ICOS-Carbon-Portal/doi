@@ -7,6 +7,7 @@ import se.lu.nateko.cp.doi.JsonSupport.given
 import scala.concurrent.Future
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport.*
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 
 class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 	import DoiClientRouting._
@@ -30,12 +31,13 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 				onSuccess(authorizer(meta)){allowed =>
 					if(allowed)
 						onSuccess(client.putMetadata(meta)){
-							//TODO make http call to meta's api for DOI citation cache invalidation
-							// use akka's http client call singleHttpRequest
 							import meta.doi.{prefix, suffix}
-							//pseudocode:
-							//Http().singleHttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = POST)
-							complete(StatusCodes.OK)
+
+							val cacheInvalidationResponse = Http().singleRequest(
+								HttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
+							)
+	
+							onSuccess(cacheInvalidationResponse)(complete)
 						}
 					else forbid
 				}
