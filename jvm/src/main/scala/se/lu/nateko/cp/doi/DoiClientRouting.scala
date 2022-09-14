@@ -9,12 +9,11 @@ import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport.*
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import scala.util.{ Failure, Success }
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, JsArray, JsString, JsValue}
 import scala.concurrent.ExecutionContext
-
-case class DoiMetaUpdateInfo(metaUpdateSuccess: Boolean, cacheInvalidationSuccess: Boolean) {
-	override def toString = s"Doi metadata update ${if(metaUpdateSuccess) "succeeded" else "failed"}, cache invalidation ${if(cacheInvalidationSuccess) "succeeded" else "failed"}"
-}
+import scala.concurrent.duration.DurationInt
+import akka.NotUsed
+import scala.util.control.NoStackTrace
 
 class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 	import DoiClientRouting._
@@ -37,24 +36,29 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 			entity(as[DoiMeta]){meta =>
 				onSuccess(authorizer(meta)){allowed =>
 					if(allowed)
-						onSuccess(client.putMetadata(meta)){//payload => {
-							// try cache-inv
-							// if cache-inv failed => DoiMetaUpdateInfo(true, false)
-							// else DoiMetaUpdateInfo(true, true)
+						onSuccess(client.putMetadata(meta)){
 
 							import meta.doi.{prefix, suffix}
 								
-							val cacheInvalidationResponse = Http().singleRequest(
-								HttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
-							)
+							val cacheInvalidationError: Future[NotUsed] = Http().singleRequest(
+									HttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
+								).flatMap{resp =>
+									if(resp.status.isSuccess) Future.successful(NotUsed)
+									else resp.entity.toStrict(3.seconds).flatMap{entity =>
+										Future.failed(new Error(entity.data.utf8String) with NoStackTrace)
+									}
+								}.recoverWith{
+									case err: Throwable => Future.failed(
+										new Error(s"Cache invalidation for DOI citation on server ${conf.metaHost} for DOI $prefix/$suffix failed\n" +
+										s"Error message: ${err.getMessage}") with NoStackTrace
+									)
+								}
 
-							onComplete(cacheInvalidationResponse){
-								case Success(value) => {
-									complete(DoiMetaUpdateInfo(true, true).toString)
-								}
-								case Failure(ex) => {
-									complete(DoiMetaUpdateInfo(true, false).toString)
-								}
+							onComplete(cacheInvalidationError){doneTry =>
+								val resp: Option[String] = doneTry match
+									case Success(_) => None
+									case Failure(ex) => Some(ex.getMessage)//JsArray(Seq(JsString(ex.getMessage)))
+								complete(resp)
 							}
 						}
 					else forbid
