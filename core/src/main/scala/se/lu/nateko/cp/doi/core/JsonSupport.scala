@@ -138,10 +138,10 @@ object JsonSupport extends DefaultJsonProtocol{
 
 
 	given RootJsonFormat[FunderIdentifier] = fieldConflatingFormat(jsonFormat2(FunderIdentifier.apply), "scheme", true)
+	given RootJsonFormat[Award] = jsonFormat3(Award.apply)
 
-	given RootJsonFormat[Award] = fieldConflatingFormat(jsonFormat3(Award.apply), "award", true)
+	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
-	given RootJsonFormat[FundingReference] = fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true)
 	given RootJsonFormat[DoiMeta] = jsonFormat17(DoiMeta.apply)
 
 	given RootJsonFormat[DoiWrapper] = jsonFormat1(DoiWrapper.apply)
