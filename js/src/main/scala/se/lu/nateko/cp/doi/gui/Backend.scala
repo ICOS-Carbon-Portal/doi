@@ -20,7 +20,7 @@ object Backend {
 		.flatMap(checkResponseOk("fetch DOI prefix"))
 		.flatMap(_.text())
 
-	def updateMeta(meta: DoiMeta): Future[Unit] = dom
+	def updateMeta(meta: DoiMeta): Future[String] = dom
 		.fetch(
 			"/api/metadata",
 			new dom.RequestInit{
@@ -29,8 +29,11 @@ object Backend {
 				headers = new dom.Headers(js.Dictionary(("content-type", "application/json")))
 			}
 		)
-		.flatMap(checkResponseOk("update DOI metadata"))
-		.map(_ => ())
+		.flatMap(resp => {
+			checkResponseOk("update DOI metadata")(resp)
+		})
+		.flatMap(_.text())
+		.map(s => Json.parse(s).as[String])
 
 	def getFreshDoiList(query: Option[String], page: Option[Int]): Future[FreshDoiList] = {
 		//val startTime = System.currentTimeMillis()

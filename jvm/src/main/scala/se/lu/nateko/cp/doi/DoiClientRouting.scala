@@ -14,6 +14,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 import akka.NotUsed
 import scala.util.control.NoStackTrace
+import java.util.concurrent.ExecutionException
 
 class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 	import DoiClientRouting._
@@ -39,25 +40,26 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 						onSuccess(client.putMetadata(meta)){
 
 							import meta.doi.{prefix, suffix}
-								
-							val cacheInvalidationError: Future[NotUsed] = Http().singleRequest(
+
+							def cacheInvalidationError(exc: Throwable): String = exc match
+								case ee: ExecutionException => cacheInvalidationError(ee.getCause)
+								case exc: Throwable =>
+									s"Cache invalidation for DOI citation on server ${conf.metaHost} for DOI $prefix/$suffix failed\n" +
+										s"Error message: ${exc.getMessage}"
+
+							val cacheInvalidationDone: Future[NotUsed] = Http().singleRequest(
 									HttpRequest(uri = s"https://${conf.metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
 								).flatMap{resp =>
 									if(resp.status.isSuccess) Future.successful(NotUsed)
 									else resp.entity.toStrict(3.seconds).flatMap{entity =>
 										Future.failed(new Error(entity.data.utf8String) with NoStackTrace)
 									}
-								}.recoverWith{
-									case err: Throwable => Future.failed(
-										new Error(s"Cache invalidation for DOI citation on server ${conf.metaHost} for DOI $prefix/$suffix failed\n" +
-										s"Error message: ${err.getMessage}") with NoStackTrace
-									)
 								}
 
-							onComplete(cacheInvalidationError){doneTry =>
-								val resp: Option[String] = doneTry match
-									case Success(_) => None
-									case Failure(ex) => Some(ex.getMessage)//JsArray(Seq(JsString(ex.getMessage)))
+							onComplete(cacheInvalidationDone){doneTry =>
+								val resp: String = doneTry match
+									case Success(_) => ""
+									case Failure(ex) => cacheInvalidationError(ex)
 								complete(resp)
 							}
 						}

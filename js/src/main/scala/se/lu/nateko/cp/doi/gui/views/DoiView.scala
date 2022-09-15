@@ -90,15 +90,21 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		EditorTab.json -> {() => cardBody.replaceChildren(metaJsonEditor.element)},
 	)
 
-	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = Backend.updateMeta(updated).andThen{
-		case Failure(exc) =>
-			d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
-		case Success(_) =>
-			//recreate the DOI metadata widget with the updated metadata
-			cardBody.innerHTML = ""
-			meta = updated
-			cardBody.appendChild(metaWidget.element)
-			updateContentVisibility()
+	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
+		val updateDone = Backend.updateMeta(updated)
+		
+		Future(updateDone.onComplete(s => {
+			s match {
+				case Failure(exc) =>
+					d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
+				case Success(s) =>
+					if (!s.isEmpty()) d.dispatch(ReportError(s))
+					//recreate the DOI metadata widget with the updated metadata
+					cardBody.innerHTML = ""
+					meta = updated
+					cardBody.appendChild(metaWidget.element)
+					updateContentVisibility()
+			}
+		}))
 	}
-
 }
