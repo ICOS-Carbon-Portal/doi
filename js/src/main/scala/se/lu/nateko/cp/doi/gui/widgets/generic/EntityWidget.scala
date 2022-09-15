@@ -15,6 +15,6 @@ trait EntityWidget[E]{
 			elem.className = "form-control is-invalid"
 		case None =>
 			elem.title = ""
-			elem.className = "form-control is-valid"
+			elem.className = "form-control"
 	}
 }
