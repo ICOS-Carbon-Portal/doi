@@ -346,3 +346,8 @@ case class Description(description: String, descriptionType: DescriptionType.Val
 		nonNull(descriptionType)("Description type must be specified")
 	)
 }
+
+case class GeoLocationPoint(pointLongitude: Double, pointLatitude: Double)
+case class GeoLocationBox(westBoundLongitude: Double, eastBoundLongitude: Double, southBoundLatitude: Double, northBoundLatitude: Double)
+
+case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBox: Option[GeoLocationBox], geoLocationPlace: Option[String])

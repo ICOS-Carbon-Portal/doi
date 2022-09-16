@@ -62,4 +62,8 @@ object JsonSupport{
 	given OFormat[FunderIdentifierScheme] = Json.format[FunderIdentifierScheme]
 	given OFormat[FunderIdentifier] =  Json.format[FunderIdentifier]
 	given OFormat[FundingReference] = Json.format[FundingReference]
+
+	given OFormat[GeoLocationPoint] = Json.format[GeoLocationPoint]
+	given OFormat[GeoLocationBox] = Json.format[GeoLocationBox]
+	given OFormat[GeoLocation] = Json.format[GeoLocation]
 }

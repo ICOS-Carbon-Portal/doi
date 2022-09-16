@@ -142,7 +142,36 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
-	given RootJsonFormat[DoiMeta] = jsonFormat17(DoiMeta.apply)
+	given RootJsonFormat[GeoLocationPoint] with {
+		def write(g: GeoLocationPoint): JsValue = JsObject(
+				"pointLongitude" -> JsString(g.pointLongitude.toString),
+				"pointLatitude" -> JsString(g.pointLatitude.toString)
+			)
+
+		def read(json: JsValue) = json.asJsObject.getFields("pointLongitude", "pointLatitude") match {
+				case List(JsString(pLong), JsString(pLat)) => new GeoLocationPoint(pLong.toDouble, pLat.toDouble)
+				case _ => deserializationError("Expected geo location point")
+			}
+	}
+
+	given RootJsonFormat[GeoLocationBox] with {
+		def write(g: GeoLocationBox): JsValue = JsObject(
+			"westBoundLongitude" -> JsString(g.westBoundLongitude.toString),
+			"eastBoundLongitude" -> JsString(g.eastBoundLongitude.toString),
+			"southBoundLatitude" -> JsString(g.southBoundLatitude.toString),
+			"northBoundLatitude" -> JsString(g.northBoundLatitude.toString)
+		)
+
+		def read(json: JsValue): GeoLocationBox = json.asJsObject.getFields("westBoundLongitude", "eastBoundLongitude", "southBoundLatitude", "northBoundLatitude") match {
+			case List(JsString(westLong), JsString(eastLong), JsString(northLat), JsString(southLat)) => 
+				new GeoLocationBox(westLong.toDouble, eastLong.toDouble, northLat.toDouble, southLat.toDouble)
+			case _ => deserializationError("Expected geo location box")
+		}
+	}
+
+	given RootJsonFormat[GeoLocation] = jsonFormat3(GeoLocation.apply)
+
+	given RootJsonFormat[DoiMeta] = jsonFormat18(DoiMeta.apply)
 
 	given RootJsonFormat[DoiWrapper] = jsonFormat1(DoiWrapper.apply)
 	given RootJsonFormat[SingleDoiPayload] = jsonFormat1(SingleDoiPayload.apply)

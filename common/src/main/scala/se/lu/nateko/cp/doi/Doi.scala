@@ -51,7 +51,8 @@ case class DoiMeta(
 	rightsList: Option[Seq[Rights]] = None,
 	descriptions: Seq[Description] = Nil,
 	url: Option[String] = None,
-	fundingReferences: Option[Seq[FundingReference]] = None
+	fundingReferences: Option[Seq[FundingReference]] = None,
+	geoLocations: Option[Seq[GeoLocation]] = None
 ) extends SelfValidating{
 
 	def draftError: Option[String] = joinErrors(draftErrors)
