@@ -8,7 +8,7 @@ import scala.collection.Seq
 
 abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	initValues: Seq[E], cb: Seq[E] => Unit
-)(protected val title: String, protected val minAmount: Int = 0){
+)(protected val title: String, protected val minAmount: Int = 0, protected val maxAmount: Int = 0){
 
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
@@ -18,6 +18,10 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private def setRemovability(): Unit = if(minAmount > 0) {
 		widgets.foreach(_.setRemovability(widgets.length > minAmount))
+	}
+
+	private def setAppendability(): Unit = if(maxAmount > 0) {
+		addWidgetButton.disabled = widgets.length >= maxAmount
 	}
 
 	private def notifyUpstream(): Unit = cb(widgets.map(_.entityValue))
@@ -31,6 +35,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()
+			setAppendability()
 			setCollapsedness()
 			notifyUpstream()
 		})
@@ -40,6 +45,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private val addWidget: Event => Unit = (_: Event) => {
 		produceWidget(defaultValue)
+		setAppendability()
 		setRemovability()
 		setCollapsedness()
 		notifyUpstream()
@@ -87,6 +93,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	initValues.foreach(produceWidget)
 	setRemovability()
+	setAppendability()
 	setCollapsedness()
 
 }

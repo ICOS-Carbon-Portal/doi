@@ -69,7 +69,8 @@ case class DoiMeta(
 		version.flatMap(_.error),
 		rightsList.flatMap(r => allGood(r)),
 		allGood(descriptions),
-		fundingReferences.flatMap(allGood)
+		fundingReferences.flatMap(allGood),
+		geoLocations.flatMap(allGood)
 	)
 
 	def error: Option[String] = joinErrors(

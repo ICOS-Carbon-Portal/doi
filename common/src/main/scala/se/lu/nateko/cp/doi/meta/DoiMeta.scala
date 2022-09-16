@@ -347,7 +347,25 @@ case class Description(description: String, descriptionType: DescriptionType.Val
 	)
 }
 
-case class GeoLocationPoint(pointLongitude: Double, pointLatitude: Double)
-case class GeoLocationBox(westBoundLongitude: Double, eastBoundLongitude: Double, southBoundLatitude: Double, northBoundLatitude: Double)
+case class GeoLocationPoint(pointLongitude: Option[Double], pointLatitude: Option[Double]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(pointLongitude)("Point longitude must be specified for every geolocation point"),
+		nonEmpty(pointLatitude)("Point latitude must be specified for every geolocation point")
+	)
+}
 
-case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBox: Option[GeoLocationBox], geoLocationPlace: Option[String])
+case class GeoLocationBox(westBoundLongitude: Option[Double], eastBoundLongitude: Option[Double], southBoundLatitude: Option[Double], northBoundLatitude: Option[Double]) extends SelfValidating{
+	def error = joinErrors(
+		nonEmpty(westBoundLongitude)("West bound longitude must be specified for every geolocation box"),
+		nonEmpty(eastBoundLongitude)("East bound latitude must be specified for every geolocation box"),
+		nonEmpty(southBoundLatitude)("South bound latitude must be specified for every geolocation box"),
+		nonEmpty(northBoundLatitude)("North bound latitude must be specified for every geolocation box")
+	)
+}
+
+case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBox: Option[GeoLocationBox], geoLocationPlace: Option[String]) extends SelfValidating{
+	def error = joinErrors(
+		geoLocationPoint.flatMap(_.error),
+		geoLocationBox.flatMap(_.error)
+	)
+}

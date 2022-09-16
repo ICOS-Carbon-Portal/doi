@@ -143,29 +143,29 @@ object JsonSupport extends DefaultJsonProtocol{
 	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
 	given RootJsonFormat[GeoLocationPoint] with {
-		def write(g: GeoLocationPoint): JsValue = JsObject(
-				"pointLongitude" -> JsString(g.pointLongitude.toString),
-				"pointLatitude" -> JsString(g.pointLatitude.toString)
+		def write(p: GeoLocationPoint): JsValue = JsObject(
+				"pointLongitude" -> JsString(p.pointLongitude.getOrElse(0).toString),
+				"pointLatitude" -> JsString(p.pointLatitude.getOrElse(0).toString)
 			)
 
 		def read(json: JsValue) = json.asJsObject.getFields("pointLongitude", "pointLatitude") match {
-				case List(JsString(pLong), JsString(pLat)) => new GeoLocationPoint(pLong.toDouble, pLat.toDouble)
-				case _ => deserializationError("Expected geo location point")
+				case List(JsString(pLong), JsString(pLat)) => new GeoLocationPoint(Some(pLong.toDouble), Some(pLat.toDouble))
+				case _ => deserializationError("Expected geolocation point")
 			}
 	}
 
 	given RootJsonFormat[GeoLocationBox] with {
 		def write(g: GeoLocationBox): JsValue = JsObject(
-			"westBoundLongitude" -> JsString(g.westBoundLongitude.toString),
-			"eastBoundLongitude" -> JsString(g.eastBoundLongitude.toString),
-			"southBoundLatitude" -> JsString(g.southBoundLatitude.toString),
-			"northBoundLatitude" -> JsString(g.northBoundLatitude.toString)
+			"westBoundLongitude" -> JsString(g.westBoundLongitude.getOrElse(0).toString),
+			"eastBoundLongitude" -> JsString(g.eastBoundLongitude.getOrElse(0).toString),
+			"southBoundLatitude" -> JsString(g.southBoundLatitude.getOrElse(0).toString),
+			"northBoundLatitude" -> JsString(g.northBoundLatitude.getOrElse(0).toString)
 		)
 
 		def read(json: JsValue): GeoLocationBox = json.asJsObject.getFields("westBoundLongitude", "eastBoundLongitude", "southBoundLatitude", "northBoundLatitude") match {
 			case List(JsString(westLong), JsString(eastLong), JsString(northLat), JsString(southLat)) => 
-				new GeoLocationBox(westLong.toDouble, eastLong.toDouble, northLat.toDouble, southLat.toDouble)
-			case _ => deserializationError("Expected geo location box")
+				new GeoLocationBox(Some(westLong.toDouble), Some(eastLong.toDouble), Some(northLat.toDouble), Some(southLat.toDouble))
+			case _ => deserializationError("Expected geolocation box")
 		}
 	}
 
