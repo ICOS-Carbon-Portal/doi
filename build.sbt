@@ -1,9 +1,6 @@
 ThisBuild / scalaVersion := "3.2.0"
 ThisBuild / organization := "se.lu.nateko.cp"
 
-//should be consistent with the scalatest module version below (manually controlled)
-val scala3Xml: ModuleID = "org.scala-lang.modules" % "scala-xml_3" % "2.1.0" % "test"
-
 val commonSettings = Seq(
 	scalacOptions ++= Seq(
 		"-encoding", "UTF-8",
@@ -11,8 +8,7 @@ val commonSettings = Seq(
 		"-feature",
 		"-deprecation"
 	),
-	//excluding scala-xml to avoid conflict with scala-xml_2.13 that transitively comes with twirl-api
-	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test" exclude("org.scala-lang.modules", "scala-xml_3")
+	libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.12" % "test"
 )
 
 val publishSettings = Seq(
@@ -35,13 +31,12 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi-common",
-		version := "0.2.1",
+		version := "0.3.0",
 		cpDeploy := {
 			sys.error("Please switch to project doiJVM for deployment")
 		}
 	)
 	.settings(publishSettings: _*)
-	.jvmSettings(libraryDependencies += scala3Xml)
 
 //core functionality that may be reused by different apps (backends)
 lazy val core = project
@@ -50,10 +45,7 @@ lazy val core = project
 	.settings(commonSettings ++ publishSettings: _*)
 	.settings(
 		name := "doi-core",
-		libraryDependencies ++= Seq(
-			"io.spray" %%  "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13,
-			scala3Xml
-		),
+		libraryDependencies ++= Seq("io.spray" %%  "spray-json" % "1.3.6"),
 		version := "0.3.0"
 	)
 
@@ -63,7 +55,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.2.1",
+		version := "0.3.0",
 		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
 	)
 	.jsSettings(
@@ -82,8 +74,8 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7" exclude("com.sun.activation", "jakarta.activation"),
-			"se.lu.nateko.cp"   %% "views-core"           % "0.5.4" cross CrossVersion.for3Use2_13,
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.6.5" cross CrossVersion.for3Use2_13,
+			"se.lu.nateko.cp"   %% "views-core"           % "0.6.0",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.7.0",
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
@@ -112,13 +104,6 @@ lazy val doiJvm = doi.jvm
 			doiJs / Test / test,
 			Test / test
 		).value,
-
-		libraryDependencies := {
-			libraryDependencies.value.map{
-				case m if m.name.startsWith("twirl-api") => m.cross(CrossVersion.for3Use2_13)
-				case m => m
-			}
-		},
 
 		Compile / resources ++= {
 			val jsFile = (doiJs / Compile / fastOptJS).value.data
