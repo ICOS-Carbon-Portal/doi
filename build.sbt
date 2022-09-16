@@ -31,7 +31,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi-common",
-		version := "0.2.1",
+		version := "0.3.0",
 		cpDeploy := {
 			sys.error("Please switch to project doiJVM for deployment")
 		}
@@ -55,7 +55,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.2.1",
+		version := "0.3.0",
 		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
 	)
 	.jsSettings(
