@@ -4,6 +4,10 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 import se.lu.nateko.cp.doi.meta.GeoLocationBox
+import org.scalajs.dom.HTMLElement
+import se.lu.nateko.cp.doi.meta.Latitude.apply
+import se.lu.nateko.cp.doi.meta.Latitude
+import se.lu.nateko.cp.doi.meta.Longitude
 
 class GeoLocationBoxWidget (
 	init: GeoLocationBox,
@@ -12,22 +16,25 @@ class GeoLocationBoxWidget (
 
 	private[this] var _geoLocationBox = init
 
-	private val eastBoundLongitudeInput = geoLocationBoxTextWidget(_geoLocationBox.eastBoundLongitude.fold("")(_.toString),  textOpt => _geoLocationBox.copy(eastBoundLongitude  = textOpt), "East bound longitude")
-	private val northBoundLatitudeInput = geoLocationBoxTextWidget(_geoLocationBox.northBoundLatitude.fold("")(_.toString), textOpt => _geoLocationBox.copy(northBoundLatitude = textOpt), "North bound latitude")
-	private val southBoundLatitudeInput = geoLocationBoxTextWidget(_geoLocationBox.southBoundLatitude.fold("")(_.toString),    textOpt => _geoLocationBox.copy(southBoundLatitude    = textOpt), "South bound latitude")
-	private val westBoundLongitudeInput = geoLocationBoxTextWidget(_geoLocationBox.westBoundLongitude.fold("")(_.toString),    textOpt => _geoLocationBox.copy(westBoundLongitude    = textOpt), "West bound longitude")
-
-	private def geoLocationBoxTextWidget(init: String, update: Option[Double] => GeoLocationBox, placeHolder: String) =
-		new TextInputWidget(
-			init,
-			str => {
-				val boxOpt = if(str.isEmpty) None else Some(str.toDouble)
-				_geoLocationBox = update(boxOpt)
+	private val northBoundLatitudeInput = LatitudeWidget(init.northBoundLatitude.getOrElse(Latitude("")), str => { // not str
+				_geoLocationBox = _geoLocationBox.copy(northBoundLatitude = Option(str))
 				updateCb(_geoLocationBox)
-			},
-			placeHolder,
-			required = true
-		)
+			})
+
+	private val southBoundLatitudeInput = LatitudeWidget(init.southBoundLatitude.getOrElse(Latitude("")), str => {
+			_geoLocationBox = _geoLocationBox.copy(southBoundLatitude = Option(str))
+			updateCb(_geoLocationBox)
+		})
+
+	private val eastBoundLongitudeInput = LongitudeWidget(init.eastBoundLongitude.getOrElse(Longitude("")), str => {
+		_geoLocationBox = _geoLocationBox.copy(eastBoundLongitude = Option(str))
+		updateCb(_geoLocationBox)
+	})
+
+	private val westBoundLongitudeInput = LongitudeWidget(init.westBoundLongitude.getOrElse(Longitude("")), str => {
+		_geoLocationBox = _geoLocationBox.copy(westBoundLongitude = Option(str))
+		updateCb(_geoLocationBox)
+	})
 
 	val element = div(div(cls := "row")(
 			div(cls := "col-md-2")(strong("East bound longitude")),

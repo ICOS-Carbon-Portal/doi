@@ -35,6 +35,24 @@ trait SelfValidating{
 	protected def validUri(uri: String): Option[String] =
 		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
+	protected def validLongitude(longitude: String): Option[String] = {
+		val long = Try(longitude.toDouble).toOption
+
+		long match {
+			case Some(v) => if(v < -180 || v > 180) Some("Longitude must be between -180 and 180") else None
+			case None => Some("Longitude must be a number")
+		}
+	}
+	
+	protected def validLatitude(latitude: String): Option[String] = {
+		val lat = Try(latitude.toDouble).toOption
+
+		lat match {
+			case Some(v) => if(v < -90 || v > 90) Some("Latitude must be between -90 and 90") else None
+			case None => Some("Longitude must be a number")
+		}
+	}
+
 }
 
 object SelfValidating{
@@ -347,19 +365,37 @@ case class Description(description: String, descriptionType: DescriptionType.Val
 	)
 }
 
-case class GeoLocationPoint(pointLongitude: Option[Double], pointLatitude: Option[Double]) extends SelfValidating{
+case class Latitude(value: String) extends SelfValidating{
+	def error = validLatitude(value)
+
+	override def toString = value
+}
+
+case class Longitude(value: String) extends SelfValidating{
+	def error = validLongitude(value)
+
+	override def toString = value
+}
+
+case class GeoLocationPoint(pointLongitude: Option[Longitude], pointLatitude: Option[Latitude]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(pointLongitude)("Point longitude must be specified for every geolocation point"),
-		nonEmpty(pointLatitude)("Point latitude must be specified for every geolocation point")
+		allGood(pointLongitude),
+		nonEmpty(pointLatitude)("Point latitude must be specified for every geolocation point"),
+		allGood(pointLatitude)
 	)
 }
 
-case class GeoLocationBox(westBoundLongitude: Option[Double], eastBoundLongitude: Option[Double], southBoundLatitude: Option[Double], northBoundLatitude: Option[Double]) extends SelfValidating{
+case class GeoLocationBox(westBoundLongitude: Option[Longitude], eastBoundLongitude: Option[Longitude], southBoundLatitude: Option[Latitude], northBoundLatitude: Option[Latitude]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(westBoundLongitude)("West bound longitude must be specified for every geolocation box"),
+		allGood(westBoundLongitude),
 		nonEmpty(eastBoundLongitude)("East bound latitude must be specified for every geolocation box"),
+		allGood(eastBoundLongitude),
 		nonEmpty(southBoundLatitude)("South bound latitude must be specified for every geolocation box"),
-		nonEmpty(northBoundLatitude)("North bound latitude must be specified for every geolocation box")
+		allGood(southBoundLatitude),
+		nonEmpty(northBoundLatitude)("North bound latitude must be specified for every geolocation box"),
+		allGood(northBoundLatitude)
 	)
 }
 

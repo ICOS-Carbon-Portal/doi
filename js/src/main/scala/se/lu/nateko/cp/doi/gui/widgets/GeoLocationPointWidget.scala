@@ -2,8 +2,10 @@ package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
-import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 import se.lu.nateko.cp.doi.meta.GeoLocationPoint
+import org.scalajs.dom.HTMLElement
+import se.lu.nateko.cp.doi.meta.Latitude
+import se.lu.nateko.cp.doi.meta.Longitude
 
 class GeoLocationPointWidget (
 	init: GeoLocationPoint,
@@ -12,20 +14,15 @@ class GeoLocationPointWidget (
 
 	private[this] var _point = init
 
-	private val pointLongitudeInput = geoLocationPointTextWidget(_point.pointLongitude.fold("")(_.toString),  textOpt => _point.copy(pointLongitude  = textOpt), "Point longitude")
-	private val pointLatitudeInput  = geoLocationPointTextWidget(_point.pointLatitude.fold("")(_.toString), textOpt => _point.copy(pointLatitude = textOpt), "Point latitude")
+	private val pointLongitudeInput = LongitudeWidget(init.pointLongitude.getOrElse(Longitude("")), str => { // not str
+			_point = _point.copy(pointLongitude = Option(str))
+			updateCb(_point)
+		})
 
-	private def geoLocationPointTextWidget(init: String, update: Option[Double] => GeoLocationPoint, placeHolder: String) =
-		new TextInputWidget(
-			init,
-			str => {
-				val pointOpt = if(str.isEmpty) None else Some(str.toDouble)
-				_point = update(pointOpt)
-				updateCb(_point)
-			},
-			placeHolder,
-			required = true
-		)
+	private val pointLatitudeInput = LatitudeWidget(init.pointLatitude.getOrElse(Latitude("")), str => {
+			_point = _point.copy(pointLatitude = Option(str))
+			updateCb(_point)
+		})
 
 	val element = div(cls := "row spacyrow")(
 		div(cls := "col-md-2")(strong("Point longitude")),
