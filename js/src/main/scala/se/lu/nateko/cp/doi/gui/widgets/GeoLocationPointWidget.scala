@@ -2,9 +2,7 @@ package se.lu.nateko.cp.doi.gui.widgets
 
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
-import se.lu.nateko.cp.doi.meta.Coordinates._
-import se.lu.nateko.cp.doi.meta.GeoLocationPoint
-
+import se.lu.nateko.cp.doi.meta._
 
 class GeoLocationPointWidget (
 	init: GeoLocationPoint,

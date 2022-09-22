@@ -67,9 +67,9 @@ class DoiMetaWidget(
 
 		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
 
-		new FundingEditWidget(init.fundingReferences.getOrElse((Seq())), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
+		new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
 
-		new GeoLocationEditWidget(init.geoLocations.getOrElse((Seq())), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
+		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
 
 		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
 

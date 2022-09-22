@@ -347,34 +347,22 @@ case class Description(description: String, descriptionType: DescriptionType.Val
 	)
 }
 
-object Coordinates {
-	opaque type Latitude <: Double = Double
-	opaque type Longitude <: Double = Double
+opaque type Latitude <: Double = Double
+opaque type Longitude <: Double = Double
 
-	object Latitude {
-		def apply(value: Double): Latitude = value
-	}
-
-	object Longitude {
-		def apply(value: Double): Longitude = value
-	}
-	
-	extension (l: Longitude) {
-
-		def lonError: Option[String] = {
-			if(l < -180 || l > 180) Some(s"Longitude must be between -180 and 180") else None
-		}
-	}
-
-	extension (l: Latitude) {
-
-		def latError: Option[String] = {
-			if(l < -90 || l > 90) Some(s"Latitude must be between -90 and 90") else None
-		}
-	}
+object Latitude {
+	def apply(value: Double): Latitude = value
 }
 
-import Coordinates._
+object Longitude {
+	def apply(value: Double): Longitude = value
+}
+
+extension (l: Longitude)
+	def lonError: Option[String] = if(l < -180 || l > 180) Some(s"Longitude must be between -180 and 180") else None
+
+extension (l: Latitude)
+	def latError: Option[String] = if(l < -90 || l > 90) Some(s"Latitude must be between -90 and 90") else None
 
 case class GeoLocationPoint(pointLongitude: Option[Longitude], pointLatitude: Option[Latitude]) extends SelfValidating{
 	def error = joinErrors(

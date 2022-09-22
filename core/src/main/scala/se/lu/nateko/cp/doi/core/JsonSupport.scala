@@ -2,9 +2,6 @@ package se.lu.nateko.cp.doi.core
 
 import se.lu.nateko.cp.doi._
 import se.lu.nateko.cp.doi.meta._
-import se.lu.nateko.cp.doi.meta.Coordinates._
-import se.lu.nateko.cp.doi.meta.Coordinates.Latitude
-import se.lu.nateko.cp.doi.meta.Coordinates.Longitude
 import spray.json._
 import spray.json.JsValue
 

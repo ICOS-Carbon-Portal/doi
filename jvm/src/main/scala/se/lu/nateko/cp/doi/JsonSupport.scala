@@ -2,8 +2,6 @@ package se.lu.nateko.cp.doi
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
-import se.lu.nateko.cp.doi.meta.Coordinates._
-
 
 object JsonSupport{
 	

@@ -4,7 +4,7 @@ import org.scalajs.dom.HTMLElement
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
-import se.lu.nateko.cp.doi.meta.Coordinates._
+import se.lu.nateko.cp.doi.meta._
 
 class LatLonWidget[T <: Latitude | Longitude] (
 	init: Option[T],
@@ -16,7 +16,7 @@ class LatLonWidget[T <: Latitude | Longitude] (
 
 	private[this] var _point = init
 
-	private def validate() = highlightError(longInput.element, _point.fold(Some(s"Missing $placeHolder"))(error))
+	private def validate() = highlightError(longInput.element, _point.fold(Some(s"Missing ${placeHolder.toLowerCase}"))(error))
 
 	private val longInput: TextInputWidget = latitudeTextWidget(_point.fold("")(_.toString), placeHolder)
   
