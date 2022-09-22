@@ -2,6 +2,7 @@ package se.lu.nateko.cp.doi
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
+import se.lu.nateko.cp.doi.meta.Coordinates._
 
 
 object JsonSupport{
@@ -63,8 +64,13 @@ object JsonSupport{
 	given OFormat[FunderIdentifier] =  Json.format[FunderIdentifier]
 	given OFormat[FundingReference] = Json.format[FundingReference]
 
-	given OFormat[Latitude] = Json.format[Latitude]
-	given OFormat[Longitude] = Json.format[Longitude]
+	private val doubleFormat = summon[Format[Double]]
+	given Reads[Latitude] = doubleFormat.map(Latitude.apply)
+	given Reads[Longitude] = doubleFormat.map(Longitude.apply)
+	given [T <: Latitude | Longitude]: Writes[T] with{
+		def writes(d: T) = JsNumber(d)
+	}
+
 	given OFormat[GeoLocationPoint] = Json.format[GeoLocationPoint]
 	given OFormat[GeoLocationBox] = Json.format[GeoLocationBox]
 	given OFormat[GeoLocation] = Json.format[GeoLocation]

@@ -2,6 +2,9 @@ package se.lu.nateko.cp.doi.core
 
 import se.lu.nateko.cp.doi._
 import se.lu.nateko.cp.doi.meta._
+import se.lu.nateko.cp.doi.meta.Coordinates._
+import se.lu.nateko.cp.doi.meta.Coordinates.Latitude
+import se.lu.nateko.cp.doi.meta.Coordinates.Longitude
 import spray.json._
 import spray.json.JsValue
 
@@ -143,39 +146,19 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
-	given RootJsonFormat[Latitude] = jsonFormat1(Latitude.apply)
-	given RootJsonFormat[Longitude] = jsonFormat1(Longitude.apply)
-
-	given RootJsonFormat[GeoLocationPoint] with {
-		def write(p: GeoLocationPoint): JsValue = JsObject(
-				"pointLongitude" -> JsNumber(p.pointLongitude.getOrElse(Longitude("0")).toString),
-				"pointLatitude" -> JsNumber(p.pointLatitude.getOrElse(Latitude("0")).toString)
-			)
-
-		def read(json: JsValue) = json.asJsObject.getFields("pointLongitude", "pointLatitude") match {
-				case List(JsNumber(pLong), JsNumber(pLat)) => new GeoLocationPoint(Some(Longitude(pLong.toString)), Some(Latitude(pLat.toString)))
-				case List(JsString(pLong), JsString(pLat)) => new GeoLocationPoint(Some(Longitude(pLong)), Some(Latitude(pLat)))
-				case _ => deserializationError("Expected geolocation point")
-			}
+	def latLonFormat[T <: Latitude | Longitude](factory: Double => T) = new RootJsonFormat[Option[T]]{
+		def write(obj: Option[T]): JsValue = obj.fold(JsNull)(JsNumber.apply)
+		def read(json: JsValue): Option[T] = json match
+			case JsNull => None
+			case JsString(s) => s.toDoubleOption.map(factory)
+			case JsNumber(n) => Some(factory(n.toDouble))
+			case _ => deserializationError("expected a lat/lon number")
 	}
+	given latFormat: RootJsonFormat[Option[Latitude]] = latLonFormat(Latitude.apply)
+	given lonFormat: RootJsonFormat[Option[Longitude]] = latLonFormat(Longitude.apply)
 
-	given RootJsonFormat[GeoLocationBox] with {
-		def write(g: GeoLocationBox): JsValue = JsObject(
-			"westBoundLongitude" -> JsNumber(g.westBoundLongitude.getOrElse(Longitude("0")).toString),
-			"eastBoundLongitude" -> JsNumber(g.eastBoundLongitude.getOrElse(Longitude("0")).toString),
-			"southBoundLatitude" -> JsNumber(g.southBoundLatitude.getOrElse(Latitude("0")).toString),
-			"northBoundLatitude" -> JsNumber(g.northBoundLatitude.getOrElse(Latitude("0")).toString)
-		)
-
-		def read(json: JsValue): GeoLocationBox = json.asJsObject.getFields("westBoundLongitude", "eastBoundLongitude", "southBoundLatitude", "northBoundLatitude") match {
-				case List(JsString(westLong), JsString(eastLong), JsString(northLat), JsString(southLat)) => 
-					new GeoLocationBox(Some(Longitude(westLong)), Some(Longitude(eastLong)), Some(Latitude(northLat)), Some(Latitude(southLat)))
-				case List(JsNumber(westLong), JsNumber(eastLong), JsNumber(northLat), JsNumber(southLat)) => 
-					new GeoLocationBox(Some(Longitude(westLong.toString)), Some(Longitude(eastLong.toString)), Some(Latitude(northLat.toString)), Some(Latitude(southLat.toString)))
-				case _ => deserializationError("Expected geolocation box")
-			}
-	}
-
+	given RootJsonFormat[GeoLocationPoint] = jsonFormat2(GeoLocationPoint.apply)
+	given RootJsonFormat[GeoLocationBox] = jsonFormat4(GeoLocationBox.apply)
 	given RootJsonFormat[GeoLocation] = jsonFormat3(GeoLocation.apply)
 
 	given RootJsonFormat[DoiMeta] = jsonFormat18(DoiMeta.apply)
