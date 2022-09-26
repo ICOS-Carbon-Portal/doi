@@ -22,9 +22,9 @@ class GeoLocationPointWidget (
 	}, latError, Latitude.apply, "Point latitude")
 
 	val element = div(cls := "row spacyrow")(
-		div(cls := "col-md-2")(strong("Point longitude")),
+		div(cls := "col-md-2")(strong("Point longitude "))(small("(WGS-84)")),
 		div(cls := "col-md-3")(pointLongitudeInput.element),
-		div(cls := "col-md-2")(strong("Point latitude")),
+		div(cls := "col-md-2")(strong("Point latitude "))(small("(WGS-84)")),
 		div(cls := "col-md-3")(pointLatitudeInput.element),
 	).render
 }

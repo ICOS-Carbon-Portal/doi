@@ -32,12 +32,12 @@ class AwardWidget(
 		)
 
 	val element = div(cls := "row spacyrow")(
-			div(cls := "col-md-1")(strong("Award title:")),
+			div(cls := "col-md-1")(strong("Award title")),
 			div(cls := "col-md-3")(awardTitleInput.element),
 			div(cls := "col-md-8")(div(cls := "row")(
-				div(cls := "col-md-2")(strong("Award number:")),
+				div(cls := "col-md-2")(strong("Award number")),
 				div(cls := "col-md-4")(awardNumberInput.element),
-				div(cls := "col-md-2")(strong("Award URI:")),
+				div(cls := "col-md-2")(strong("Award URI")),
 				div(cls := "col-md-4")(awardUriInput.element)
 			))
 		).render

@@ -37,6 +37,7 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], tabsCb: Ma
 
 	val element = div(
 		tabs.element,
+		p("Be careful: The structure of this JSON does not always match the JSON produced by Datacite"),
 		p(
 			editor.element
 		),
