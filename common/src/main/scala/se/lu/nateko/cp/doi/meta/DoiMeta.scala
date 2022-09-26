@@ -350,13 +350,10 @@ case class Description(description: String, descriptionType: DescriptionType.Val
 opaque type Latitude <: Double = Double
 opaque type Longitude <: Double = Double
 
-object Latitude {
+object Latitude:
 	def apply(value: Double): Latitude = value
-}
-
-object Longitude {
+object Longitude:
 	def apply(value: Double): Longitude = value
-}
 
 extension (l: Longitude)
 	def lonError: Option[String] = if(l < -180 || l > 180) Some(s"Longitude must be between -180 and 180") else None
