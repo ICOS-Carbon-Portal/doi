@@ -43,7 +43,7 @@ class FundingWidget(init: FundingReference, protected val updateCb: FundingRefer
 
 	val element = div(cls := "row")(
 		div(cls := "row spacyrow")(
-			div(cls := "col-md-1")(strong("Funder name*:")),
+			div(cls := "col-md-1")(strong("Funder name")),
 			div(cls := "col-md-3")(funderNameInput.element)(paddingBottom := 15),
 			div(cls := "col-md-8")(funderIdsInput.element)(paddingBottom := 15)
 		),
