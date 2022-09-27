@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 object JsonSupport{
 
-	def enumFormat[T <: reflect.Enum](valueOf: String => T)(using ctg: ClassTag[T]) = new Format[T] {
+	def enumFormat[T <: reflect.Enum](valueOf: String => T)(using ctg: ClassTag[T]): Format[T] = new Format[T] {
 		def writes(v: T) = JsString(v.toString)
 
 		def reads(value: JsValue): JsResult[T] = value match{
@@ -15,7 +15,7 @@ object JsonSupport{
 					JsSuccess(valueOf(s))
 				}catch{
 					case _: IllegalArgumentException => JsError(
-						s"No such $ctg enum value: $s"
+						s"No such enum $ctg value: $s"
 					)
 				}
 			case _ => JsError("Expected a string")
@@ -32,7 +32,7 @@ object JsonSupport{
 
 	given Format[Doi] = Json.format[Doi]
 
-	given OFormat[SubjectScheme] = Json.format[SubjectScheme]
+	given Format[SubjectScheme] = enumFormat(SubjectScheme.valueOf)
 	given OFormat[Subject] = Json.format[Subject]
 	given OFormat[NameIdentifierScheme] = Json.format[NameIdentifierScheme]
 	given OFormat[NameIdentifier] = Json.format[NameIdentifier]
