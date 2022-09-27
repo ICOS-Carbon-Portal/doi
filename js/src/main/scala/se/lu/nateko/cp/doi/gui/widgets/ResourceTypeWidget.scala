@@ -4,7 +4,6 @@ import scalatags.JsDom.all._
 
 import se.lu.nateko.cp.doi.meta.ResourceType
 import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral
-import se.lu.nateko.cp.doi.meta.ResourceTypeGeneral.ResourceTypeGeneral
 import se.lu.nateko.cp.doi.gui.widgets.generic._
 
 class ResourceTypeWidget(
@@ -20,7 +19,7 @@ class ResourceTypeWidget(
 	}, "Specific resource type", required = true)
 
 	private[this] val rtGenInput = new SelectWidget[ResourceTypeGeneral](
-		SelectWidget.selectOptions(ResourceTypeGeneral, Some("General resource type")),
+		SelectWidget.selectOptions(Some("General resource type"), ResourceTypeGeneral.values),
 		init.resourceTypeGeneral,
 		rtGenOpt => {
 			val rtGen = rtGenOpt.getOrElse(null)

@@ -20,8 +20,8 @@ class DescriptionWidget(init: Description, protected val updateCb: Description =
 
 	descrInput.element.style.setProperty("resize", "none")
 
-	private[this] val descrTypeInput = new SelectWidget[DescriptionType.Value](
-		SelectWidget.selectOptions(DescriptionType, Some("Description type")),
+	private[this] val descrTypeInput = new SelectWidget[DescriptionType](
+		SelectWidget.selectOptions(Some("Description type"), DescriptionType.values),
 		Option(init.descriptionType),
 		dtOpt => {
 			_descr = _descr.copy(descriptionType = dtOpt.getOrElse(null))

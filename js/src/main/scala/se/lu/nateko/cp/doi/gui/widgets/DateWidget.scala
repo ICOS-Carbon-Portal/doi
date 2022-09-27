@@ -7,7 +7,6 @@ import org.scalajs.dom.html.Input
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.SelectOption
 import se.lu.nateko.cp.doi.meta.DateType
-import se.lu.nateko.cp.doi.meta.DateType.DateType
 import se.lu.nateko.cp.doi.gui.widgets.generic.SelectWidget
 
 class DateWidget(init: Date, protected val updateCb: Date => Unit) extends EntityWidget[Date]{
@@ -23,7 +22,7 @@ class DateWidget(init: Date, protected val updateCb: Date => Unit) extends Entit
 	private[this] def validate(): Unit = highlightError(dateInput, _date.error)
 
 	private[this] val dateTypeInput = new SelectWidget[DateType](
-		SelectWidget.selectOptions(DateType, Some("Date type")),
+		SelectWidget.selectOptions(Some("Date type"), DateType.values),
 		Option(init.dateType),
 		dtOpt => {
 			val dt = dtOpt.getOrElse(null)

@@ -11,7 +11,7 @@ import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 import se.lu.nateko.cp.doi.gui.widgets.TabWidget
 import se.lu.nateko.cp.doi.gui.views.Constants
 
-class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], tabsCb: Map[EditorTab.Value, () => Unit]) {
+class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], tabsCb: Map[EditorTab, () => Unit]) {
 
 	private val tabs = new TabWidget(EditorTab.json, tabsCb)
 	private var _json = Json.prettyPrint(Json.toJson(meta))

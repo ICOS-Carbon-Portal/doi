@@ -15,8 +15,8 @@ class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends En
 		updateCb(_title)
 	}, "Title", required = true)
 
-	private[this] val titleTypeInput = new SelectWidget[TitleType.Value](
-		SelectWidget.selectOptions(TitleType, Some("Title type")),
+	private[this] val titleTypeInput = new SelectWidget[TitleType](
+		SelectWidget.selectOptions(Some("Title type"), TitleType.values),
 		init.titleType,
 		ttOpt => {
 			_title = _title.copy(titleType = ttOpt)

@@ -6,7 +6,6 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.SelectOption
 import se.lu.nateko.cp.doi.meta.SubjectScheme
-import se.lu.nateko.cp.doi.meta.SubjectScheme.Dewey
 import se.lu.nateko.cp.doi.gui.widgets.generic.SelectWidget
 
 class SubjectWidget(init: Subject, protected val updateCb: Subject => Unit) extends EntityWidget[Subject]{
@@ -19,7 +18,7 @@ class SubjectWidget(init: Subject, protected val updateCb: Subject => Unit) exte
 	}, required = true)
 
 	private[this] val schemeInput = new SelectWidget[SubjectScheme](
-		SelectWidget.selectOptions(Some("Subject scheme"))(Dewey),
+		SelectWidget.selectOptions(Some("Subject scheme"), SubjectScheme.values),
 		init.scheme,
 		schemeOpt => {
 			_subj = _subj.copy(scheme = schemeOpt)

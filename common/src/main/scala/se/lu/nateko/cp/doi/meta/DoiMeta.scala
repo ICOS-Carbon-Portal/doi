@@ -57,35 +57,36 @@ case class GenericName(name: String) extends Name{
 }
 
 case class NameIdentifier(nameIdentifier: String, scheme: NameIdentifierScheme) extends SelfValidating{
-	import NameIdentifierScheme._
+	import NameIdentifierScheme.*
 
 	def error = joinErrors(
 		nonEmpty(nameIdentifier)("Name identifier must not be empty"),
 		nonNull(scheme)("Name Identifier scheme must be provided"),
 		scheme.error,
-		lookupRegex(scheme.nameIdentifierScheme) match{
+		lookupRegex(scheme) match{
 			case Some(rex) =>
 				if(rex.matches(nameIdentifier)) None
-				else Some(s"Wrong ${scheme.nameIdentifierScheme} ID format")
-			case None if(supported.contains(scheme)) => None
+				else Some(s"Wrong $scheme ID format")
+			case None if(values.contains(scheme)) => None
 			case None =>
-				val supportedNames = supported.mkString(", ")
+				val supportedNames = values.mkString(", ")
 				Some("Only the following name identifier schemes are supported: " + supportedNames)
 		}
 	)
 }
 
 object NameIdentifier{
-	def orcid(id: String) = NameIdentifier(id, NameIdentifierScheme.Orcid)
-	def isni(id: String) = NameIdentifier(id, NameIdentifierScheme.Isni)
+	def orcid(id: String) = NameIdentifier(id, NameIdentifierScheme.ORCID)
+	def isni(id: String) = NameIdentifier(id, NameIdentifierScheme.ISNI)
 }
 
-case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[String]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(nameIdentifierScheme)("Name identifier scheme must have a name"),
-		schemeUri.flatMap(validUri)
-	)
-	override def toString = nameIdentifierScheme
+enum NameIdentifierScheme(schemeUri: Option[String]) extends SelfValidating{
+	def error = schemeUri.flatMap(validUri)
+
+	case ORCID   extends NameIdentifierScheme(Some("http://orcid.org/"))
+	case ISNI    extends NameIdentifierScheme(Some("http://www.isni.org/"))
+	case ROR     extends NameIdentifierScheme(Some("https://ror.org"))
+	case FLUXNET extends NameIdentifierScheme(None)
 }
 
 case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[FunderIdentifierScheme]) extends SelfValidating {
@@ -168,24 +169,21 @@ case class FunderIdentifierValidator(scheme: FunderIdentifierScheme, regex: Rege
 	}
 }
 object NameIdentifierScheme{
-	val Orcid = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
-	val Isni = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
-	val Ror = NameIdentifierScheme("ROR", Some("https://ror.org/"))
-	val Fluxnet = NameIdentifierScheme("FLUXNET", None)
+	import NameIdentifierScheme.*
 
 	def supported = Regexes.keys.toSeq
 
 	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
-		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
+		Try(valueOf(nameIdentifierScheme)).toOption
 
-	def lookupRegex(nameIdentifierScheme: String): Option[Regex] =
-		lookup(nameIdentifierScheme).flatMap(Regexes.get)
+	def lookupRegex(nameIdentifierScheme: NameIdentifierScheme): Option[Regex] =
+		Regexes.get(nameIdentifierScheme)
 
 	private val Regexes = Map(
-		Orcid -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
-		Isni -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
-		Ror -> "^[a-z0-9]{9}$".r,
-		Fluxnet -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
+		ORCID -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
+		ISNI -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
+		ROR -> "^[a-z0-9]{9}$".r,
+		FLUXNET -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
 	)
 }
 
@@ -229,7 +227,7 @@ case class Contributor(
 	name: Name,
 	nameIdentifiers: Seq[NameIdentifier],
 	affiliation: Seq[Affiliation],
-	contributorType: Option[ContributorType.Value]
+	contributorType: Option[ContributorType]
 ) extends Person{
 
 	override def error = joinErrors(
@@ -239,29 +237,23 @@ case class Contributor(
 }
 
 
-case class Title(title: String, lang: Option[String], titleType: Option[TitleType.Value]) extends SelfValidating{
+case class Title(title: String, lang: Option[String], titleType: Option[TitleType]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(title)("Title must not be empty"),
 		lang.flatMap(l => nonEmpty(l)("Title language is not required but must not be empty if provided"))
 	)
 }
 
-case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral.Value]) extends SelfValidating{
+case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(resourceType.fold("")(r => r))("Specific resource type must not be empty"),
 		nonNull(resourceTypeGeneral)("The general resource type must be specified")
 	)
 }
 
-case class SubjectScheme(subjectScheme: String, schemeUri: Option[String]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(subjectScheme)("Subject scheme must have a name"),
-		schemeUri.flatMap(validUri)
-	)
-	override def toString = subjectScheme
-}
-object SubjectScheme{
-	val Dewey = SubjectScheme("Dewey", Some("http://dewey.info/"))
+enum SubjectScheme(schemeUri: Option[String]) extends SelfValidating{
+	def error = schemeUri.flatMap(validUri)
+	case Dewey extends SubjectScheme(Some("http://dewey.info/"))
 }
 
 case class Subject(
@@ -278,7 +270,7 @@ case class Subject(
 	)
 }
 
-case class Date(date: String, dateType: DateType.Value) extends SelfValidating{
+case class Date(date: String, dateType: DateType) extends SelfValidating{
 	import Date._
 	def error = joinErrors(
 		nonEmpty(date)("Date must not be empty if specified"),
@@ -339,7 +331,7 @@ case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidat
 	)
 }
 
-case class Description(description: String, descriptionType: DescriptionType.Value, lang: Option[String]) extends SelfValidating{
+case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(description)("Description must not be empty (if supplied)"),
 		lang.flatMap(l => nonEmpty(l)("Description language is not required but must not be empty if provided")),
