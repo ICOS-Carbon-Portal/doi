@@ -80,13 +80,32 @@ object NameIdentifier{
 	def isni(id: String) = NameIdentifier(id, NameIdentifierScheme.ISNI)
 }
 
-enum NameIdentifierScheme(schemeUri: Option[String]) extends SelfValidating{
+case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[String]) extends SelfValidating{
+
 	def error = schemeUri.flatMap(validUri)
 
-	case ORCID   extends NameIdentifierScheme(Some("http://orcid.org/"))
-	case ISNI    extends NameIdentifierScheme(Some("http://www.isni.org/"))
-	case ROR     extends NameIdentifierScheme(Some("https://ror.org"))
-	case FLUXNET extends NameIdentifierScheme(None)
+}
+
+object NameIdentifierScheme{
+	val ORCID               = NameIdentifierScheme("ORCID", Some("http://orcid.org/"))
+	val ISNI                = NameIdentifierScheme("ISNI", Some("http://www.isni.org/"))
+	val ROR                 = NameIdentifierScheme("ROR", Some("https://ror.org"))
+	val FLUXNET             = NameIdentifierScheme("FLUXNET", None)
+
+	def values = Regexes.keys.toSeq
+
+	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
+		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
+
+	def lookupRegex(nameIdentifierScheme: NameIdentifierScheme): Option[Regex] =
+		Regexes.get(nameIdentifierScheme)
+
+	private val Regexes = Map(
+		ORCID -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
+		ISNI -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
+		ROR -> "^[a-z0-9]{9}$".r,
+		FLUXNET -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
+	)
 }
 
 case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[FunderIdentifierScheme]) extends SelfValidating {
@@ -167,24 +186,6 @@ case class FunderIdentifierValidator(scheme: FunderIdentifierScheme, regex: Rege
 			else Some(s"Wrong $scheme ID format, examples of accepted IDs: ${expectedFormat}")
 		}
 	}
-}
-object NameIdentifierScheme{
-	import NameIdentifierScheme.*
-
-	def supported = Regexes.keys.toSeq
-
-	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
-		Try(valueOf(nameIdentifierScheme)).toOption
-
-	def lookupRegex(nameIdentifierScheme: NameIdentifierScheme): Option[Regex] =
-		Regexes.get(nameIdentifierScheme)
-
-	private val Regexes = Map(
-		ORCID -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
-		ISNI -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
-		ROR -> "^[a-z0-9]{9}$".r,
-		FLUXNET -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
-	)
 }
 
 case class Affiliation(name: String)

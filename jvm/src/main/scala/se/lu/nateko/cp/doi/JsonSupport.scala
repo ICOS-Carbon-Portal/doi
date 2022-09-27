@@ -2,16 +2,33 @@ package se.lu.nateko.cp.doi
 
 import play.api.libs.json._
 import se.lu.nateko.cp.doi.meta._
+import scala.reflect.ClassTag
 
 object JsonSupport{
+
+	def enumFormat[T <: reflect.Enum](valueOf: String => T)(using ctg: ClassTag[T]) = new Format[T] {
+		def writes(v: T) = JsString(v.toString)
+
+		def reads(value: JsValue): JsResult[T] = value match{
+			case JsString(s) =>
+				try{
+					JsSuccess(valueOf(s))
+				}catch{
+					case _: IllegalArgumentException => JsError(
+						s"No such $ctg enum value: $s"
+					)
+				}
+			case _ => JsError("Expected a string")
+		}
+	}
 	
-	given dateTypeFormat: Format[DateType.Value] = Json.formatEnum(DateType)
-	given contrTypeFormat: Format[ContributorType.Value] = Json.formatEnum(ContributorType)
-	given descriptionTypeFormat: Format[DescriptionType.Value] = Json.formatEnum(DescriptionType)
-	given resourceTypeGeneralFormat: Format[ResourceTypeGeneral.Value] = Json.formatEnum(ResourceTypeGeneral)
-	given titleTypeFormat: Format[TitleType.Value] = Json.formatEnum(TitleType)
-	given doiStateEnumFormat: Format[DoiPublicationState.Value] = Json.formatEnum(DoiPublicationState)
-	given doiEventEnumFormat: Format[DoiPublicationEvent.Value] = Json.formatEnum(DoiPublicationEvent)
+	given dateTypeFormat: Format[DateType] = enumFormat(DateType.valueOf)
+	given contrTypeFormat: Format[ContributorType] = enumFormat(ContributorType.valueOf)
+	given descriptionTypeFormat: Format[DescriptionType] = enumFormat(DescriptionType.valueOf)
+	given resourceTypeGeneralFormat: Format[ResourceTypeGeneral] = enumFormat(ResourceTypeGeneral.valueOf)
+	given titleTypeFormat: Format[TitleType] = enumFormat(TitleType.valueOf)
+	given doiStateEnumFormat: Format[DoiPublicationState] = enumFormat(DoiPublicationState.valueOf)
+	given doiEventEnumFormat: Format[DoiPublicationEvent] = enumFormat(DoiPublicationEvent.valueOf)
 
 	given Format[Doi] = Json.format[Doi]
 
