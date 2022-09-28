@@ -81,9 +81,9 @@ object NameIdentifier{
 }
 
 case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[String]) extends SelfValidating{
-
 	def error = schemeUri.flatMap(validUri)
 
+	override def toString = nameIdentifierScheme
 }
 
 object NameIdentifierScheme{
@@ -93,6 +93,7 @@ object NameIdentifierScheme{
 	val FLUXNET             = NameIdentifierScheme("FLUXNET", None)
 
 	def values = Regexes.keys.toSeq
+	
 
 	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
 		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
