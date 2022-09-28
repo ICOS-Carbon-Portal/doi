@@ -27,12 +27,8 @@ object SelectWidget{
 		option(value := optInfo.id)(optInfo.label)
 	}
 
-	def selectOptions[T](noValueLabelOpt: Option[String], values: Array[T]): IndexedSeq[SelectOption[T]] = {
-		noValueLabelOpt.map(SelectOption[T](None, "", _)).toIndexedSeq ++
-		values.toIndexedSeq.map(v =>
-			SelectOption(Some(v), v.toString, v.toString)
-		)
-	}
+	def selectOptions[T](noValueLabelOpt: Option[String], values: Array[T]): IndexedSeq[SelectOption[T]] =
+		selectOptions(noValueLabelOpt)(values*)
 
 	def selectOptions[T](noValueLabelOpt: Option[String])(selectVals: T*): IndexedSeq[SelectOption[T]] = {
 		noValueLabelOpt.map(SelectOption[T](None, "", _)).toIndexedSeq ++

@@ -8,7 +8,7 @@ import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
 import se.lu.nateko.cp.doi.meta.Date
 import se.lu.nateko.cp.doi.meta.DateType
 
-class DateRangeWidget(init: Date, protected val updateCb: Date => Unit, values: Array[DateType]) extends EntityWidget[Date]{
+class DateRangeWidget(init: Date, protected val updateCb: Date => Unit) extends EntityWidget[Date]{
 
 	private var _date = init
 
@@ -33,7 +33,7 @@ class DateRangeWidget(init: Date, protected val updateCb: Date => Unit, values: 
 	}, "YYYY-MM-DD", required = true)
 
 	private val dateTypeInput = new SelectWidget[DateType](
-		SelectWidget.selectOptions(Some("Date format"), values),
+		SelectWidget.selectOptions(Some("Date format"), DateType.values.filter(_.couldBeRange)),
 		Option(_date.dateType),
 		dtOpt => {
 			val dt = dtOpt.getOrElse(null)

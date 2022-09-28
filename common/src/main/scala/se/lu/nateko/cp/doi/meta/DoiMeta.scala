@@ -277,9 +277,15 @@ case class Date(date: String, dateType: DateType) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(date)("Date must not be empty if specified"),
 		nonNull(dateType)("Date type must be specified for every date"),
-		if(date == null || date.isEmpty || !dateIsWrong(date)) None
-		else Some(s"Wrong date '$date', use format YYYY[-MM-DD]")
+		if(date == null || date.isEmpty || !dateIsWrong(date)) rangeAllowedCheck
+		else Some(s"Wrong date '$date', use format YYYY[-MM-DD] or YYYY-MM-DD/YYYY-MM-DD")
 	)
+
+	private def rangeAllowedCheck: Option[String] = date match
+		case dateRangeRegex(_, _) if !dateType.couldBeRange =>
+			Some(s"Date of type $dateType cannot be a date range")
+		case _ =>
+			None
 
 	private def dateIsWrong(date: String): Boolean = date match {
 		case dateRegex(yearStr, monthStr, dayStr) =>
