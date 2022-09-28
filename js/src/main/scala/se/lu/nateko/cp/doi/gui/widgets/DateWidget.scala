@@ -37,16 +37,16 @@ class DateWidget(init: Date, protected val updateCb: Date => Unit) extends Entit
 
 	private def checkedModifier(range: Boolean) = if(range == isRange) Seq(checked := true) else Nil
 
-	private def changeNameType(range: Boolean): Event => Unit = e => if(isRange != range){
+	private def changeDateType(range: Boolean): Event => Unit = e => if(isRange != range){
 		_date = if(range) Date(s"${_date.date}/", getRangeType) else Date(s"${_date.date.split("/")(0)}", _date.dateType)
-		val newNameElem = getDateElem
-		dateElem.parentNode.replaceChild(newNameElem, dateElem)
-		dateElem = newNameElem
+		val newDateElem = getDateElem
+		dateElem.parentNode.replaceChild(newDateElem, dateElem)
+		dateElem = newDateElem
 		updateCb(_date)
 	}
 
 	private def dateTypeOption(range: Boolean) =
-		input(tpe := "radio", name := "nameType", onchange := changeNameType(range))(checkedModifier(range))
+		input(tpe := "radio", name := "dateType", onchange := changeDateType(range))(checkedModifier(range))
 
 	val element = Bootstrap.basicCard(
 		Bootstrap.propValueRow(strong("Date format"))(
