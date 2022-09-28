@@ -7,8 +7,17 @@ enum ContributorType:
 		RegistrationAgency, RegistrationAuthority, RelatedPerson, ResearchGroup,
 		RightsHolder, Researcher, Sponsor, Supervisor, WorkPackageLeader
 
-enum DateType:
-	case Accepted, Available, Copyrighted, Collected, Created, Issued, Submitted, Updated, Valid
+enum DateType(val couldBeRange: Boolean):
+	case Accepted extends DateType(false)
+	case Available extends DateType(true)
+	case Copyrighted extends DateType(false)
+	case Collected extends DateType(true)
+	case Created extends DateType(true)
+	case Issued extends DateType(false)
+	case Submitted extends DateType(false)
+	case Updated extends DateType(true)
+	case Valid extends DateType(true)
+	case Other extends DateType(false)
 
 enum DescriptionType:
 	case Abstract, Methods, SeriesInformation, TableOfContents, TechnicalInfo, Other

@@ -285,7 +285,7 @@ case class Date(date: String, dateType: DateType) extends SelfValidating{
 			val month = monthStr.toInt
 			val day = dayStr.toInt
 			yearIsWrong(yearStr) || month < 1 || month > 12 || day < 1 || day > 31
-
+		case dateRangeRegex(startDate, endDate) => dateIsWrong(startDate) || dateIsWrong(endDate)
 		case yearRegex(yearStr) => yearIsWrong(yearStr)
 		case _ => true
 	}
@@ -302,6 +302,7 @@ case class Date(date: String, dateType: DateType) extends SelfValidating{
 object Date{
 	private val dateRegex = """(\d{4})-(\d\d)-(\d\d)""".r
 	private val yearRegex = "(\\d{4})".r
+	private val dateRangeRegex = """(\d{4}-\d\d-\d\d)/(\d{4}-\d\d-\d\d)""".r
 }
 
 case class Version(major: Int, minor: Int) extends SelfValidating{
