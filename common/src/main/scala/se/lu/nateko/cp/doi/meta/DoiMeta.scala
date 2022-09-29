@@ -94,7 +94,6 @@ object NameIdentifierScheme{
 
 	def values = Regexes.keys.toSeq
 	
-
 	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
 		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
 
@@ -272,18 +271,18 @@ case class Subject(
 	)
 }
 
-case class Date(date: String, dateType: DateType) extends SelfValidating{
+case class Date(date: String, dateType: Option[DateType]) extends SelfValidating{
 	import Date._
 	def error = joinErrors(
 		nonEmpty(date)("Date must not be empty if specified"),
-		nonNull(dateType)("Date type must be specified for every date"),
+		nonEmpty(dateType)("Date type must be specified for every date"),
 		if(date == null || date.isEmpty || !dateIsWrong(date)) rangeAllowedCheck
 		else Some(s"Wrong date '$date', use format YYYY[-MM-DD] or YYYY-MM-DD/YYYY-MM-DD")
 	)
 
 	private def rangeAllowedCheck: Option[String] = date match
-		case dateRangeRegex(_, _) if !dateType.couldBeRange =>
-			Some(s"Date of type $dateType cannot be a date range")
+		case dateRangeRegex(_, _) => dateType.flatMap(dt => if(!dt.couldBeRange)
+			Some(s"Date of type $dateType cannot be a date range") else None)
 		case _ =>
 			None
 

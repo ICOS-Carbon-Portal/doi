@@ -32,7 +32,7 @@ object DoiMetaExamples {
 				contributorType = Some(ContributorType.ProjectLeader)
 			)
 		),
-		dates = Seq(Date("2014-10-17", DateType.Updated)),
+		dates = Seq(Date("2014-10-17", Some(DateType.Updated))),
 		formats = Seq("application/xml"),
 		version = Some(Version(3, 1)),
 		rightsList = Some(Seq(Rights("CC0 1.0 Universal", Some("http://creativecommons.org/publicdomain/zero/1.0/")))),

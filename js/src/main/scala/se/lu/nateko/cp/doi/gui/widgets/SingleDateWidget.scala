@@ -22,9 +22,9 @@ class SingleDateWidget(init: Date, protected val updateCb: Date => Unit) extends
 
 	private val dateTypeInput = new SelectWidget[DateType](
 		SelectWidget.selectOptions(Some("Date format"), DateType.values),
-		Option(_date.dateType),
+		_date.dateType,
 		dtOpt => {
-			val dt = dtOpt.getOrElse(null)
+			val dt = dtOpt
 			_date = _date.copy(dateType = dt)
 			validate()
 			updateCb(_date)
@@ -35,4 +35,7 @@ class SingleDateWidget(init: Date, protected val updateCb: Date => Unit) extends
 			div(cls := "col-md-8")(dateInput.element),
 			div(cls := "col-md-4")(dateTypeInput.element)
 		).render
+
+	validate()
+	
 }

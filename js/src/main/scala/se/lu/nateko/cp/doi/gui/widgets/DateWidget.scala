@@ -28,7 +28,10 @@ class DateWidget(init: Date, protected val updateCb: Date => Unit) extends Entit
 	private var dateElem = getDateElem
 
 	private def changeDateType(range: Boolean): Event => Unit = e => if(isRange != range){
-		_date = Date( if(range) _date.date + "/" else _date.date.split("/")(0), _date.dateType)
+		_date = Date(
+					if(range) _date.date + "/" else _date.date.split("/")(0),
+					_date.dateType.flatMap(t => Option.when(t.couldBeRange)(t))
+					)
 		val newDateElem = getDateElem
 		dateElem.parentNode.replaceChild(newDateElem, dateElem)
 		dateElem = newDateElem
