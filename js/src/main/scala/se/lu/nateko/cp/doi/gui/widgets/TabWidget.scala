@@ -3,17 +3,13 @@ package se.lu.nateko.cp.doi.gui.widgets
 import scalatags.JsDom.all._
 import org.scalajs.dom.Event
 
-object EditorTab extends Enumeration{
-	type EditorTab = Value
+enum EditorTab:
+	case view, edit, json
 
-	val view = Value("view")
-	val edit = Value("edit")
-	val json = Value("json")
-}
 
-class TabWidget(activeTab: EditorTab.Value, cb: Map[EditorTab.Value, () => Unit]) {
+class TabWidget(activeTab: EditorTab, cb: Map[EditorTab, () => Unit]) {
 
-	private def isActive(tab: EditorTab.Value) = if (tab == activeTab) " active" else ""
+	private def isActive(tab: EditorTab) = if (tab == activeTab) " active" else ""
 
 	private val viewButton = button(tpe := "button", cls := "nav-link" ++ isActive(EditorTab.view))("View").render
 	viewButton.onclick = (_: Event) => cb(EditorTab.view)()

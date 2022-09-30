@@ -1,42 +1,44 @@
 package se.lu.nateko.cp.doi.gui.widgets
 
+import org.scalajs.dom.HTMLInputElement
+import org.scalajs.dom.HTMLSelectElement
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
-import se.lu.nateko.cp.doi.meta.Date
-import scalatags.JsDom.all._
-import org.scalajs.dom.html.Input
-import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
-import se.lu.nateko.cp.doi.gui.widgets.generic.SelectOption
-import se.lu.nateko.cp.doi.meta.DateType
-import se.lu.nateko.cp.doi.meta.DateType.DateType
 import se.lu.nateko.cp.doi.gui.widgets.generic.SelectWidget
+import se.lu.nateko.cp.doi.meta.Date
+import se.lu.nateko.cp.doi.meta.DateType
 
-class DateWidget(init: Date, protected val updateCb: Date => Unit) extends EntityWidget[Date]{
+trait DateWidget(init: Date) extends EntityWidget[Date]{
 
-	private[this] var _date = init
+	protected var _date = init
 
-	private[this] val dateInput: Input = new TextInputWidget(init.date, newDate => {
+	private val dateRegex = """\d\d\d\d-\d\d-\d\d""".r
+
+	def updateDate(newDate: String, validate: () => Unit) = {
 		_date = _date.copy(date = newDate)
 		validate()
 		updateCb(_date)
-	}, "YYYY-MM-DD", required = true).element
+	}
 
-	private[this] def validate(): Unit = highlightError(dateInput, _date.error)
+	def highlightDateTypeError(input: HTMLSelectElement) = {
+		val dateTypeErr =
+			if(input.value.nonEmpty) None
+			else Some("Date type must be specified for every date")
+		highlightError(input, dateTypeErr)
+	}
 
-	private[this] val dateTypeInput = new SelectWidget[DateType](
-		SelectWidget.selectOptions(DateType, Some("Date type")),
-		Option(init.dateType),
+	def highlightDateError(input: HTMLInputElement): Unit =
+		val dateErr =
+			if(dateRegex.matches(input.value)) None
+			else Some("Bad date format, use YYYY-MM-dd")
+		highlightError(input, dateErr)
+
+	def getDateTypeInput(init: Option[DateType], values: Array[DateType], validate: () => Unit) = new SelectWidget[DateType](
+		SelectWidget.selectOptions(Some("Date type"), values),
+		init,
 		dtOpt => {
-			val dt = dtOpt.getOrElse(null)
-			_date = _date.copy(dateType = dt)
+			_date = _date.copy(dateType = dtOpt)
 			validate()
 			updateCb(_date)
 		}
 	)
-
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(dateInput),
-		div(cls := "col-md-3")(dateTypeInput.element)
-	).render
-
-	validate()
 }

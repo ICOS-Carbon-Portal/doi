@@ -7,7 +7,7 @@ import se.lu.nateko.cp.doi.meta.Person
 import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 import se.lu.nateko.cp.doi.gui.widgets.TabWidget
 
-class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab.Value, () => Unit], cloneCb: DoiMeta => Unit) {
+class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: DoiMeta => Unit) {
 
 	private val tabs = new TabWidget(EditorTab.view, tabsCb).element
 	private val titles = meta.titles.fold[Seq[String]](Seq())(_.map(_.title).toSeq).map(h2(cls := "fs-3")(_))

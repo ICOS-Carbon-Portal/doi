@@ -10,12 +10,12 @@ class DoiMetaTests extends AnyFunSpec{
 	describe("NameIdentifier"){
 
 		it("is valid if has proper ORCID scheme"){
-			val id = NameIdentifier("0000-0001-1234-123X", NameIdentifierScheme.Orcid)
+			val id = NameIdentifier("0000-0001-1234-123X", NameIdentifierScheme.ORCID)
 			assert(id.error === None)
 		}
 
 		it("is invalid if has ORCID scheme but wrong format"){
-			val id = NameIdentifier("0000-0001-1234-123A", NameIdentifierScheme.Orcid)
+			val id = NameIdentifier("0000-0001-1234-123A", NameIdentifierScheme.ORCID)
 			assert(id.error.isDefined)
 			assert(id.error.get.contains("format"))
 		}

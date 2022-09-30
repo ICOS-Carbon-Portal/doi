@@ -36,8 +36,8 @@ object Doi{
 
 case class DoiMeta(
 	doi: Doi,
-	state: DoiPublicationState.Value = draft,
-	event: Option[DoiPublicationEvent.Value] = None,
+	state: DoiPublicationState = draft,
+	event: Option[DoiPublicationEvent] = None,
 	creators: Seq[Creator] = Seq(),
 	titles: Option[Seq[Title]] = None,
 	publisher: Option[String] = None,
