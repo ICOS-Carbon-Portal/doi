@@ -281,10 +281,10 @@ case class Date(date: String, dateType: Option[DateType]) extends SelfValidating
 	)
 
 	private def rangeAllowedCheck: Option[String] = date match
-		case dateRangeRegex(_, _) => dateType.flatMap(dt => if(!dt.couldBeRange)
-			Some(s"Date of type $dateType cannot be a date range") else None)
-		case _ =>
-			None
+		case dateRangeRegex(_, _) => dateType.collect{
+			case dt if(!dt.couldBeRange) =>  s"Date of type $dt cannot be a date range"
+		}
+		case _ => None
 
 	private def dateIsWrong(date: String): Boolean = date match {
 		case dateRegex(yearStr, monthStr, dayStr) =>

@@ -217,11 +217,11 @@ object DoiMetaWidget{
 
 
 	class DatesEditWidget(init: Seq[Date], cb: Seq[Date] => Unit) extends
-		MultiEntitiesEditWidget[Date, DateWidget](init, cb)("Dates"){
+		MultiEntitiesEditWidget[Date, CompositeDateWidget](init, cb)("Dates"){
 
-		protected def makeWidget(value: Date, updateCb: Date => Unit) = new DateWidget(value, updateCb)
+		protected def makeWidget(value: Date, updateCb: Date => Unit) = new CompositeDateWidget(value, updateCb)
 
-		protected def defaultValue = Date("", null)
+		protected def defaultValue = Date("", None)
 	}
 
 
