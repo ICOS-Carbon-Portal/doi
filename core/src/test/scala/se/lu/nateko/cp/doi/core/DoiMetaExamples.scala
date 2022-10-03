@@ -22,7 +22,7 @@ object DoiMetaExamples {
 		publicationYear = Some(2014),
 		types = Some(ResourceType(Some("XML"), Some(ResourceTypeGeneral.Software))),
 		subjects = Seq(
-			Subject("000 computer science", Some("en-us"), Some(SubjectScheme.Dewey), None)
+			Subject("000 computer science", Some("en-us"), None)
 		),
 		contributors = Seq(
 			Contributor(

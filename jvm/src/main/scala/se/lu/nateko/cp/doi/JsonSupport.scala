@@ -32,7 +32,6 @@ object JsonSupport{
 
 	given Format[Doi] = Json.format[Doi]
 
-	given Format[SubjectScheme] = enumFormat(SubjectScheme.valueOf)
 	given OFormat[Subject] = Json.format[Subject]
 	given OFormat[NameIdentifierScheme] = Json.format[NameIdentifierScheme]
 	given OFormat[NameIdentifier] = Json.format[NameIdentifier]

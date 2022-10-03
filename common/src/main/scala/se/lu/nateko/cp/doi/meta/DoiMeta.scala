@@ -252,21 +252,14 @@ case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Optio
 	)
 }
 
-enum SubjectScheme(schemeUri: Option[String]) extends SelfValidating{
-	def error = schemeUri.flatMap(validUri)
-	case Dewey extends SubjectScheme(Some("http://dewey.info/"))
-}
-
 case class Subject(
 	val subject: String,
 	val lang: Option[String] = None,
-	val scheme: Option[SubjectScheme] = None,
 	val valueUri: Option[String] = None
 ) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(subject)("Subject must not be empty"),
 		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided")),
-		scheme.flatMap(_.error),
 		valueUri.flatMap(validUri)
 	)
 }

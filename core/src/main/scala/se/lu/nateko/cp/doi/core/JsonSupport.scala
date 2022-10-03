@@ -60,8 +60,7 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
-	given RootJsonFormat[SubjectScheme] = enumFormat(SubjectScheme.valueOf)
-	given RootJsonFormat[Subject] = fieldConflatingFormat(jsonFormat4(Subject.apply), "scheme", opt = true)
+	given RootJsonFormat[Subject] = jsonFormat3(Subject.apply)
 	private val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
 
 	given RootJsonFormat[NameIdentifierScheme] with {
