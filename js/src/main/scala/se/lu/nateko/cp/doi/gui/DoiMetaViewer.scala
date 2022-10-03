@@ -23,7 +23,7 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 	private val subjects = p(meta.subjects.map(subject => span(cls := "badge rounded-pill bg-secondary me-1")(subject.subject)).toSeq)
 	private val creators = div(listPeople(meta.creators.toSeq, "Creators"))
 	private val contributors = div(listPeople(meta.contributors.toSeq, "Contributors"))
-	private val dates = p(meta.dates.map(d => div(s"${d.dateType}: ${d.date}")).toSeq)
+	private val dates = p(meta.dates.map(d => div(d.toString)).toSeq)
 	private val doiUrl = "https://doi.org/" + meta.doi
 	private val doiLink = p(a(href := doiUrl, target := "_blank")(doiUrl))
 

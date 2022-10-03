@@ -296,6 +296,8 @@ case class Date(date: String, dateType: Option[DateType]) extends SelfValidating
 		}catch{
 			case _: Throwable => true
 		}
+
+	override def toString = dateType.fold(s"${date}")(dt => s"$dt: ${date}")
 }
 
 object Date{
