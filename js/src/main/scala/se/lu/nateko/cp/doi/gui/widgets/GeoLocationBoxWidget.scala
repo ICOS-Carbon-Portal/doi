@@ -34,16 +34,16 @@ class GeoLocationBoxWidget (
 
 	val element = div(
 		div(cls := "row")(
-			div(cls := "col-md-2")(strong("East bound longitude "), small("(WGS-84)")),
-			div(cls := "col-md-3")(eastBoundLongitudeInput.element),
+			div(cls := "col-md-2")(strong("South bound latitude "), small("(WGS-84)")),
+			div(cls := "col-md-3")(southBoundLatitudeInput.element),
 			div(cls := "col-md-2")(strong("North bound latitude "), small("(WGS-84)")),
 			div(cls := "col-md-3")(northBoundLatitudeInput.element)
 		)(paddingBottom := 15),
 		div(cls := "row")(
-			div(cls := "col-md-2")(strong("South bound latitude "), small("(WGS-84)")),
-			div(cls := "col-md-3")(southBoundLatitudeInput.element),
 			div(cls := "col-md-2")(strong("West bound longitude "), small("(WGS-84)")),
 			div(cls := "col-md-3")(westBoundLongitudeInput.element),
+			div(cls := "col-md-2")(strong("East bound longitude "), small("(WGS-84)")),
+			div(cls := "col-md-3")(eastBoundLongitudeInput.element),
 		)
 	).render
 }
