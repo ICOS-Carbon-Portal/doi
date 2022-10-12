@@ -22,7 +22,7 @@ class VersionWidget(init: Option[Version], protected val updateCb: Option[Versio
 		case _ =>
 			updateCb(Some(Version(-1, -1)))
 			highlightError(element, Some("Bad version format, try N[N].N[N]"))
-	}, "N[N].N[N]", required = true).element
+	}, "N[N].N[N]").element
 
 }
 
