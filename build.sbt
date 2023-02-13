@@ -74,8 +74,8 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7",
-			"se.lu.nateko.cp"   %% "views-core"           % "0.6.0",
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.7.0",
+			"se.lu.nateko.cp"   %% "views-core"           % "0.6.5",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.8.0",
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
