@@ -7,9 +7,6 @@ trait DoiHttp {
 
 	case class DoiResponse(status: Int, message: String, body: String)
 
-	protected val username: String
-	protected val password: String
-
 	def getJson(url: URL): Future[DoiResponse] = getContent(url, "application/vnd.api+json")
 
 	protected def getContent(url: URL, accept: String): Future[DoiResponse]

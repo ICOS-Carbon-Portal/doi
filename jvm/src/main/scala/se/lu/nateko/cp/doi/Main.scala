@@ -33,7 +33,7 @@ object Main{
 		val authRouting = new AuthRouting(conf.auth)
 
 		val client = {
-			val http = new AkkaDoiHttp(conf.client.symbol, conf.client.password)
+			val http = new AkkaDoiHttp(conf.client.member.symbol, conf.client.member.password)
 			new DoiClient(conf.client, http)
 		}
 		val doiRouting = new DoiClientRouting(client, conf)

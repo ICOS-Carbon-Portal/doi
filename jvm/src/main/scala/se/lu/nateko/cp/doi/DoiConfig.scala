@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import se.lu.nateko.cp.doi.core.DoiClientConfig
+import se.lu.nateko.cp.doi.core.DoiMemberConfig
 import java.net.URL
 import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
 import se.lu.nateko.cp.cpauth.core.UserId
@@ -35,7 +36,7 @@ object DoiConfig {
 			httpBindInterface = doiConf.getString("httpBindInterface"),
 			httpBindPort = doiConf.getInt("httpBindPort"),
 			client = getClientConfig(doiConf),
-			prefixInfo = doiConf.getString("prefix"),
+			prefixInfo = doiConf.getString("member.prefix"),
 			auth = getAuthConfig(allConf),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf),
@@ -51,10 +52,12 @@ object DoiConfig {
 	}
 
 	private def getClientConfig(doiConf: Config) = DoiClientConfig(
-		symbol = doiConf.getString("symbol"),
-		password = doiConf.getString("password"),
 		restEndpoint = new URL(doiConf.getString("restEndpoint")),
-		doiPrefix = doiConf.getString("prefix")
+		member = DoiMemberConfig(
+			symbol = doiConf.getString("member.symbol"),
+			password = doiConf.getString("member.password"),
+			doiPrefix = doiConf.getString("member.prefix")
+		)
 	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {

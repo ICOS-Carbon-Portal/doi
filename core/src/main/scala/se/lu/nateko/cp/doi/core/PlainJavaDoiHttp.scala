@@ -10,9 +10,9 @@ import java.io.IOException
 
 
 class PlainJavaDoiHttp(
-	protected val username: String,
-	protected val password: String
-)(implicit ctxt: ExecutionContext) extends DoiHttp{
+	username: Option[String],
+	password: Option[String]
+)(using ExecutionContext) extends DoiHttp{
 
 	protected def getContent(url: URL, accept: String): Future[DoiResponse] = Future{
 
@@ -57,13 +57,14 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	private def getConnection(url: URL): HttpURLConnection = {
+	private def getConnection(url: URL): HttpURLConnection =
 		val conn = url.openConnection().asInstanceOf[HttpURLConnection]
-		val encoder = Base64.getEncoder()
-		val authString = encoder.encodeToString((username + ":" + password).getBytes)
-		conn.setRequestProperty("Authorization", "Basic " + authString)
+		for user <- username; pass <- password do
+			val encoder = Base64.getEncoder()
+			val authString = encoder.encodeToString((user + ":" + pass).getBytes)
+			conn.setRequestProperty("Authorization", "Basic " + authString)
 		conn
-	}
+
 
 	private def toDoiResponse(conn: HttpURLConnection, in: InputStream): DoiResponse = {
 

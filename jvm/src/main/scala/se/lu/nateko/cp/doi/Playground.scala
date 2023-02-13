@@ -16,7 +16,7 @@ object Playground {
 	import system.dispatcher
 
 	val config = DoiConfig.getConfig.client
-	val http = new AkkaDoiHttp(config.symbol, config.password)
+	val http = new AkkaDoiHttp(config.member.symbol, config.member.password)
 	val client = new DoiClient(config, http)
 
 	val testDoi = client.doi("carbonportal")

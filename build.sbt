@@ -46,7 +46,7 @@ lazy val core = project
 	.settings(
 		name := "doi-core",
 		libraryDependencies ++= Seq("io.spray" %%  "spray-json" % "1.3.6"),
-		version := "0.4.0"
+		version := "0.4.1"
 	)
 
 //the DOI minting web app itself
