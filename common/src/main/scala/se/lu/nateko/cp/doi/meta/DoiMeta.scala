@@ -101,7 +101,7 @@ object NameIdentifierScheme{
 		Regexes.get(nameIdentifierScheme)
 
 	private val Regexes = Map(
-		ORCID -> """^(\d{4}\-?){3}\d{3}[0-9X]$""".r,
+		ORCID -> """^(https://orcid.org/)?(\d{4}\-?){3}\d{3}[0-9X]$""".r,
 		ISNI -> """^(\d{4} ?){3}\d{3}[0-9X]$""".r,
 		ROR -> "^[a-z0-9]{9}$".r,
 		FLUXNET -> """^[A-Z]{2}\-[A-Z][A-Za-z0-9]{2}$""".r
