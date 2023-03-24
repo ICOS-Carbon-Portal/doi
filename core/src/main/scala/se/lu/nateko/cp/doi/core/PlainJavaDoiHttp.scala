@@ -31,7 +31,7 @@ class PlainJavaDoiHttp(
 		val conn = getConnection(url)
 		conn.setDoOutput(true)
 		conn.setRequestProperty("Content-Type", contentType)
-		conn.setRequestMethod("PUT")
+		conn.setRequestMethod("POST")
 
 		try{
 			val out = conn.getOutputStream()

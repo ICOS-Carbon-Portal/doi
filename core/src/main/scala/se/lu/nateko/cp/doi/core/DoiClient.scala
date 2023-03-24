@@ -65,9 +65,9 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 		)
 
 	def putMetadata(meta: DoiMeta): Future[Unit] = http
-		.putPayload(
-			metaUrl(meta.doi),
-			SingleDoiPayload(DoiWrapper(meta)).toJson.compactPrint,
+	.putPayload(
+			new URL(s"$metaBase"),
+			SingleDoiPayload(DoiWrapper(id = meta.doi.toString, `type` = "dois", attributes = meta)).toJson.compactPrint,
 			"application/vnd.api+json"
 		).flatMap(analyzeResponse{
 			case 200 | 201 => Future.successful(())
