@@ -190,6 +190,7 @@ case class FunderIdentifierValidator(scheme: FunderIdentifierScheme, regex: Rege
 
 case class Affiliation(name: String)
 
+// TODO: change to Agent
 sealed trait Person extends SelfValidating{
 	val name: Name
 	val nameIdentifiers: Seq[NameIdentifier]
