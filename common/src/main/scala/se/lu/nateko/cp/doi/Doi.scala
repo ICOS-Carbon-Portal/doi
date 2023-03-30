@@ -83,7 +83,7 @@ case class DoiMeta(
 	)
 }
 
-case class DoiWrapper(attributes: DoiMeta)
+case class DoiWrapper(id: Doi, `type`: String, attributes: DoiMeta)
 case class SingleDoiPayload(data: DoiWrapper)
 case class DoiListMeta(total: Int, totalPages: Int, page: Int)
 case class DoiListPayload(data: Seq[DoiWrapper], meta: DoiListMeta)
