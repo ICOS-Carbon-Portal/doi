@@ -75,7 +75,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7",
 			"se.lu.nateko.cp"   %% "views-core"           % "0.6.7",
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.8.0",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.8.1",
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
