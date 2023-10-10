@@ -98,6 +98,10 @@ lazy val doiJvm = doi.jvm
 		cpDeployTarget := "doi",
 		cpDeployBuildInfoPackage := "se.lu.nateko.cp.doi",
 		cpDeployPreAssembly := Def.sequential(
+			common / clean,
+			core / clean,
+			doiJs / clean,
+			clean,
 			common.jvm / Test / test,
 			common.js / Test / test,
 			core / Test / test,
