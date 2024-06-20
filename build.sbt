@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "3.2.0"
+ThisBuild / scalaVersion := "3.3.3"
 ThisBuild / organization := "se.lu.nateko.cp"
 
 val commonSettings = Seq(

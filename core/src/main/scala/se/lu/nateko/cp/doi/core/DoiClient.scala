@@ -16,14 +16,15 @@ import scala.io.Source
 import scala.util.Try
 
 import JsonSupport.given
+import java.net.URI
 
 trait DoiReadonlyClient(conf: DoiEndpointConfig, protected val http: DoiHttp)(using ExecutionContext):
 
-	protected val metaBase: URL = new URL(conf.restEndpoint, "dois")
+	protected val metaBase: URI = new URI(conf.restEndpoint.toString()).resolve("dois")
 
-	def metaUrl(doi: Doi) = new URL(s"$metaBase/$doi")
+	def metaUrl(doi: Doi) = new URI(s"$metaBase/$doi")
 
-	def getMetadata(doi: Doi): Future[Option[DoiMeta]] = http.getJson(metaUrl(doi)).flatMap(
+	def getMetadata(doi: Doi): Future[Option[DoiMeta]] = http.getJson(metaUrl(doi).toURL()).flatMap(
 		resp => analyzeResponse{
 			case 200 => Future.successful(
 				Some(resp.body.parseJson.convertTo[SingleDoiPayload].data.attributes)
@@ -50,7 +51,7 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 
 	private val config = conf.member
 
-	def clientDois(query: String, page: Int): URL = new URL(
+	def clientDois(query: String, page: Int): URI = new URI(
 		//TODO Move page size into the API, too
 		s"${conf.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
 	)
@@ -58,7 +59,7 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 
 	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[DoiListPayload] = http
-		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(
+		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1)).toURL()).flatMap(
 			resp => analyzeResponse{
 				case 200 => Future.successful(resp.body.parseJson.convertTo[DoiListPayload])
 			}(resp)
@@ -66,7 +67,7 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 
 	def putMetadata(meta: DoiMeta): Future[Unit] = http
 		.putPayload(
-			metaUrl(meta.doi),
+			metaUrl(meta.doi).toURL(),
 			SingleDoiPayload(DoiWrapper(meta)).toJson.compactPrint,
 			"application/vnd.api+json"
 		).flatMap(analyzeResponse{
@@ -74,6 +75,6 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 		})
 
 	def delete(doi: Doi): Future[Unit] =
-		http.delete(metaUrl(doi)).flatMap(
+		http.delete(metaUrl(doi).toURL()).flatMap(
 			analyzeResponse{case 204 | 404 => Future.successful(())}
 		)
