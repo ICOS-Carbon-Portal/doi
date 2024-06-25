@@ -20,9 +20,9 @@ import java.net.URI
 
 trait DoiReadonlyClient(conf: DoiEndpointConfig, protected val http: DoiHttp)(using ExecutionContext):
 
-	protected val metaBase: URI = new URI(conf.restEndpoint.toString()).resolve("dois")
+	protected val metaBase: URI = conf.restEndpoint.resolve("dois")
 
-	def metaUrl(doi: Doi) = new URI(s"$metaBase/$doi")
+	def metaUrl(doi: Doi): URI = metaBase.resolve(doi.toString)
 
 	def getMetadata(doi: Doi): Future[Option[DoiMeta]] = http.getJson(metaUrl(doi)).flatMap(
 		resp => analyzeResponse{
@@ -53,7 +53,7 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 
 	def clientDois(query: String, page: Int): URI = new URI(
 		//TODO Move page size into the API, too
-		s"${conf.restEndpoint}dois?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
+		s"${metaBase}?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
 	)
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
