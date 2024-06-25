@@ -1,7 +1,8 @@
 @import views.html.CpCommonPage
+@import eu.icoscp.envri.Envri
 
-@(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false, cpauthHost: String)
-@CpCommonPage("Carbon Portal's DOI minting service", authHost = cpauthHost, dataHost = "data.icos-cp.eu"){
+@(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false)(implicit env: Envri)
+@CpCommonPage("Carbon Portal's DOI minting service"){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
 			.spacyrow{

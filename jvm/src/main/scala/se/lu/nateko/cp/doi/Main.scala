@@ -18,10 +18,12 @@ import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import scala.concurrent.Future
 import scala.util.Try
 import play.twirl.api.Html
+import eu.icoscp.envri.Envri
 
 object Main{
 
 	private given ToResponseMarshaller[Html] = TemplatePageMarshalling.marshaller
+	private given Envri = Envri.ICOS
 
 	def main(args: Array[String]): Unit = {
 
@@ -49,7 +51,7 @@ object Main{
 		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
 		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development, conf.auth.authHost))
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development))
 		}
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(

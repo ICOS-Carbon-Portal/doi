@@ -1,6 +1,6 @@
 package se.lu.nateko.cp.doi
 
-import java.net.URL
+import java.net.URI
 
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -29,7 +29,7 @@ class AkkaDoiHttp(
 	import system.dispatcher
 
 
-	protected def getContent(url: URL, accept: String): Future[DoiResponse] = {
+	protected def getContent(url: URI, accept: String): Future[DoiResponse] = {
 
 		val acceptHeader = Accept.parseFromValueString(accept).getOrElse(
 			throw new Exception("Invalid accept header value: " + accept)
@@ -39,7 +39,7 @@ class AkkaDoiHttp(
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
-	def putPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = {
+	def putPayload(url: URI, payload: String, contentType: String): Future[DoiResponse] = {
 		val cType = ContentType.parse(contentType).getOrElse(
 			throw new Exception("Invalid content type: " + contentType)
 		)
@@ -50,12 +50,12 @@ class AkkaDoiHttp(
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
-	def delete(url: URL): Future[DoiResponse] = {
+	def delete(url: URI): Future[DoiResponse] = {
 		val request = basicRequest(url).withMethod(HttpMethods.DELETE)
 		http.singleRequest(request).flatMap(responseToDoi)
 	}
 
-	private def basicRequest(url: URL) = HttpRequest(
+	private def basicRequest(url: URI) = HttpRequest(
 		uri = Uri(url.toString),
 		headers = List(authHeader)
 	)

@@ -1,7 +1,7 @@
 package se.lu.nateko.cp.doi.core
 
 import scala.concurrent.Future
-import java.net.URL
+import java.net.URI
 import java.net.HttpURLConnection
 import scala.concurrent.ExecutionContext
 import java.util.Base64
@@ -14,7 +14,7 @@ class PlainJavaDoiHttp(
 	password: Option[String]
 )(using ExecutionContext) extends DoiHttp{
 
-	protected def getContent(url: URL, accept: String): Future[DoiResponse] = Future{
+	protected def getContent(url: URI, accept: String): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
 		conn.setRequestProperty("Accept", accept)
@@ -26,7 +26,7 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	def putPayload(url: URL, payload: String, contentType: String): Future[DoiResponse] = Future{
+	def putPayload(url: URI, payload: String, contentType: String): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
 		conn.setDoOutput(true)
@@ -45,7 +45,7 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	def delete(url: URL): Future[DoiResponse] = Future{
+	def delete(url: URI): Future[DoiResponse] = Future{
 
 		val conn = getConnection(url)
 		conn.setRequestMethod("DELETE")
@@ -57,8 +57,8 @@ class PlainJavaDoiHttp(
 		}
 	}
 
-	private def getConnection(url: URL): HttpURLConnection =
-		val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+	private def getConnection(url: URI): HttpURLConnection =
+		val conn = url.toURL.openConnection().asInstanceOf[HttpURLConnection]
 		for user <- username; pass <- password do
 			val encoder = Base64.getEncoder()
 			val authString = encoder.encodeToString((user + ":" + pass).getBytes)

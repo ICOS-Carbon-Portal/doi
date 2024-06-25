@@ -2,12 +2,14 @@ package se.lu.nateko.cp.doi
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import se.lu.nateko.cp.cpauth.core.ConfigLoader
 import se.lu.nateko.cp.doi.core.DoiClientConfig
 import se.lu.nateko.cp.doi.core.DoiMemberConfig
-import java.net.URL
+import java.net.URI
 import se.lu.nateko.cp.cpauth.core.PublicAuthConfig
 import se.lu.nateko.cp.cpauth.core.UserId
 import scala.jdk.CollectionConverters.ListHasAsScala
+import eu.icoscp.envri.Envri
 
 case class EmailConfig(
 	smtpServer: String,
@@ -29,30 +31,24 @@ case class DoiConfig(
 
 object DoiConfig {
 
-	def getConfig: DoiConfig = {
-		val allConf = getAppConfig
+	def getConfig(using envri: Envri): DoiConfig = {
+		val allConf = ConfigLoader.appConfig
+
 		val doiConf = allConf.getConfig("cpdoi")
 		DoiConfig(
 			httpBindInterface = doiConf.getString("httpBindInterface"),
 			httpBindPort = doiConf.getInt("httpBindPort"),
 			client = getClientConfig(doiConf),
 			prefixInfo = doiConf.getString("member.prefix"),
-			auth = getAuthConfig(allConf),
+			auth = ConfigLoader.authPubConfig(envri),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf),
 			metaHost = doiConf.getString("metaHost")
 		)
 	}
 
-	private def getAppConfig: Config = {
-		val default = ConfigFactory.load
-		val confFile = new java.io.File("application.conf").getAbsoluteFile
-		if(!confFile.exists) default
-		else ConfigFactory.parseFile(confFile).withFallback(default)
-	}
-
 	private def getClientConfig(doiConf: Config) = DoiClientConfig(
-		restEndpoint = new URL(doiConf.getString("restEndpoint")),
+		restEndpoint = new URI(doiConf.getString("restEndpoint")),
 		member = DoiMemberConfig(
 			symbol = doiConf.getString("member.symbol"),
 			password = doiConf.getString("member.password"),

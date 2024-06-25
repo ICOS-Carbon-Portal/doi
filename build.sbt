@@ -46,7 +46,7 @@ lazy val core = project
 	.settings(
 		name := "doi-core",
 		libraryDependencies ++= Seq("io.spray" %%  "spray-json" % "1.3.6"),
-		version := "0.4.1"
+		version := "0.4.2"
 	)
 
 //the DOI minting web app itself
@@ -55,8 +55,8 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi",
-		version := "0.3.0",
-		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.10.0-RC6",
+		version := "0.3.1",
+		libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.10.6",
 	)
 	.jsSettings(
 		name := "doi-js",
@@ -74,14 +74,14 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 			"com.typesafe.akka" %% "akka-slf4j"           % "2.6.19" cross CrossVersion.for3Use2_13,
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7",
-			"se.lu.nateko.cp"   %% "views-core"           % "0.6.7",
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.8.1",
+			"se.lu.nateko.cp"   %% "views-core"           % "0.7.10",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.9.1",
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
 		},
 		assembly / assemblyMergeStrategy := {
-			case PathList(name) if(name.endsWith("-fastopt.js") || name.endsWith("module-info.class")) =>
+			case name if(name.endsWith("-fastopt.js") || name.endsWith("module-info.class")) =>
 				MergeStrategy.discard
 			case x =>
 				val originalStrategy = (assembly / assemblyMergeStrategy).value

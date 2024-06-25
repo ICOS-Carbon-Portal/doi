@@ -7,12 +7,14 @@ import se.lu.nateko.cp.doi.core.DoiClient
 import se.lu.nateko.cp.doi.core.JsonSupport.given
 import se.lu.nateko.cp.doi.meta._
 import spray.json.*
+import eu.icoscp.envri.Envri
 
 
 
 object Playground {
 
 	given system: ActorSystem = ActorSystem("doi-playground")
+	given Envri = Envri.ICOS
 	import system.dispatcher
 
 	val config = DoiConfig.getConfig.client

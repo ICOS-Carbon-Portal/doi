@@ -1,10 +1,10 @@
 package se.lu.nateko.cp.doi.core
 
-import java.net.URL
+import java.net.URI
 
 trait DoiEndpointConfig:
-	def restEndpoint: URL
+	def restEndpoint: URI
 
 case class DoiMemberConfig(symbol: String, password: String, doiPrefix: String)
 
-case class DoiClientConfig(restEndpoint: URL, member: DoiMemberConfig) extends DoiEndpointConfig
+case class DoiClientConfig(restEndpoint: URI, member: DoiMemberConfig) extends DoiEndpointConfig
