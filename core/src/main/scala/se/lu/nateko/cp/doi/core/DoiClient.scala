@@ -20,7 +20,7 @@ import java.net.URI
 
 trait DoiReadonlyClient(conf: DoiEndpointConfig, protected val http: DoiHttp)(using ExecutionContext):
 
-	protected val metaBase: URI = conf.restEndpoint.resolve("dois")
+	protected val metaBase: URI = conf.restEndpoint.resolve("dois/")
 
 	def metaUrl(doi: Doi): URI = metaBase.resolve(doi.toString)
 
