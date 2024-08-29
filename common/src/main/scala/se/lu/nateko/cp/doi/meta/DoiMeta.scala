@@ -234,7 +234,7 @@ case class Contributor(
 
 	override def error = joinErrors(
 		super.error,
-		nonNull(contributorType)("Contributor type must be specified")
+		nonEmpty(contributorType)("Contributor type must be specified")
 	)
 }
 
@@ -248,8 +248,8 @@ case class Title(title: String, lang: Option[String], titleType: Option[TitleTyp
 
 case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral]) extends SelfValidating{
 	def error = joinErrors(
-		nonEmpty(resourceType.fold("")(r => r))("Specific resource type must not be empty"),
-		nonNull(resourceTypeGeneral)("The general resource type must be specified")
+		nonEmpty(resourceType.getOrElse(""))("Specific resource type must not be empty"),
+		nonEmpty(resourceTypeGeneral)("The general resource type must be specified")
 	)
 }
 

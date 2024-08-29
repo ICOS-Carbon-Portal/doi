@@ -62,5 +62,6 @@ object Backend {
 
 	private def checkResponseOk(hint: String)(resp: dom.Response): Future[dom.Response] =
 		if(resp.ok) Future.successful(resp)
-		else Future.failed(new Exception(s"Got response ${resp.statusText} when trying to $hint"))
+		else resp.text().toFuture.map: respTxt =>
+			throw new Exception(s"When trying to $hint , got response:\n$respTxt ")
 }
