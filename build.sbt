@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "3.3.3"
+ThisBuild / scalaVersion := "3.3.4"
 ThisBuild / organization := "se.lu.nateko.cp"
 
 val commonSettings = Seq(
@@ -75,7 +75,7 @@ lazy val doi = crossProject(JSPlatform, JVMPlatform)
 			"ch.qos.logback"     % "logback-classic"      % "1.1.3",
 			"com.sun.mail"       % "jakarta.mail"         % "1.6.7",
 			"se.lu.nateko.cp"   %% "views-core"           % "0.7.10",
-			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.9.1",
+			"se.lu.nateko.cp"   %% "cpauth-core"          % "0.10.1",
 		),
 		reStart / baseDirectory  := {
 			(reStart / baseDirectory).value.getParentFile
