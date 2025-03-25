@@ -44,7 +44,7 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 
 							val metaHost = meta.url.fold(conf.metaHost)(url => {
 								val targetHost = new URI(url).getHost()
-								if (targetHost.endsWith("icos-cp.eu"))
+								if (targetHost == "citymeta.icos-cp.eu")
 									targetHost
 								else
 									conf.metaHost
