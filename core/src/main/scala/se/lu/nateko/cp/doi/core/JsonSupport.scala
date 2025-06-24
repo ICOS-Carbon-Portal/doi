@@ -121,7 +121,7 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
-	given RootJsonFormat[Rights] = jsonFormat2(Rights.apply)
+	given RootJsonFormat[Rights] = jsonFormat1(Rights.apply)
 	given RootJsonFormat[Description] = jsonFormat3(Description.apply)
 
 	private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)

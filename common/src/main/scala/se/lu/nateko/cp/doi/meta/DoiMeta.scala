@@ -328,11 +328,31 @@ object Version{
 	}
 }
 
-case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(rights)("License name must be provided"),
-		rightsUri.flatMap(validUri)
-	)
+case class Rights(rights: String) extends SelfValidating{
+  val rightsIdentifier = rights match {
+    case "CC BY 4.0" => "cc-by-4.0"
+    case "CC0 1.0" => "cc0-1.0"
+  }
+  val rightsUri = rightsIdentifier match {
+    case "cc-by-4.0" => "https://creativecommons.org/licenses/by/4.0/legalcode"
+    case "cc0-1.0" => "https://creativecommons.org/publicdomain/zero/1.0/legalcode.en"
+  }
+  val schemeUri = "https://spdx.org/licenses/"
+  val rightsIdentifierScheme = "SPDX"
+  def error = joinErrors(
+    nonEmpty(rightsIdentifier)("Rights identifier must be provided"),
+    nonEmpty(rights)("License name must be provided"),
+  )
+}
+
+object Rights {
+  val Ccby4 = Rights("CC BY 4.0")
+  val Cc0 = Rights("CC0 1.0")
+  val iterableRights = Map(
+    Ccby4 -> Ccby4,
+    Cc0 -> Cc0
+  )
+  def supported = iterableRights.keys.toSeq
 }
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
