@@ -121,14 +121,13 @@ object JsonSupport extends DefaultJsonProtocol{
       identity
     )
   }
-  private val rightsFormat = jsonFormat1(Rights.apply)
-  given RootJsonFormat[Rights] with {
-    def write(rights: Rights): JsValue = JsObject(
-      "rights" -> JsString(rights.rights),
-      "rightsIdentifier" -> JsString(rights.rightsIdentifier),
-      "rightsUri" -> JsString(rights.rightsUri),
-      "schemeUri" -> JsString(rights.schemeUri),
-      "rightsIdentifierScheme" -> JsString(rights.rightsIdentifierScheme)
+  implicit val rightsFormat: RootJsonFormat[Rights] = new RootJsonFormat[Rights] {
+    def write(obj: Rights): JsValue = JsObject(
+      "rights" -> JsString(obj.rights),
+      "rightsIdentifier" -> JsString(obj.rightsIdentifier),
+      "rightsUri" -> JsString(obj.rightsUri),
+      "schemeUri" -> JsString(obj.schemeUri),
+      "rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme)
     )
     def read(json: JsValue): Rights = json.asJsObject.getFields("rights") match {
       case Seq(JsString(rights)) => Rights(rights.toString)
