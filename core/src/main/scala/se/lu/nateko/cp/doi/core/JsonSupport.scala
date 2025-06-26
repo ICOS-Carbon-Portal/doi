@@ -121,7 +121,20 @@ object JsonSupport extends DefaultJsonProtocol{
       identity
     )
   }
-  given RootJsonFormat[Rights] = jsonFormat1(Rights.apply)
+  private val rightsFormat = jsonFormat1(Rights.apply)
+  given RootJsonFormat[Rights] with {
+    def write(rights: Rights): JsValue = JsObject(
+      "rights" -> JsString(rights.rights),
+      "rightsIdentifier" -> JsString(rights.rightsIdentifier),
+      "rightsUri" -> JsString(rights.rightsUri),
+      "schemeUri" -> JsString(rights.schemeUri),
+      "rightsIdentifierScheme" -> JsString(rights.rightsIdentifierScheme)
+    )
+    def read(json: JsValue): Rights = json.asJsObject.getFields("rights") match {
+      case Seq(JsString(rights)) => Rights(rights.toString)
+      case _ => deserializationError("Expected 'rights' field")
+    }
+  }
   given RootJsonFormat[Description] = jsonFormat3(Description.apply)
 
   private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
