@@ -234,7 +234,7 @@ object DoiMetaWidget{
 
 		protected def makeWidget(value: Rights, updateCb: Rights => Unit) = new RightsWidget(value, updateCb)
 
-		protected def defaultValue = Rights("", None)
+		protected def defaultValue = Rights("")
 	}
 
 

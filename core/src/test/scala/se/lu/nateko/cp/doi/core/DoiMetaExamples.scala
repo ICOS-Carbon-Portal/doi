@@ -35,7 +35,7 @@ object DoiMetaExamples {
 		dates = Seq(Date("2014-10-17", Some(DateType.Updated))),
 		formats = Seq("application/xml"),
 		version = Some(Version(3, 1)),
-		rightsList = Some(Seq(Rights("CC0 1.0 Universal", Some("http://creativecommons.org/publicdomain/zero/1.0/")))),
+		rightsList = Some(Seq(Rights("CC0 1.0 Universal"))),
 		descriptions = Seq(
 			Description("XML example of all DataCite Metadata Schema v4.0 properties.", DescriptionType.Abstract, Some("en-us"))
 		),
