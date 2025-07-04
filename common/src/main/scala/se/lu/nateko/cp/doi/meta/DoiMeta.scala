@@ -330,8 +330,8 @@ object Version{
 
 case class Rights(rights: String) extends SelfValidating {
 	val rightsIdentifier = rights match {
-		case "CC BY 4.0" => "cc-by-4.0"
-		case "CC0 1.0" => "cc0-1.0"
+		case "Creative Commons Attribution 4.0 International" => "cc-by-4.0"
+		case "Creative Commons Zero v1.0 Universal" => "cc0-1.0"
 	}
 	val rightsUri = rightsIdentifier match {
 		case "cc-by-4.0" => "https://creativecommons.org/licenses/by/4.0/legalcode"
