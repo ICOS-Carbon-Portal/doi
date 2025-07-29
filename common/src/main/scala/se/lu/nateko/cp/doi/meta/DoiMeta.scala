@@ -330,15 +330,16 @@ object Version{
 
 case class Rights(rights: String) extends SelfValidating {
 	val rightsIdentifier = rights match {
-		case "Creative Commons Attribution 4.0 International" => "cc-by-4.0"
-		case "Creative Commons Zero v1.0 Universal" => "cc0-1.0"
+		case "Creative Commons Attribution 4.0 International" => "CC-BY-4.0"
+		case "Creative Commons Zero v1.0 Universal" => "CC0-1.0"
 	}
 	val rightsUri = rightsIdentifier match {
-		case "cc-by-4.0" => "https://creativecommons.org/licenses/by/4.0/legalcode"
-		case "cc0-1.0" => "https://creativecommons.org/publicdomain/zero/1.0/legalcode.en"
+		case "CC-BY-4.0" => "https://creativecommons.org/licenses/by/4.0/legalcode"
+		case "CC0-1.0" => "https://creativecommons.org/publicdomain/zero/1.0/legalcode.en"
 	}
 	val schemeUri = "https://spdx.org/licenses/"
 	val rightsIdentifierScheme = "SPDX"
+	val lang = "eng"
 	def error = joinErrors(
 		nonEmpty(rightsIdentifier)("Rights identifier must be provided"),
 		nonEmpty(rights)("License name must be provided"),
