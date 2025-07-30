@@ -122,19 +122,26 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
+	/*
 	implicit val rightsFormat: RootJsonFormat[Rights] = new RootJsonFormat[Rights] {
 		def write(obj: Rights): JsValue = JsObject(
 			"rights" -> JsString(obj.rights),
-			"rightsIdentifier" -> JsString(obj.rightsIdentifier),
+			// TODO: error due to it being an Option, does it need to be an Option? do we need this method?
 			"rightsUri" -> JsString(obj.rightsUri),
+			"rightsIdentifier" -> JsString(obj.rightsIdentifier),
+			"rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme),
 			"schemeUri" -> JsString(obj.schemeUri),
-			"rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme)
+			"rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme),
+			"lang" -> JsString(obj.lang)
 		)
 		def read(json: JsValue): Rights = json.asJsObject.getFields("rights") match {
 			case Seq(JsString(rights)) => Rights(rights.toString)
 			case _ => deserializationError("Expected 'rights' field")
 		}
 	}
+	*/
+	given RootJsonFormat[Rights] = jsonFormat6(Rights.apply)
+
 	given RootJsonFormat[Description] = jsonFormat3(Description.apply)
 
 	private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
