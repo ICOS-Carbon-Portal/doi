@@ -9,6 +9,16 @@ import se.lu.nateko.cp.doi.gui.widgets.generic.SelectWidget
 class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends EntityWidget[Rights] {
 	private[this] var _rights = init
 
+	private[this] val ccBy4Button = button(
+		cls := "btn btn-secondary",
+		tpe := "button",
+	)("CC-BY-4.0")
+
+	private[this] val ccZeroButton = button(
+		cls := "btn btn-secondary",
+		tpe := "button",
+	)("CC0-1.0")
+
 	private[this] val statementInput = new TextInputWidget(init.rights, rs => {
 		_rights = _rights.copy(rights = rs)
 		updateCb(_rights)
@@ -45,6 +55,9 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 	}, "Language", required = false)
 
 	val element = div(cls := "row spacyrow")(
+		div(cls := "col-md-2")(strong("Autofill")),
+		div(cls := "col-md-2")(ccBy4Button)(paddingBottom := 15),
+		div(cls := "col-md-8")(ccZeroButton)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("License name")),
 		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("License URI")),
