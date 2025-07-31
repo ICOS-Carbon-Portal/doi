@@ -44,12 +44,18 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		updateCb(_rights)
 	}, "Language", required = false)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(statementInput.element),
-		div(cls := "col-md-6")(urlInput.element),
-		div(cls := "col-md-6")(schemeUri.element),
-		div(cls := "col-md-6")(rightsIdentifier.element),
-		div(cls := "col-md-6")(rightsIdentifierScheme.element),
-		div(cls := "col-md-6")(lang.element)
+	val element = div(cls := "row spacyrow")(
+		div(cls := "col-md-2")(strong("License name")),
+		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("License URI")),
+		div(cls := "col-md-4")(urlInput.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("License id")),
+		div(cls := "col-md-4")(rightsIdentifier.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("License id scheme")),
+		div(cls := "col-md-4")(rightsIdentifierScheme.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("Scheme uri")),
+		div(cls := "col-md-4")(schemeUri.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("Language")),
+		div(cls := "col-md-4")(lang.element)(paddingBottom := 15)
 	).render
 }
