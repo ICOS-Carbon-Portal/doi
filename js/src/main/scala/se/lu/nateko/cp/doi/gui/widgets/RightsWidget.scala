@@ -38,11 +38,14 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		updateCb(_rights)
 	}, "License id scheme", required = false)
 
-	private[this] val lang = new TextInputWidget(init.lang.getOrElse(""), l => {
-		val lOpt = if (l.isEmpty) None else Some(l)
-		_rights = _rights.copy(lang = lOpt)
-		updateCb(_rights)
-	}, "Language", required = false)
+	private[this] val languageInput = new SelectWidget[String](
+		TitleWidget.languageOptions,
+		init.lang,
+		langOpt => {
+			_rights = _rights.copy(lang = langOpt)
+			updateCb(_rights)
+		}
+	)
 
 	val element = div(cls := "row spacyrow")(
 		div(cls := "col-md-2")(strong("License name")),
@@ -56,6 +59,6 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		div(cls := "col-md-2")(strong("Scheme uri")),
 		div(cls := "col-md-4")(schemeUri.element)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("Language")),
-		div(cls := "col-md-4")(lang.element)(paddingBottom := 15)
+		div(cls := "col-md-4")(languageInput.element)(paddingBottom := 15)
 	).render
 }
