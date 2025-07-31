@@ -334,7 +334,7 @@ case class Rights(
 	schemeUri: Option[String] = Some("https://spdx.org/licenses"),
 	rightsIdentifier: Option[String],
 	rightsIdentifierScheme: Option[String] = Some("SPDX"),
-	lang: Option[String]
+	lang: Option[String] = Some("en")
 ) extends SelfValidating {
 	def error = joinErrors(
 		nonEmpty(rightsIdentifier)("Rights identifier must be provided"),
