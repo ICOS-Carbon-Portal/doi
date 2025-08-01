@@ -12,12 +12,32 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 	private[this] val ccBy4Button = button(
 		cls := "btn btn-secondary",
 		tpe := "button",
-	)("CC-BY-4.0")
+		onclick := (autofillCcBy4 _)
+	)("CC-BY-4.0").render
+
+	private def autofillCcBy4(): Unit = {
+		statementInput.element.value = "Creative Commons Attribution 4.0 International"
+		urlInput.element.value = "https://creativecommons.org/licenses/by/4.0/"
+		schemeUri.element.value = "https://spdx.org/licenses/"
+		rightsIdentifier.element.value = "CC-BY-4.0"
+		rightsIdentifierScheme.element.value = "SPDX"
+		lang.element.value = "eng"
+	}
 
 	private[this] val ccZeroButton = button(
 		cls := "btn btn-secondary",
 		tpe := "button",
-	)("CC0-1.0")
+		onclick := (autofillCcZero _)
+	)("CC0-1.0").render
+
+	private def autofillCcZero(): Unit = {
+		statementInput.element.value = "Creative Commons Zero v1.0 Universal"
+		urlInput.element.value = "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+		schemeUri.element.value = "https://spdx.org/licenses/"
+		rightsIdentifier.element.value = "CC0-1.0"
+		rightsIdentifierScheme.element.value = "SPDX"
+		lang.element.value = "eng"
+	}
 
 	private[this] val statementInput = new TextInputWidget(init.rights, rs => {
 		_rights = _rights.copy(rights = rs)
