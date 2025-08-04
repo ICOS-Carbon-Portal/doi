@@ -125,13 +125,12 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
 	given RootJsonFormat[FunderIdentifierScheme] with {
+		def write(fs: FunderIdentifierScheme): JsValue = funderIdentifierSchemeFormat.write(fs)
 
-	def write(fs: FunderIdentifierScheme): JsValue = funderIdentifierSchemeFormat.write(fs)
+		def read(json: JsValue) = {
+			val dataCiteVersion = funderIdentifierSchemeFormat.read(json)
 
-	def read(json: JsValue) = {
-		val dataCiteVersion = funderIdentifierSchemeFormat.read(json)
-
-		FunderIdentifierScheme.lookup(dataCiteVersion.funderIdentifierType).getOrElse(dataCiteVersion)
+			FunderIdentifierScheme.lookup(dataCiteVersion.funderIdentifierType).getOrElse(dataCiteVersion)
 		}
 	}
 
