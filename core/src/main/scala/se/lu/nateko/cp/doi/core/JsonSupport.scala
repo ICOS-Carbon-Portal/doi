@@ -55,10 +55,8 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	given RootJsonFormat[Doi] with{
 		def write(doi: Doi): JsValue = JsString(doi.toString)
-		def read(json: JsValue): Doi = Doi.parse(json.convertTo[String]).fold(
-		err => deserializationError(err.getMessage),
-		identity
-		)
+		def read(json: JsValue): Doi = Doi.parse(json.convertTo[String])
+			.fold(err => deserializationError(err.getMessage), identity)
 	}
 	given RootJsonFormat[Subject] = jsonFormat3(Subject.apply)
 	private val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
@@ -67,9 +65,8 @@ object JsonSupport extends DefaultJsonProtocol{
 		def write(ns: NameIdentifierScheme): JsValue = nameIdentifierSchemeFormat.write(ns)
 
 		def read(json: JsValue) = {
-		val dataCiteVersion = nameIdentifierSchemeFormat.read(json)
-
-		NameIdentifierScheme.lookup(dataCiteVersion.nameIdentifierScheme).getOrElse(dataCiteVersion)
+			val dataCiteVersion = nameIdentifierSchemeFormat.read(json)
+			NameIdentifierScheme.lookup(dataCiteVersion.nameIdentifierScheme).getOrElse(dataCiteVersion)
 		}
 	}
 
@@ -94,18 +91,18 @@ object JsonSupport extends DefaultJsonProtocol{
 	}
 
 	given JsonFormat[Affiliation] with {
-	def write(affiliation: Affiliation) = JsObject(
-		"name" -> JsString(affiliation.name)
-	)
+		def write(affiliation: Affiliation) = JsObject(
+			"name" -> JsString(affiliation.name)
+		)
 
-	def read(json: JsValue): Affiliation = json match {
-		case JsObject(fields) => fields.get("name") match {
-			case Some(JsString(name)) => Affiliation(name)
-			case _ => deserializationError("Expected affiliation name")
-		}
+		def read(json: JsValue): Affiliation = json match {
+			case JsObject(fields) => fields.get("name") match {
+				case Some(JsString(name)) => Affiliation(name)
+				case _ => deserializationError("Expected affiliation name")
+			}
 			case JsString(name) => Affiliation(name)
 			case _ => deserializationError("Expected affiliation")
-	}
+		}
 	}
 	given RootJsonFormat[Creator] = fieldConflatingFormat(jsonFormat3(Creator.apply), "name")
 	given RootJsonFormat[Contributor] = fieldConflatingFormat(jsonFormat4(Contributor.apply), "name")
@@ -122,24 +119,6 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
-	/*
-	implicit val rightsFormat: RootJsonFormat[Rights] = new RootJsonFormat[Rights] {
-		def write(obj: Rights): JsValue = JsObject(
-			"rights" -> JsString(obj.rights),
-			// TODO: error due to it being an Option, does it need to be an Option? do we need this method?
-			"rightsUri" -> JsString(obj.rightsUri),
-			"rightsIdentifier" -> JsString(obj.rightsIdentifier),
-			"rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme),
-			"schemeUri" -> JsString(obj.schemeUri),
-			"rightsIdentifierScheme" -> JsString(obj.rightsIdentifierScheme),
-			"lang" -> JsString(obj.lang)
-		)
-		def read(json: JsValue): Rights = json.asJsObject.getFields("rights") match {
-			case Seq(JsString(rights)) => Rights(rights.toString)
-			case _ => deserializationError("Expected 'rights' field")
-		}
-	}
-	*/
 	given RootJsonFormat[Rights] = jsonFormat6(Rights.apply)
 
 	given RootJsonFormat[Description] = jsonFormat3(Description.apply)
@@ -161,13 +140,13 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
-	def latLonFormat[T <: Latitude | Longitude](factory: Double => T) = new RootJsonFormat[Option[T]]{
-	def write(obj: Option[T]): JsValue = obj.fold(JsNull)(JsNumber.apply)
-	def read(json: JsValue): Option[T] = json match
-		case JsNull => None
-		case JsString(s) => s.toDoubleOption.map(factory)
-		case JsNumber(n) => Some(factory(n.toDouble))
-		case _ => deserializationError("expected a lat/lon number")
+	def latLonFormat[T <: Latitude | Longitude](factory: Double => T) = new RootJsonFormat[Option[T]] {
+		def write(obj: Option[T]): JsValue = obj.fold(JsNull)(JsNumber.apply)
+		def read(json: JsValue): Option[T] = json match
+			case JsNull => None
+			case JsString(s) => s.toDoubleOption.map(factory)
+			case JsNumber(n) => Some(factory(n.toDouble))
+			case _ => deserializationError("expected a lat/lon number")
 	}
 	given latFormat: RootJsonFormat[Option[Latitude]] = latLonFormat(Latitude.apply)
 	given lonFormat: RootJsonFormat[Option[Longitude]] = latLonFormat(Longitude.apply)
