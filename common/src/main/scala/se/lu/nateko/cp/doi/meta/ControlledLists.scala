@@ -32,5 +32,7 @@ enum TitleType:
 	case AlternativeTitle, Subtitle, TranslatedTitle, Other
 
 enum ResourceTypeGeneral:
-	case Audiovisual, Collection, Dataset, Event, Image, InteractiveResource, Model, PhysicalObject,
-		Service, Software, Sound, Text, Workflow, Other
+	case Audiovisual, Book, BookChapter, Collection, ComputationalNotebook, ConferencePaper,
+	ConferenceProceeding, DataPaper, Dataset, Dissertation, Event, Image, InteractiveResource,
+	Instrument, Journal, JournalArticle, Model, OutputManagementPlan, PeerReview, PhysicalObject,
+	Report, Service, Software, Sound, Standard, StudyRegistration, Text, Workflow, Other
