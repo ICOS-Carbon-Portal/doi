@@ -93,7 +93,7 @@ object NameIdentifierScheme{
 	val FLUXNET             = NameIdentifierScheme("FLUXNET", None)
 
 	def values = Regexes.keys.toSeq
-	
+
 	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
 		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
 
@@ -341,48 +341,48 @@ enum MetadataRelation {
 }
 
 enum ResourceRelation {
-	case IsCitedBy extends ResourceRelation
-	case Cites extends ResourceRelation
-	case IsSupplementTo extends ResourceRelation
-	case IsSupplementedBy extends ResourceRelation
-	case IsContinuedBy extends ResourceRelation
-	case Continues extends ResourceRelation
-	case IsDescribedBy extends ResourceRelation
-	case Describes extends ResourceRelation
-	case HasMetadata extends ResourceRelation
-	case IsMetadataFor extends ResourceRelation
-	case HasVersion extends ResourceRelation
-	case IsVersionOf extends ResourceRelation
-	case IsNewVersionOf extends ResourceRelation
-	case IsPreviousVersionOf extends ResourceRelation
-	case IsPartOf extends ResourceRelation
-	case HasPart extends ResourceRelation
-	case IsPublishedIn extends ResourceRelation
-	case IsReferencedBy extends ResourceRelation
-	case References extends ResourceRelation
-	case IsDocumentedBy extends ResourceRelation
-	case Documents extends ResourceRelation
-	case IsCompiledBy extends ResourceRelation
-	case Compiles extends ResourceRelation
-	case IsVariantFormOf extends ResourceRelation
-	case IsOriginalFormOf extends ResourceRelation
-	case IsIdenticalTo extends ResourceRelation
-	case IsReviewedBy extends ResourceRelation
-	case Reviews extends ResourceRelation
-	case IsDerivedFrom extends ResourceRelation
-	case IsSourceOf extends ResourceRelation
-	case IsRequiredBy extends ResourceRelation
-	case Requires extends ResourceRelation
-	case IsObsoletedBy extends ResourceRelation
-	case Obsoletes extends ResourceRelation
-	case IsCollectedBy extends ResourceRelation
-	case Collects extends ResourceRelation
-	case IsTranslationOf extends ResourceRelation
-	case HasTranslation extends ResourceRelation
+	case IsCitedBy
+	case Cites
+	case IsSupplementTo
+	case IsSupplementedBy
+	case IsContinuedBy
+	case Continues
+	case IsDescribedBy
+	case Describes
+	case HasMetadata
+	case IsMetadataFor
+	case HasVersion
+	case IsVersionOf
+	case IsNewVersionOf
+	case IsPreviousVersionOf
+	case IsPartOf
+	case HasPart
+	case IsPublishedIn
+	case IsReferencedBy
+	case References
+	case IsDocumentedBy
+	case Documents
+	case IsCompiledBy
+	case Compiles
+	case IsVariantFormOf
+	case IsOriginalFormOf
+	case IsIdenticalTo
+	case IsReviewedBy
+	case Reviews
+	case IsDerivedFrom
+	case IsSourceOf
+	case IsRequiredBy
+	case Requires
+	case IsObsoletedBy
+	case Obsoletes
+	case IsCollectedBy
+	case Collects
+	case IsTranslationOf
+	case HasTranslation
 }
 
 enum RelatedIdentifierType {
-	case Dummy extends RelatedIdentifierType
+	case Dummy // TODO
 }
 
 // TODO: Add new controlled lists
@@ -390,6 +390,7 @@ type SchemeType = String
 type RelatedMetadataScheme = String
 
 enum RelatedIdentifier {
+	case RelatedResource(content: RelatedContent) extends RelatedIdentifier
 	case RelatedMetadata(
 		relationType: MetadataRelation,
 		relatedIdentifierType: RelatedIdentifierType,
