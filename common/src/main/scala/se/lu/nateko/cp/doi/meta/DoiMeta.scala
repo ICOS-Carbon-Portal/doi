@@ -335,6 +335,78 @@ case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidat
 	)
 }
 
+enum MetadataRelation {
+	case HasMetadata extends MetadataRelation
+	case IsMetadataFor extends MetadataRelation
+}
+
+enum ResourceRelation {
+	case IsCitedBy extends ResourceRelation
+	case Cites extends ResourceRelation
+	case IsSupplementTo extends ResourceRelation
+	case IsSupplementedBy extends ResourceRelation
+	case IsContinuedBy extends ResourceRelation
+	case Continues extends ResourceRelation
+	case IsDescribedBy extends ResourceRelation
+	case Describes extends ResourceRelation
+	case HasMetadata extends ResourceRelation
+	case IsMetadataFor extends ResourceRelation
+	case HasVersion extends ResourceRelation
+	case IsVersionOf extends ResourceRelation
+	case IsNewVersionOf extends ResourceRelation
+	case IsPreviousVersionOf extends ResourceRelation
+	case IsPartOf extends ResourceRelation
+	case HasPart extends ResourceRelation
+	case IsPublishedIn extends ResourceRelation
+	case IsReferencedBy extends ResourceRelation
+	case References extends ResourceRelation
+	case IsDocumentedBy extends ResourceRelation
+	case Documents extends ResourceRelation
+	case IsCompiledBy extends ResourceRelation
+	case Compiles extends ResourceRelation
+	case IsVariantFormOf extends ResourceRelation
+	case IsOriginalFormOf extends ResourceRelation
+	case IsIdenticalTo extends ResourceRelation
+	case IsReviewedBy extends ResourceRelation
+	case Reviews extends ResourceRelation
+	case IsDerivedFrom extends ResourceRelation
+	case IsSourceOf extends ResourceRelation
+	case IsRequiredBy extends ResourceRelation
+	case Requires extends ResourceRelation
+	case IsObsoletedBy extends ResourceRelation
+	case Obsoletes extends ResourceRelation
+	case IsCollectedBy extends ResourceRelation
+	case Collects extends ResourceRelation
+	case IsTranslationOf extends ResourceRelation
+	case HasTranslation extends ResourceRelation
+}
+
+enum RelatedIdentifierType {
+	case Dummy extends RelatedIdentifierType
+}
+
+// TODO: Add new controlled lists
+type SchemeType = String
+type RelatedMetadataScheme = String
+
+enum RelatedIdentifier {
+	case RelatedMetadata(
+		relationType: MetadataRelation,
+		relatedIdentifierType: RelatedIdentifierType,
+		relatedIdentifier: String,
+		resourceTypeGeneral: Option[ResourceTypeGeneral],
+		relatedMetadataScheme: RelatedMetadataScheme,
+		schemeUri: String,
+		schemeType: SchemeType
+	) extends RelatedIdentifier
+	case RelatedResource(
+		relationType: ResourceRelation,
+		relatedIdentifierType: RelatedIdentifierType,
+		relatedIdentifier: String,
+		resourceTypeGeneral: Option[ResourceTypeGeneral]
+	) extends RelatedIdentifier
+}
+
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(description)("Description must not be empty (if supplied)"),
