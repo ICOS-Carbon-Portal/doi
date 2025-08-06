@@ -382,7 +382,27 @@ enum ResourceRelation {
 }
 
 enum RelatedIdentifierType {
-	case Dummy // TODO
+	case ARK
+	case arXiv
+	case bibcode
+	case CSTR
+	case DOI
+	case EAN13
+	case EISSN
+	case Handle
+	case IGSN
+	case ISBN
+	case ISSN
+	case ISTC
+	case LISSN
+	case LSID
+	case PMID
+	case PURL
+	case RRID
+	case UPC
+	case URL
+	case URN
+	case w3id
 }
 
 // TODO: Add new controlled lists
