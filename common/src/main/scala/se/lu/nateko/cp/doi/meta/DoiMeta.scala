@@ -390,7 +390,6 @@ type SchemeType = String
 type RelatedMetadataScheme = String
 
 enum RelatedIdentifier {
-	case RelatedResource(content: RelatedContent) extends RelatedIdentifier
 	case RelatedMetadata(
 		relationType: MetadataRelation,
 		relatedIdentifierType: RelatedIdentifierType,
