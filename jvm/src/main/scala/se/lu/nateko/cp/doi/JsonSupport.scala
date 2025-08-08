@@ -78,6 +78,12 @@ object JsonSupport{
 	given OFormat[FunderIdentifier] =  Json.format[FunderIdentifier]
 	given OFormat[FundingReference] = Json.format[FundingReference]
 
+	//given OFormat[RelatedIdentifier] = Json.format[RelatedIdentifier]
+	//given OFormat[RelatedIdentifier.RelatedMetadata] = Json.format[RelatedIdentifier.RelatedMetadata]
+	//given OFormat[MetadataRelation] = Json.format[MetadataRelation]
+	//given OFormat[RelatedIdentifierType] = Json.format[RelatedIdentifierType]
+	//given OFormat[RelatedIdentifier.RelatedResource] = Json.format[RelatedIdentifier.RelatedResource]
+
 	private val doubleFormat = summon[Format[Double]]
 	given Reads[Latitude] = doubleFormat.map(Latitude.apply)
 	given Reads[Longitude] = doubleFormat.map(Longitude.apply)
