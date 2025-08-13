@@ -29,6 +29,8 @@ object JsonSupport{
 	given titleTypeFormat: Format[TitleType] = enumFormat(TitleType.valueOf)
 	given doiStateEnumFormat: Format[DoiPublicationState] = enumFormat(DoiPublicationState.valueOf)
 	given doiEventEnumFormat: Format[DoiPublicationEvent] = enumFormat(DoiPublicationEvent.valueOf)
+	given Format[RelationType] = enumFormat(RelationType.valueOf)
+	given Format[RelatedIdentifierType] = enumFormat(RelatedIdentifierType.valueOf)
 
 	given Format[Doi] = Json.format[Doi]
 

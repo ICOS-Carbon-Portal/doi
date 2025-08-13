@@ -335,13 +335,6 @@ case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidat
 	)
 }
 
-/*
-enum MetadataRelation {
-	case HasMetadata
-	case IsMetadataFor
-}
-*/
-
 enum RelationType {
 	case HasMetadata, IsMetadataFor, IsCitedBy, Cites, IsSupplementTo,
 	IsSupplementedBy,
