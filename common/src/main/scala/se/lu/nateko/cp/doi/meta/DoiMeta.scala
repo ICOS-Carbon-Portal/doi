@@ -343,68 +343,64 @@ enum MetadataRelation {
 */
 
 enum RelationType {
-	case HasMetadata
-	case IsMetadataFor
-	case IsCitedBy
-	case Cites
-	case IsSupplementTo
-	case IsSupplementedBy
-	case IsContinuedBy
-	case Continues
-	case IsDescribedBy
-	case Describes
-	case HasVersion
-	case IsVersionOf
-	case IsNewVersionOf
-	case IsPreviousVersionOf
-	case IsPartOf
-	case HasPart
-	case IsPublishedIn
-	case IsReferencedBy
-	case References
-	case IsDocumentedBy
-	case Documents
-	case IsCompiledBy
-	case Compiles
-	case IsVariantFormOf
-	case IsOriginalFormOf
-	case IsIdenticalTo
-	case IsReviewedBy
-	case Reviews
-	case IsDerivedFrom
-	case IsSourceOf
-	case IsRequiredBy
-	case Requires
-	case IsObsoletedBy
-	case Obsoletes
-	case IsCollectedBy
-	case Collects
-	case IsTranslationOf
-	case HasTranslation
+	case HasMetadata, IsMetadataFor, IsCitedBy, Cites, IsSupplementTo,
+	IsSupplementedBy,
+	IsContinuedBy,
+	Continues,
+	IsDescribedBy,
+	Describes,
+	HasVersion,
+	IsVersionOf,
+	IsNewVersionOf,
+	IsPreviousVersionOf,
+	IsPartOf,
+	HasPart,
+	IsPublishedIn,
+	IsReferencedBy,
+	References,
+	IsDocumentedBy,
+	Documents,
+	IsCompiledBy,
+	Compiles,
+	IsVariantFormOf,
+	IsOriginalFormOf,
+	IsIdenticalTo,
+	IsReviewedBy,
+	Reviews,
+	IsDerivedFrom,
+	IsSourceOf,
+	IsRequiredBy,
+	Requires,
+	IsObsoletedBy,
+	Obsoletes,
+	IsCollectedBy,
+	Collects,
+	IsTranslationOf,
+	HasTranslation,
 }
 
 enum RelatedIdentifierType {
-	case ARK
-	case arXiv
-	case bibcode
-	case CSTR
-	case DOI
-	case EAN13
-	case EISSN
-	case Handle
-	case IGSN
-	case ISBN
-	case ISSN
-	case ISTC
-	case LISSN
-	case LSID
-	case PMID
-	case PURL
-	case RRID
-	case UPC
-	case URL
-	case URN
-	case w3id
+	case ARK,
+		arXiv,
+		bibcode,
+		CSTR,
+		DOI,
+		EAN13,
+		EISSN,
+		Handle,
+		IGSN,
+		ISBN,
+		ISSN,
+		ISTC,
+		LISSN,
+		LSID,
+		PMID,
+		PURL,
+		RRID,
+		UPC,
+		URL,
+		URN,
+		w3id
 }
 
 final case class RelatedIdentifier (
@@ -418,27 +414,8 @@ final case class RelatedIdentifier (
 	schemeUri: Option[String],
 	schemeType: Option[String]
 ) extends SelfValidating {
+	def error: Option[String] = ???
 }
-
-/*
-enum RelatedIdentifier {
-	case RelatedMetadata(
-		relationType: MetadataRelation,
-		relatedIdentifierType: RelatedIdentifierType,
-		relatedIdentifier: String,
-		resourceTypeGeneral: Option[ResourceTypeGeneral],
-		relatedMetadataScheme: RelatedMetadataScheme,
-		schemeUri: String,
-		schemeType: SchemeType
-	) extends RelatedIdentifier
-	case RelatedResource(
-		relationType: ResourceRelation,
-		relatedIdentifierType: RelatedIdentifierType,
-		relatedIdentifier: String,
-		resourceTypeGeneral: Option[ResourceTypeGeneral]
-	) extends RelatedIdentifier
-}
-*/
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
 	def error = joinErrors(
