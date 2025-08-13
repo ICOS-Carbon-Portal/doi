@@ -335,12 +335,16 @@ case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidat
 	)
 }
 
+/*
 enum MetadataRelation {
-	case HasMetadata extends MetadataRelation
-	case IsMetadataFor extends MetadataRelation
+	case HasMetadata
+	case IsMetadataFor
 }
+*/
 
-enum ResourceRelation {
+enum RelationType {
+	case HasMetadata
+	case IsMetadataFor
 	case IsCitedBy
 	case Cites
 	case IsSupplementTo
@@ -349,8 +353,6 @@ enum ResourceRelation {
 	case Continues
 	case IsDescribedBy
 	case Describes
-	case HasMetadata
-	case IsMetadataFor
 	case HasVersion
 	case IsVersionOf
 	case IsNewVersionOf
@@ -405,10 +407,20 @@ enum RelatedIdentifierType {
 	case w3id
 }
 
-// TODO: Add new controlled lists
-type SchemeType = String
-type RelatedMetadataScheme = String
+final case class RelatedIdentifier (
+	relationType: RelationType,
+	relatedIdentifierType: RelatedIdentifierType,
+	relatedIdentifier: String,
+	resourceTypeGeneral: Option[ResourceTypeGeneral],
 
+	// Only valid for HasMetadata and IsMetadataFor
+	relatedMetadataScheme: Option[String],
+	schemeUri: Option[String],
+	schemeType: Option[String]
+) extends SelfValidating {
+}
+
+/*
 enum RelatedIdentifier {
 	case RelatedMetadata(
 		relationType: MetadataRelation,
@@ -426,6 +438,7 @@ enum RelatedIdentifier {
 		resourceTypeGeneral: Option[ResourceTypeGeneral]
 	) extends RelatedIdentifier
 }
+*/
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
 	def error = joinErrors(

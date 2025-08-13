@@ -21,7 +21,7 @@ object JsonSupport{
 			case _ => JsError("Expected a string")
 		}
 	}
-	
+
 	given dateTypeFormat: Format[DateType] = enumFormat(DateType.valueOf)
 	given contrTypeFormat: Format[ContributorType] = enumFormat(ContributorType.valueOf)
 	given descriptionTypeFormat: Format[DescriptionType] = enumFormat(DescriptionType.valueOf)
@@ -78,11 +78,8 @@ object JsonSupport{
 	given OFormat[FunderIdentifier] =  Json.format[FunderIdentifier]
 	given OFormat[FundingReference] = Json.format[FundingReference]
 
-	//given OFormat[RelatedIdentifier] = Json.format[RelatedIdentifier]
-	//given OFormat[RelatedIdentifier.RelatedMetadata] = Json.format[RelatedIdentifier.RelatedMetadata]
-	//given OFormat[MetadataRelation] = Json.format[MetadataRelation]
-	//given OFormat[RelatedIdentifierType] = Json.format[RelatedIdentifierType]
-	//given OFormat[RelatedIdentifier.RelatedResource] = Json.format[RelatedIdentifier.RelatedResource]
+	given OFormat[RelatedIdentifier] = Json.format[RelatedIdentifier]
+
 
 	private val doubleFormat = summon[Format[Double]]
 	given Reads[Latitude] = doubleFormat.map(Latitude.apply)
