@@ -397,8 +397,8 @@ enum RelatedIdentifierType {
 }
 
 final case class RelatedIdentifier (
-	relationType: RelationType,
-	relatedIdentifierType: RelatedIdentifierType,
+	relationType: Option[RelationType],
+	relatedIdentifierType: Option[RelatedIdentifierType],
 	relatedIdentifier: String,
 	resourceTypeGeneral: Option[ResourceTypeGeneral],
 
@@ -407,7 +407,10 @@ final case class RelatedIdentifier (
 	schemeUri: Option[String],
 	schemeType: Option[String]
 ) extends SelfValidating {
-	def error: Option[String] = ???
+	def error = joinErrors(
+		nonEmpty(relatedIdentifier)("Related identifier must not be empty"),
+		nonNull(relationType)("Please provide a relation type")
+	)
 }
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
