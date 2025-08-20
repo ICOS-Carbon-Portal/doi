@@ -25,6 +25,11 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		init.relationType,
 		rtOpt => {
 			_relatedIdentifier = _relatedIdentifier.copy(relationType = rtOpt)
+			rtOpt.getOrElse("") match {
+				case RelationType.HasMetadata => relatedMetadataDiv.classList.remove("d-none")
+				case RelationType.IsMetadataFor => relatedMetadataDiv.classList.remove("d-none")
+				case _ => relatedMetadataDiv.classList.add("d-none")
+			}
 			updateCb(_relatedIdentifier)
 		}
 	)
@@ -65,13 +70,25 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		updateCb(_relatedIdentifier)
 	}, "Scheme type", required = false)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(relatedIdentifierInput.element),
-		div(cls := "col-md-6")(relationTypeInput.element),
-		div(cls := "col-md-6")(relatedIdentifierTypeInput.element),
-		div(cls := "col-md-6")(resourceTypeGeneralInput.element),
+	var defaultHidden = init.relationType.getOrElse("") match {
+		case RelationType.HasMetadata => "row spacyrow"
+		case RelationType.IsMetadataFor => "row spacyrow"
+		case _ => "row spacyrow d-none"
+	}
+
+	private[this] var relatedMetadataDiv = div(cls := defaultHidden)(
 		div(cls := "col-md-6")(relatedMetadataSchemeInput.element),
 		div(cls := "col-md-6")(schemeUriInput.element),
-		div(cls := "col-md-6")(schemeTypeInput.element)
+		div(cls := "col-md-6")(schemeTypeInput.element),
+	).render
+
+	val element = div(cls := "row spacyrow")(
+		div(cls := "row")(
+			div(cls := "col-md-6")(relatedIdentifierInput.element),
+			div(cls := "col-md-6")(relationTypeInput.element),
+			div(cls := "col-md-6")(relatedIdentifierTypeInput.element),
+			div(cls := "col-md-6")(resourceTypeGeneralInput.element),
+		),
+		relatedMetadataDiv
 	).render
 }
