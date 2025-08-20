@@ -70,24 +70,31 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		updateCb(_relatedIdentifier)
 	}, "Scheme type", required = false)
 
-	var defaultHidden = init.relationType.getOrElse("") match {
+	var initialRelationType = init.relationType.getOrElse("") match {
 		case RelationType.HasMetadata => "row spacyrow"
 		case RelationType.IsMetadataFor => "row spacyrow"
 		case _ => "row spacyrow d-none"
 	}
 
-	private[this] var relatedMetadataDiv = div(cls := defaultHidden)(
-		div(cls := "col-md-6")(relatedMetadataSchemeInput.element),
-		div(cls := "col-md-6")(schemeUriInput.element),
-		div(cls := "col-md-6")(schemeTypeInput.element),
+	private[this] var relatedMetadataDiv = div(cls := initialRelationType)(
+		div(cls := "col-md-2")(strong("Metadata scheme")),
+		div(cls := "col-md-4")(relatedMetadataSchemeInput.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("Scheme uri")),
+		div(cls := "col-md-4")(schemeUriInput.element)(paddingBottom := 15),
+		div(cls := "col-md-2")(strong("Scheme type")),
+		div(cls := "col-md-4")(schemeTypeInput.element)(paddingBottom := 15),
 	).render
 
 	val element = div(cls := "row spacyrow")(
 		div(cls := "row")(
-			div(cls := "col-md-6")(relatedIdentifierInput.element),
-			div(cls := "col-md-6")(relationTypeInput.element),
-			div(cls := "col-md-6")(relatedIdentifierTypeInput.element),
-			div(cls := "col-md-6")(resourceTypeGeneralInput.element),
+			div(cls := "col-md-2")(strong("Related identifier")),
+			div(cls := "col-md-4")(relatedIdentifierInput.element)(paddingBottom := 15),
+			div(cls := "col-md-2")(strong("Relation type")),
+			div(cls := "col-md-4")(relationTypeInput.element)(paddingBottom := 15),
+			div(cls := "col-md-2")(strong("Identifier type")),
+			div(cls := "col-md-4")(relatedIdentifierTypeInput.element)(paddingBottom := 15),
+			div(cls := "col-md-2")(strong("Resource type general")),
+			div(cls := "col-md-4")(resourceTypeGeneralInput.element)(paddingBottom := 15),
 		),
 		relatedMetadataDiv
 	).render
