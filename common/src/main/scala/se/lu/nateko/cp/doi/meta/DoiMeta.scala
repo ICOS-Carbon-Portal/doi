@@ -393,3 +393,4 @@ case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBo
 		geoLocationBox.flatMap(_.error)
 	)
 }
+

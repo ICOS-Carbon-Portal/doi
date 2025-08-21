@@ -12,9 +12,9 @@ object JsonSupport extends DefaultJsonProtocol{
 
 		def read(value: JsValue): T = value match{
 			case JsString(s) =>
-				try {
+				try{
 					valueOf(s)
-				} catch {
+				}catch{
 					case _: IllegalArgumentException => deserializationError(
 						s"No such $ctg enum value: $s"
 					)
@@ -62,17 +62,17 @@ object JsonSupport extends DefaultJsonProtocol{
 	private val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
 
 	given RootJsonFormat[NameIdentifierScheme] with {
+
 		def write(ns: NameIdentifierScheme): JsValue = nameIdentifierSchemeFormat.write(ns)
 
 		def read(json: JsValue) = {
 			val dataCiteVersion = nameIdentifierSchemeFormat.read(json)
+
 			NameIdentifierScheme.lookup(dataCiteVersion.nameIdentifierScheme).getOrElse(dataCiteVersion)
 		}
 	}
 
-	given RootJsonFormat[NameIdentifier] = fieldConflatingFormat(
-		jsonFormat2(NameIdentifier.apply), "scheme"
-	)
+	given RootJsonFormat[NameIdentifier] = fieldConflatingFormat(jsonFormat2(NameIdentifier.apply), "scheme")
 
 	given genericNameFormat: RootJsonFormat[GenericName] = jsonFormat1(GenericName.apply)
 	given personalNameFormat: RootJsonFormat[PersonalName] = jsonFormat2(PersonalName.apply)
@@ -90,7 +90,7 @@ object JsonSupport extends DefaultJsonProtocol{
 		}
 	}
 
-	given JsonFormat[Affiliation] with {
+	given JsonFormat[Affiliation] with{
 		def write(affiliation: Affiliation) = JsObject(
 			"name" -> JsString(affiliation.name)
 		)
@@ -112,7 +112,7 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	private val versionRegex = """^(\d+).(\d+)$""".r
 
-	given JsonFormat[Version] with {
+	given JsonFormat[Version] with{
 		def write(v: Version): JsValue = JsString(v.toString)
 		def read(json: JsValue): Version = Version.parse(json.convertTo[String]).fold(
 			err => deserializationError(err.getMessage),
@@ -125,6 +125,7 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
 	given RootJsonFormat[FunderIdentifierScheme] with {
+
 		def write(fs: FunderIdentifierScheme): JsValue = funderIdentifierSchemeFormat.write(fs)
 
 		def read(json: JsValue) = {
@@ -134,12 +135,13 @@ object JsonSupport extends DefaultJsonProtocol{
 		}
 	}
 
+
 	given RootJsonFormat[FunderIdentifier] = fieldConflatingFormat(jsonFormat2(FunderIdentifier.apply), "scheme", true)
 	given RootJsonFormat[Award] = jsonFormat3(Award.apply)
 
 	given RootJsonFormat[FundingReference] = fieldConflatingFormat(fieldConflatingFormat(jsonFormat3(FundingReference.apply), "funderIdentifier", true), "award", true)
 
-	def latLonFormat[T <: Latitude | Longitude](factory: Double => T) = new RootJsonFormat[Option[T]] {
+	def latLonFormat[T <: Latitude | Longitude](factory: Double => T) = new RootJsonFormat[Option[T]]{
 		def write(obj: Option[T]): JsValue = obj.fold(JsNull)(JsNumber.apply)
 		def read(json: JsValue): Option[T] = json match
 			case JsNull => None
