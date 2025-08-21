@@ -26,8 +26,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		rtOpt => {
 			_relatedIdentifier = _relatedIdentifier.copy(relationType = rtOpt)
 			rtOpt.getOrElse("") match {
-				case RelationType.HasMetadata => relatedMetadataDiv.classList.remove("d-none")
-				case RelationType.IsMetadataFor => relatedMetadataDiv.classList.remove("d-none")
+				case RelationType.HasMetadata | RelationType.IsMetadataFor => relatedMetadataDiv.classList.remove("d-none")
 				case _ => relatedMetadataDiv.classList.add("d-none")
 			}
 			updateCb(_relatedIdentifier)
@@ -71,8 +70,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 	}, "Scheme type", required = false)
 
 	var initialRelationType = init.relationType.getOrElse("") match {
-		case RelationType.HasMetadata => "row spacyrow"
-		case RelationType.IsMetadataFor => "row spacyrow"
+		case RelationType.HasMetadata | RelationType.IsMetadataFor => "row spacyrow"
 		case _ => "row spacyrow d-none"
 	}
 

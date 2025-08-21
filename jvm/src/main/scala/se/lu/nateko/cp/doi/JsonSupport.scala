@@ -82,7 +82,6 @@ object JsonSupport{
 
 	given OFormat[RelatedIdentifier] = Json.format[RelatedIdentifier]
 
-
 	private val doubleFormat = summon[Format[Double]]
 	given Reads[Latitude] = doubleFormat.map(Latitude.apply)
 	given Reads[Longitude] = doubleFormat.map(Longitude.apply)
