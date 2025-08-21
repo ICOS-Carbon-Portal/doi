@@ -35,4 +35,4 @@ enum ResourceTypeGeneral:
 	case Audiovisual, Book, BookChapter, Collection, ComputationalNotebook, ConferencePaper,
 	ConferenceProceeding, DataPaper, Dataset, Dissertation, Event, Image, InteractiveResource,
 	Instrument, Journal, JournalArticle, Model, OutputManagementPlan, PeerReview, PhysicalObject,
-	Report, Service, Software, Sound, Standard, StudyRegistration, Text, Workflow, Other
+	Preprint, Report, Service, Software, Sound, Standard, StudyRegistration, Text, Workflow, Other
