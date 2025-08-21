@@ -4,7 +4,6 @@ import se.lu.nateko.cp.doi.meta.Rights
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
-import se.lu.nateko.cp.doi.gui.widgets.generic.SelectWidget
 
 class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends EntityWidget[Rights] {
 	private[this] var _rights = init
