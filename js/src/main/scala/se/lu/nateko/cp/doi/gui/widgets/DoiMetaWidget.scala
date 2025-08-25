@@ -67,6 +67,8 @@ class DoiMetaWidget(
 
 		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
 
+		new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element.render,
+
 		new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
 
 		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
@@ -244,6 +246,14 @@ object DoiMetaWidget{
 		protected def makeWidget(value: Description, updateCb: Description => Unit) = new DescriptionWidget(value, updateCb)
 
 		protected def defaultValue = Description("", null, None)
+	}
+
+	class RelatedIdentifierEditWidget(init: Seq[RelatedIdentifier], cb: Seq[RelatedIdentifier] => Unit) extends
+		MultiEntitiesEditWidget[RelatedIdentifier, RelatedIdentifierWidget](init, cb)("Related identifiers") {
+
+		protected def makeWidget(value: RelatedIdentifier, updateCb: RelatedIdentifier => Unit) = new RelatedIdentifierWidget(value, updateCb)
+
+		protected  def defaultValue = RelatedIdentifier(None, None, "", None, None, None, None)
 	}
 
 	class FundingEditWidget(init: Seq[FundingReference], cb: Seq[FundingReference] => Unit) extends
