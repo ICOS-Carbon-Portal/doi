@@ -36,10 +36,10 @@ trait SelfValidating{
 		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
 	protected def validDoi(doi: String): Option[String] =
-		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ab1c-12a3")
+		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ABC0-ABC0")
 
 	protected def validPid(pid: String): Option[String] =
-		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined) None else Some("Invalid PID: " + pid + ", valid format: 00000/")
+		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined) None else Some("Invalid PID: " + pid + ", valid format: 00000/aA0...")
 }
 
 object SelfValidating{
