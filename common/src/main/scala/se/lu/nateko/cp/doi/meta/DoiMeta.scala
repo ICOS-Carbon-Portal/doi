@@ -328,8 +328,16 @@ object Version{
 	}
 }
 
-case class Rights(rights: String, rightsUri: Option[String]) extends SelfValidating{
+case class Rights(
+	rights: String,
+	rightsUri: Option[String],
+	schemeUri: Option[String] = Some("https://spdx.org/licenses"),
+	rightsIdentifier: Option[String],
+	rightsIdentifierScheme: Option[String] = Some("SPDX"),
+	lang: Option[String] = Some("en")
+) extends SelfValidating {
 	def error = joinErrors(
+		nonEmpty(rightsIdentifier)("Rights identifier must be provided"),
 		nonEmpty(rights)("License name must be provided"),
 		rightsUri.flatMap(validUri)
 	)
@@ -385,3 +393,4 @@ case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBo
 		geoLocationBox.flatMap(_.error)
 	)
 }
+
