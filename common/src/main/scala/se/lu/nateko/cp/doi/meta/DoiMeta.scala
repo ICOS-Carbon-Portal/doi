@@ -35,10 +35,17 @@ trait SelfValidating{
 	protected def validUri(uri: String): Option[String] =
 		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
+	protected def validDoi(doi: String): Option[String] =
+		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ab1c-12a3")
+
+	protected def validPid(pid: String): Option[String] =
+		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined) None else Some("Invalid PID: " + pid + ", valid format: 00000/")
 }
 
 object SelfValidating{
 	private val uriRegex = """^https?://.+$""".r
+	private val doiRegex = """^\d{2}\.\d{5}/[A-Za-z0-9-]+$""".r
+	private val pidRegex = """^\d{5}/[A-Za-z0-9-]+$""".r
 }
 
 sealed trait Name extends SelfValidating
@@ -361,8 +368,17 @@ final case class RelatedIdentifier (
 ) extends SelfValidating {
 	def error = joinErrors(
 		nonEmpty(relatedIdentifier)("Related identifier must not be empty"),
+		nonEmpty(relatedIdentifierType)("Please select a related identifier type"),
+		validateIdentifier(relatedIdentifier, relatedIdentifierType.get),
 		nonNull(relationType)("Please provide a relation type")
 	)
+
+	def validateIdentifier(id: String, idType: RelatedIdentifierType): Option[String] = idType match {
+		case RelatedIdentifierType.DOI => validDoi(id)
+		case RelatedIdentifierType.Handle => validPid(id)
+		case RelatedIdentifierType.URL => validUri(id)
+		case _ => None
+	}
 }
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
