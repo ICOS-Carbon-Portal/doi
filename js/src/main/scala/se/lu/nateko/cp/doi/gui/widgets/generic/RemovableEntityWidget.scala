@@ -8,7 +8,8 @@ class RemovableEntityWidget[E](
 	widgetFactory: (E => Unit) => EntityWidget[E],
 	init: E,
 	updateCb: E => Unit,
-	removeCb: RemovableEntityWidget[E] => Unit
+	removeCb: RemovableEntityWidget[E] => Unit,
+	moveCb: (RemovableEntityWidget[E], Boolean) => Unit
 ){
 	private[this] var _entityValue: E = init
 	def entityValue = _entityValue
@@ -27,6 +28,24 @@ class RemovableEntityWidget[E](
 
 	def setRemovability(removable: Boolean): Unit = {
 		removeButton.disabled = !removable
+	}
+
+	private[this] val moveUpButton =
+		button(tpe := "button", cls := "btn btn-info")(
+			span(cls := "fas fa-chevron-up")
+		).render
+
+	private[this] val moveDownButton =
+		button(tpe := "button", cls := "btn btn-info")(
+			span(cls := "fas fa-chevron-down")
+		).render
+
+	moveUpButton.onclick = (_: Event) => moveCb(this, true)
+	moveDownButton.onclick = (_: Event) => moveCb(this, false)
+
+	def setOrderability(orderable: (Boolean, Boolean)): Unit = {
+		moveUpButton.disabled = !orderable(0)
+		moveDownButton.disabled = !orderable(1)
 	}
 
 	val element = Bootstrap.basicCard(
