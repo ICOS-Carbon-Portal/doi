@@ -20,6 +20,19 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		widgets.foreach(_.setRemovability(widgets.length > minAmount))
 	}
 
+	private def setOrderability(): Unit = {
+		widgets.foreach(widget => {
+			var orderability = (false, false)
+			if (widget.previousSibling) {
+				orderability(0) = true
+			}
+			if (widget.nextSibling) {
+				orderability(1) = true
+			}
+			widget.setOrderability(orderability)
+		})
+	}
+
 	private def setAppendability(): Unit = if(maxAmount > 0) {
 		addWidgetButton.disabled = widgets.length >= maxAmount
 	}
@@ -38,6 +51,12 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			setAppendability()
 			setCollapsedness()
 			notifyUpstream()
+		}, (widget, moveWidgetUp) => {
+			if (moveWidgetUp) {
+				widgetsParent.insertBefore(widget.element, widget.element.previousSibling)
+			} else {
+				widgetsParent.insertBefore(widget.element.nextSibling, widget.element)
+			}
 		})
 		widgetsParent.appendChild(newWidget.element)
 		widgets += newWidget
@@ -47,6 +66,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		produceWidget(defaultValue)
 		setAppendability()
 		setRemovability()
+		setOrderability()
 		setCollapsedness()
 		notifyUpstream()
 	}
@@ -93,6 +113,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	initValues.foreach(produceWidget)
 	setRemovability()
+	setOrderability()
 	setAppendability()
 	setCollapsedness()
 
