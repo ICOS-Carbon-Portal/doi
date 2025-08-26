@@ -20,10 +20,11 @@ class RemovableEntityWidget[E](
 	})
 
 	private[this] val removeButton =
-		button(tpe := "button", cls := "btn btn-warning")(
+		button(tpe := "button", cls := "btn btn-warning m-1")(
 			span(cls := "fas fa-trash")
 		).render
 
+	removeButton.title = "Remove this item"
 	removeButton.onclick = (_: Event) => removeCb(this)
 
 	def setRemovability(removable: Boolean): Unit = {
@@ -31,16 +32,18 @@ class RemovableEntityWidget[E](
 	}
 
 	private[this] val moveUpButton =
-		button(tpe := "button", cls := "btn btn-info")(
-			span(cls := "fas fa-chevron-up")
+		button(tpe := "button", cls := "btn btn-info m-1")(
+			span(cls := "fas fa-arrow-up")
 		).render
 
 	private[this] val moveDownButton =
-		button(tpe := "button", cls := "btn btn-info")(
-			span(cls := "fas fa-chevron-down")
+		button(tpe := "button", cls := "btn btn-info m-1")(
+			span(cls := "fas fa-arrow-down")
 		).render
 
+	moveUpButton.title = "Move this item up"
 	moveUpButton.onclick = (_: Event) => moveCb(this, true)
+	moveDownButton.title = "Move this item down"
 	moveDownButton.onclick = (_: Event) => moveCb(this, false)
 
 	def setOrderability(orderable: (Boolean, Boolean)): Unit = {
@@ -51,7 +54,7 @@ class RemovableEntityWidget[E](
 	val element = Bootstrap.basicCard(
 		div(cls := "row")(
 			div(cls := "col-md-11")(widget.element),
-			div(cls := "col-md-1 spacyrow")(moveUpButton, removeButton, moveDownButton)
+			div(cls := "col-md-1 spacyrow")(div(moveUpButton, moveDownButton, removeButton))
 		)
 	).render
 }
