@@ -23,11 +23,11 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	private def setOrderability(): Unit = {
 		widgets.foreach(widget => {
 			var orderability = (false, false)
-			if (widget.previousSibling) {
-				orderability(0) = true
+			if (widget.element.previousSibling != null) {
+				orderability = (true, orderability(1))
 			}
-			if (widget.nextSibling) {
-				orderability(1) = true
+			if (widget.element.nextSibling != null) {
+				orderability = (orderability(0), true)
 			}
 			widget.setOrderability(orderability)
 		})
@@ -48,6 +48,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()
+			setOrderability()
 			setAppendability()
 			setCollapsedness()
 			notifyUpstream()
@@ -57,6 +58,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			} else {
 				widgetsParent.insertBefore(widget.element.nextSibling, widget.element)
 			}
+			setOrderability()
 		})
 		widgetsParent.appendChild(newWidget.element)
 		widgets += newWidget

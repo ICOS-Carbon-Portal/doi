@@ -51,7 +51,7 @@ class RemovableEntityWidget[E](
 	val element = Bootstrap.basicCard(
 		div(cls := "row")(
 			div(cls := "col-md-11")(widget.element),
-			div(cls := "col-md-1 spacyrow")(removeButton)
+			div(cls := "col-md-1 spacyrow")(removeButton, moveUpButton, moveDownButton)
 		)
 	).render
 }
