@@ -55,10 +55,19 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		}, (widget, moveWidgetUp) => {
 			if (moveWidgetUp) {
 				widgetsParent.insertBefore(widget.element, widget.element.previousSibling)
+				val firstNodeIndex = widgets.indexOf(widget)
+				val secondNode = widgets.apply(firstNodeIndex - 1)
+				widgets.update(firstNodeIndex, secondNode)
+				widgets.update(firstNodeIndex - 1, widget)
 			} else {
 				widgetsParent.insertBefore(widget.element.nextSibling, widget.element)
+				val firstNodeIndex = widgets.indexOf(widget)
+				val secondNode = widgets.apply(firstNodeIndex + 1)
+				widgets.update(firstNodeIndex, secondNode)
+				widgets.update(firstNodeIndex + 1, widget)
 			}
 			setOrderability()
+			notifyUpstream()
 		})
 		widgetsParent.appendChild(newWidget.element)
 		widgets += newWidget
