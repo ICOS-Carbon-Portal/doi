@@ -351,8 +351,7 @@ enum RelationType {
 }
 
 enum RelatedIdentifierType {
-	case ARK, arXiv, bibcode, CSTR, DOI, EAN13, EISSN, Handle, IGSN, ISBN, ISSN, ISTC, LISSN, LSID, PMID, PURL,
-		RRID, UPC, URL, URN, w3id
+	case DOI, Handle, URL
 }
 
 final case class RelatedIdentifier (
@@ -377,7 +376,7 @@ final case class RelatedIdentifier (
 		case RelatedIdentifierType.DOI => validDoi(id)
 		case RelatedIdentifierType.Handle => validPid(id)
 		case RelatedIdentifierType.URL => validUri(id)
-		case _ => None
+		case null => None
 	}
 }
 
