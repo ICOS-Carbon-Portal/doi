@@ -21,6 +21,18 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		rightsIdentifier.element.value = "CC-BY-4.0"
 		rightsIdentifierScheme.element.value = "SPDX"
 		lang.element.value = "eng"
+		statementInput.validate()
+		urlInput.validate()
+		rightsIdentifier.validate()
+		_rights = _rights.copy(
+			statementInput.element.value,
+			Some(urlInput.element.value),
+			Some(schemeUri.element.value),
+			Some(rightsIdentifier.element.value),
+			Some(rightsIdentifierScheme.element.value),
+			Some(lang.element.value)
+		)
+		updateCb(_rights)
 	}
 
 	private[this] val ccZeroButton = button(
