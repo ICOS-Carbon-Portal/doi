@@ -52,19 +52,18 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			setAppendability()
 			setCollapsedness()
 			notifyUpstream()
-		}, (widget, moveWidgetUp) => {
+		}, (initiatingWidget, moveWidgetUp) => {
+			val initiatingWidgetIndex = widgets.indexOf(initiatingWidget)
 			if (moveWidgetUp) {
-				widgetsParent.insertBefore(widget.element, widget.element.previousSibling)
-				val firstNodeIndex = widgets.indexOf(widget)
-				val secondNode = widgets.apply(firstNodeIndex - 1)
-				widgets.update(firstNodeIndex, secondNode)
-				widgets.update(firstNodeIndex - 1, widget)
+				widgetsParent.insertBefore(initiatingWidget.element, initiatingWidget.element.previousSibling)
+				val targetWidget = widgets.apply(initiatingWidgetIndex - 1)
+				widgets.update(initiatingWidgetIndex, targetWidget)
+				widgets.update(initiatingWidgetIndex - 1, initiatingWidget)
 			} else {
-				widgetsParent.insertBefore(widget.element.nextSibling, widget.element)
-				val firstNodeIndex = widgets.indexOf(widget)
-				val secondNode = widgets.apply(firstNodeIndex + 1)
-				widgets.update(firstNodeIndex, secondNode)
-				widgets.update(firstNodeIndex + 1, widget)
+				widgetsParent.insertBefore(initiatingWidget.element.nextSibling, initiatingWidget.element)
+				val targetWidget = widgets.apply(initiatingWidgetIndex + 1)
+				widgets.update(initiatingWidgetIndex, targetWidget)
+				widgets.update(initiatingWidgetIndex + 1, initiatingWidget)
 			}
 			setOrderability()
 			notifyUpstream()
