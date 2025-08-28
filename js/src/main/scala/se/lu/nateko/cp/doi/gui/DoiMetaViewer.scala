@@ -26,6 +26,8 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 	private val dates = p(meta.dates.map(d => div(d.toString)).toSeq)
 	private val doiUrl = "https://doi.org/" + meta.doi
 	private val doiLink = p(a(href := doiUrl, target := "_blank")(doiUrl))
+	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
+	private val dataciteLink = p(a(href := dataciteUrl, target := "_blank")(dataciteUrl))
 
 	private val cloneButton = button(tpe := "button", cls := "btn btn-secondary edit-control")("Clone").render
 	cloneButton.onclick = (_: Event) => cloneCb(meta)
@@ -42,6 +44,7 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 		),
 		dates,
 		doiLink,
+		dataciteLink,
 		cloneButton
 	).render
 

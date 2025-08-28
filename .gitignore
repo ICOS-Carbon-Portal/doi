@@ -15,5 +15,6 @@ project/metals.sbt
 
 #ScalaJS specific
 *.sjsir
+.scalafmt.conf
 
 /application.conf

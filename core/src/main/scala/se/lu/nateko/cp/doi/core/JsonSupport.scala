@@ -55,10 +55,8 @@ object JsonSupport extends DefaultJsonProtocol{
 
 	given RootJsonFormat[Doi] with{
 		def write(doi: Doi): JsValue = JsString(doi.toString)
-		def read(json: JsValue): Doi = Doi.parse(json.convertTo[String]).fold(
-			err => deserializationError(err.getMessage),
-			identity
-		)
+		def read(json: JsValue): Doi = Doi.parse(json.convertTo[String])
+			.fold(err => deserializationError(err.getMessage), identity)
 	}
 	given RootJsonFormat[Subject] = jsonFormat3(Subject.apply)
 	private val nameIdentifierSchemeFormat = jsonFormat2(NameIdentifierScheme.apply)
@@ -121,7 +119,8 @@ object JsonSupport extends DefaultJsonProtocol{
 			identity
 		)
 	}
-	given RootJsonFormat[Rights] = jsonFormat2(Rights.apply)
+	given RootJsonFormat[Rights] = jsonFormat6(Rights.apply)
+
 	given RootJsonFormat[Description] = jsonFormat3(Description.apply)
 
 	private val funderIdentifierSchemeFormat = jsonFormat2(FunderIdentifierScheme.apply)
