@@ -35,10 +35,17 @@ trait SelfValidating{
 	protected def validUri(uri: String): Option[String] =
 		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
 
+	protected def validDoi(doi: String): Option[String] =
+		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ABC0-ABC0")
+
+	protected def validPid(pid: String): Option[String] =
+		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined) None else Some("Invalid PID: " + pid + ", valid format: 00000/aA0...")
 }
 
 object SelfValidating{
 	private val uriRegex = """^https?://.+$""".r
+	private val doiRegex = """^\d{2}\.\d{5}/[A-Za-z0-9-]+$""".r
+	private val pidRegex = """^\d{5}/[A-Za-z0-9-]+$""".r
 }
 
 sealed trait Name extends SelfValidating
@@ -93,7 +100,7 @@ object NameIdentifierScheme{
 	val FLUXNET             = NameIdentifierScheme("FLUXNET", None)
 
 	def values = Regexes.keys.toSeq
-	
+
 	def lookup(nameIdentifierScheme: String): Option[NameIdentifierScheme] =
 		Regexes.keys.find(_.nameIdentifierScheme == nameIdentifierScheme)
 
@@ -343,6 +350,44 @@ case class Rights(
 	)
 }
 
+enum RelationType {
+	case HasMetadata, IsMetadataFor, IsCitedBy, Cites, IsSupplementTo, IsSupplementedBy, IsContinuedBy, Continues,
+	IsDescribedBy, Describes, HasVersion, IsVersionOf, IsNewVersionOf, IsPreviousVersionOf, IsPartOf, HasPart,
+	IsPublishedIn, IsReferencedBy, References, IsDocumentedBy, Documents, IsCompiledBy, Compiles, IsVariantFormOf,
+	IsOriginalFormOf, IsIdenticalTo, IsReviewedBy, Reviews, IsDerivedFrom, IsSourceOf, IsRequiredBy, Requires,
+	IsObsoletedBy, Obsoletes, IsCollectedBy, Collects, IsTranslationOf, HasTranslation
+}
+
+enum RelatedIdentifierType {
+	case DOI, Handle, URL
+}
+
+final case class RelatedIdentifier (
+	relationType: Option[RelationType],
+	relatedIdentifierType: Option[RelatedIdentifierType],
+	relatedIdentifier: String,
+	resourceTypeGeneral: Option[ResourceTypeGeneral],
+
+	// Only valid for HasMetadata and IsMetadataFor
+	relatedMetadataScheme: Option[String],
+	schemeUri: Option[String],
+	schemeType: Option[String]
+) extends SelfValidating {
+	def error = joinErrors(
+		nonEmpty(relatedIdentifier)("Related identifier must not be empty"),
+		nonEmpty(relatedIdentifierType)("Please select a related identifier type"),
+		validateIdentifier(relatedIdentifier, relatedIdentifierType.get),
+		nonNull(relationType)("Please provide a relation type")
+	)
+
+	def validateIdentifier(id: String, idType: RelatedIdentifierType): Option[String] = idType match {
+		case RelatedIdentifierType.DOI => validDoi(id)
+		case RelatedIdentifierType.Handle => validPid(id)
+		case RelatedIdentifierType.URL => validUri(id)
+		case null => None
+	}
+}
+
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
 	def error = joinErrors(
 		nonEmpty(description)("Description must not be empty (if supplied)"),
@@ -393,4 +438,3 @@ case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBo
 		geoLocationBox.flatMap(_.error)
 	)
 }
-

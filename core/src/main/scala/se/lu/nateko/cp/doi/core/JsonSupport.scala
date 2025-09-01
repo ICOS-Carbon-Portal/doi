@@ -156,7 +156,11 @@ object JsonSupport extends DefaultJsonProtocol{
 	given RootJsonFormat[GeoLocationBox] = jsonFormat4(GeoLocationBox.apply)
 	given RootJsonFormat[GeoLocation] = jsonFormat3(GeoLocation.apply)
 
-	given RootJsonFormat[DoiMeta] = jsonFormat18(DoiMeta.apply)
+	given RootJsonFormat[RelationType] = enumFormat(RelationType.valueOf)
+	given RootJsonFormat[RelatedIdentifierType] = enumFormat(RelatedIdentifierType.valueOf)
+	given RootJsonFormat[RelatedIdentifier] = jsonFormat7(RelatedIdentifier.apply)
+
+	given RootJsonFormat[DoiMeta] = jsonFormat19(DoiMeta.apply)
 
 	given RootJsonFormat[DoiWrapper] = jsonFormat1(DoiWrapper.apply)
 	given RootJsonFormat[SingleDoiPayload] = jsonFormat1(SingleDoiPayload.apply)
