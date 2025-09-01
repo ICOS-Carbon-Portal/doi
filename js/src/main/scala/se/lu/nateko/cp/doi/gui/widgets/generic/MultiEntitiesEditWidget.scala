@@ -20,6 +20,19 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		widgets.foreach(_.setRemovability(widgets.length > minAmount))
 	}
 
+	private def setOrderability(): Unit = {
+		widgets.foreach(widget => {
+			var orderability = (false, false)
+			if (widget.element.previousSibling != null) {
+				orderability = (true, orderability(1))
+			}
+			if (widget.element.nextSibling != null) {
+				orderability = (orderability(0), true)
+			}
+			widget.setOrderability(orderability)
+		})
+	}
+
 	private def setAppendability(): Unit = if(maxAmount > 0) {
 		addWidgetButton.disabled = widgets.length >= maxAmount
 	}
@@ -35,8 +48,24 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			widgets -= widget
 			widgetsParent.removeChild(widget.element)
 			setRemovability()
+			setOrderability()
 			setAppendability()
 			setCollapsedness()
+			notifyUpstream()
+		}, (initiatingWidget, moveWidgetUp) => {
+			val initiatingWidgetIndex = widgets.indexOf(initiatingWidget)
+			if (moveWidgetUp) {
+				widgetsParent.insertBefore(initiatingWidget.element, initiatingWidget.element.previousSibling)
+				val targetWidget = widgets.apply(initiatingWidgetIndex - 1)
+				widgets.update(initiatingWidgetIndex, targetWidget)
+				widgets.update(initiatingWidgetIndex - 1, initiatingWidget)
+			} else {
+				widgetsParent.insertBefore(initiatingWidget.element.nextSibling, initiatingWidget.element)
+				val targetWidget = widgets.apply(initiatingWidgetIndex + 1)
+				widgets.update(initiatingWidgetIndex, targetWidget)
+				widgets.update(initiatingWidgetIndex + 1, initiatingWidget)
+			}
+			setOrderability()
 			notifyUpstream()
 		})
 		widgetsParent.appendChild(newWidget.element)
@@ -47,6 +76,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		produceWidget(defaultValue)
 		setAppendability()
 		setRemovability()
+		setOrderability()
 		setCollapsedness()
 		notifyUpstream()
 	}
@@ -93,6 +123,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	initValues.foreach(produceWidget)
 	setRemovability()
+	setOrderability()
 	setAppendability()
 	setCollapsedness()
 
