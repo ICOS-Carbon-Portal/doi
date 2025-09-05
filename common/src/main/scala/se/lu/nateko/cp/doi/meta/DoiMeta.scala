@@ -338,8 +338,8 @@ object Version{
 case class Rights(
 	rights: String,
 	rightsUri: Option[String],
-	schemeUri: Option[String] = Some("https://spdx.org/licenses"),
 	rightsIdentifier: Option[String],
+	schemeUri: Option[String] = Some("https://spdx.org/licenses"),
 	rightsIdentifierScheme: Option[String] = Some("SPDX"),
 	lang: Option[String] = Some("en")
 ) extends SelfValidating {
