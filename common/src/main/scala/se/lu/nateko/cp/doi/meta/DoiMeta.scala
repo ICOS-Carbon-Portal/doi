@@ -45,7 +45,7 @@ trait SelfValidating{
 object SelfValidating{
 	private val uriRegex = """^https?://.+$""".r
 	private val doiRegex = """^\d{2}\.\d{5}/[A-Za-z0-9-]+$""".r
-	private val pidRegex = """^\d{5}/[A-Za-z0-9-]+$""".r
+	private val pidRegex = """^[A-Za-z0-9-_]+/[A-Za-z0-9_]+$""".r
 }
 
 sealed trait Name extends SelfValidating
