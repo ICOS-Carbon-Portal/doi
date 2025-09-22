@@ -39,13 +39,16 @@ trait SelfValidating{
 		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ABC0-ABC0")
 
 	protected def validPid(pid: String): Option[String] =
-		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined) None else Some("Invalid PID: " + pid + ", valid format: 00000/aA0...")
+		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined)
+			None
+		else
+			Some("Invalid PID: " + pid + ", only letters, numbers, - and _ are allowed. Must be separated by a '/'")
 }
 
 object SelfValidating{
 	private val uriRegex = """^https?://.+$""".r
-	private val doiRegex = """^\d{2}\.\d{5}/[A-Za-z0-9-]+$""".r
-	private val pidRegex = """^[A-Za-z0-9-_]+/[A-Za-z0-9_]+$""".r
+	private val doiRegex = """^\d{2}\.[0-9]+/[A-Za-z0-9-_]+$""".r
+	private val pidRegex = """^[A-Za-z0-9-_]+/[A-Za-z0-9-_]+$""".r
 }
 
 sealed trait Name extends SelfValidating
