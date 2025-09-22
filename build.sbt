@@ -31,7 +31,7 @@ val common = crossProject(JSPlatform, JVMPlatform)
 	.settings(commonSettings)
 	.settings(
 		name := "doi-common",
-		version := "0.4.1",
+		version := "0.4.2",
 		cpDeploy := {
 			sys.error("Please switch to project doiJVM for deployment")
 		}
