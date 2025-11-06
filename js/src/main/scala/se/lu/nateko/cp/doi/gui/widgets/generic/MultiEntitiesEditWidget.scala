@@ -39,7 +39,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private def notifyUpstream(): Unit = cb(widgets.map(_.entityValue))
 
-	private val widgetsParent = div(cls := "col-md-11").render
+	private val widgetsParent = div(cls := "col-md-10").render
 
 	private def produceWidget(value: E): Unit = {
 		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
@@ -89,6 +89,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	private val collapseIcon = span().render
 	private val collapseButton = span(
 			onclick := collapseWidget,
+			width := "1rem"
 		)(collapseIcon).render
 
 	private val addWidgetButton = button(
@@ -110,8 +111,8 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	val element =
 		div(cls := "row")(
-			div(cls := "col-md-1")(
-				div(collapseButton, strong(title))
+			div(cls := "col-md-2")(
+				div(onclick := collapseWidget, cursor := "pointer")(collapseButton, strong(title))
 			),
 			widgetsParent
 		)
