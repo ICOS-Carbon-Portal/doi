@@ -68,14 +68,22 @@ class MainView(d: DoiRedux.Dispatcher) {
 		onclick := (searchDoi _)
 	)("Search")
 
+	private val infoLink = a(
+		href := "https://support.datacite.org/docs/api-queries#using-the-query-parameter",
+		target := "_blank",
+		cls := "icon-link px-3 text-nowrap"
+	)("Search documentation")
+
 	private val searchResultsStats = p.render
 
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
+			cls := "d-flex",
 			div(cls := "input-group")(
 				searchInput,
 				searchSubmitButton
-			)
+			),
+			infoLink
 		),
 		p(cls := "edit-control")(
 			div(cls := "input-group")(

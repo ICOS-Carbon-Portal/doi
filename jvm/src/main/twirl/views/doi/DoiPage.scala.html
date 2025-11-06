@@ -1,8 +1,8 @@
-@import views.html.CpCommonPage
+@import views.html.CpCommonContainerPage
 @import eu.icoscp.envri.Envri
 
-@(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false)(implicit env: Envri)
-@CpCommonPage("Carbon Portal's DOI minting service"){
+@(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
+@CpCommonContainerPage(s"${devIcon}DOI minting"){
 	<style type="text/css">
 		@@media all and (max-width: 991px) {
 			.spacyrow{
@@ -16,6 +16,9 @@
 		}
 		.card {
 			margin-bottom: 1rem;
+		}
+		.row + .row {
+			margin-top: 1rem;
 		}
 		span.label{
 			font-size: 100%;
@@ -39,34 +42,19 @@
 		.is-not-admin .published-doi .card-body input{
 			background-color: lightgrey;
 		}
-		a[target="_blank"]::after {
-			font-family: "Font Awesome 5 Free";
-			content: "\f35d";
-			font-weight: 900;
-			margin: 0 0.3rem;
-		}
 	</style>
 }{
 	<div class="row">
 		<div class="col">
 			<div class="page-header">
-				<h1>Carbon Portal DOI minting service</h1>
+				<h1>DOI minting</h1>
 			</div>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col">
-			<p><b>@permissions</b></p>
-			<p>
-				<div>🔵 Published DOIs are in blue.</div>
-				<div>🟡 Drafts are in yellow.</div>
-			</p>
-			<p>
-				<a href="https://support.datacite.org/docs/datacite-search-user-documentation#1-search-the-for-a-specific-publisher" target="_blank">
-					Read about advanced search queries
-				</a>
-			</p>
+			<p>@permissions</p>
 		</div>
 	</div>
 
@@ -79,7 +67,7 @@
 	</div>
 
 
-	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>
+	<script src="doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
 
 }
 
@@ -99,3 +87,8 @@
 @isLoggedInClass = @{
 	if(isLoggedIn) "is-logged-in" else "is-anonymous"
 }
+
+@devIcon = @{
+	if(isDevelopment) "🚧 " else ""
+}
+

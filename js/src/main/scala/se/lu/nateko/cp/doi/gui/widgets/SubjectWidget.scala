@@ -16,7 +16,6 @@ class SubjectWidget(init: Subject, protected val updateCb: Subject => Unit) exte
 		updateCb(_subj)
 	}, required = true)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(subjInput.element),
-	).render
+	val element =
+		subjInput.element.render
 }

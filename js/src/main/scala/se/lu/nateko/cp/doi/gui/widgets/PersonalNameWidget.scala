@@ -20,9 +20,9 @@ class PersonalNameWidget(init: PersonalName, protected val updateCb: PersonalNam
 	}, required = true)
 
 	val element = div(cls := "row")(
-		div(cls := "col-md-2")(strong("Given name:")),
+		div(cls := "col-md-2")(strong("Given name")),
 		div(cls := "col-md-4")(fnameInput.element),
-		div(cls := "col-md-2")(strong("Family name:")),
+		div(cls := "col-md-2")(strong("Family name")),
 		div(cls := "col-md-4")(lnameInput.element)
 	).render
 }

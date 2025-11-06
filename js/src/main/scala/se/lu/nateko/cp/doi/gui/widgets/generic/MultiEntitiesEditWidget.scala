@@ -87,11 +87,8 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	}
 
 	private val collapseIcon = span().render
-	private val collapseButton = button(
-			tpe := "button",
-			cls := "btn btn-secondary",
+	private val collapseButton = span(
 			onclick := collapseWidget,
-			marginBottom := 5
 		)(collapseIcon).render
 
 	private val addWidgetButton = button(
@@ -105,21 +102,19 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	private def setCollapsedness(): Unit = {
 		val canCollapse: Boolean = widgetsParent.childNodes.length > 0
 		collapseButton.style.display = if(canCollapse) "inline-block" else "none"
-		collapseIcon.className = "fas fa-caret-" + (if(isCollapsed) "down" else "up")
+		collapseIcon.className = "fas fa-caret-" + (if(isCollapsed) "right" else "down")
 		collapseButton.title = if(isCollapsed) "Expand this list back down" else "Collapse this list up"
 		widgetsParent.style.display = if(isCollapsed) "none" else "block"
 		addWidgetButton.style.display = if(isCollapsed) "none" else "inline-block"
 	}
 
-	val element = Bootstrap.basicCard(
+	val element =
 		div(cls := "row")(
 			div(cls := "col-md-1")(
-				div(strong(title)),
-				div(addWidgetButton, collapseButton)
+				div(collapseButton, strong(title))
 			),
 			widgetsParent
 		)
-	)
 
 	initValues.foreach(produceWidget)
 	setRemovability()

@@ -22,12 +22,11 @@ object Bootstrap {
 		)
 
 	def propValueRow(propHtml: Modifier*)(valHtml: Modifier*) =
-		div(cls := "row")(
+		div(cls := "row gy-2")(
 			div(cls := "col-md-1")(propHtml),
 			div(cls := "col-md-11")(valHtml)
 		)
 
-	def basicPropValueWidget(name: String)(valHtml: Modifier*) = basicCard{
+	def basicPropValueWidget(name: String)(valHtml: Modifier*) =
 		propValueRow(strong(name))(valHtml)
-	}
 }

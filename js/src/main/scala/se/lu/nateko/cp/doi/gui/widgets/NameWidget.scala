@@ -43,12 +43,23 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 	}
 
 	private def nameTypeOption(personal: Boolean) =
-		input(tpe := "radio", name := "nameType", onchange := changeNameType(personal))(checkedModifier(personal))
+		input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(personal))(checkedModifier(personal))
 
-	val element = Bootstrap.basicCard(
-		Bootstrap.propValueRow(strong("Name type"))(
-			form(nameTypeOption(true), " Personal name", br, nameTypeOption(false), " Organizational name")
-		)(paddingBottom := 15),
+	val element = div(
+		div(
+		cls := "row",
+			form(
+				cls := "col offset-1",
+				div(
+					nameTypeOption(true), label("Person", cls := "form-check-label"),
+					cls := "form-check form-check-inline"
+				),
+				div(
+					nameTypeOption(false), label("Organization", cls := "form-check-label"),
+					cls := "form-check form-check-inline"
+				)
+			),
+		),
 		Bootstrap.propValueRow(strong("Name"))(nameElem)
 	).render
 }

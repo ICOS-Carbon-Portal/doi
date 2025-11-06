@@ -39,7 +39,7 @@ class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) exte
 object CreatorWidget{
 
 	class NameIdsInput(init: Seq[NameIdentifier], updateCb: Seq[NameIdentifier] => Unit) extends
-		MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb)("IDs"){
+		MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb)("Identifiers"){
 
 		protected def makeWidget(value: NameIdentifier, updateCb: NameIdentifier => Unit) =
 			new NameIdentifierWidget(value, updateCb)

@@ -99,8 +99,7 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 
 	val element = div(cls := "row spacyrow")(
 		div(cls := "col-md-2")(strong("Autofill")),
-		div(cls := "col-md-2")(ccBy4Button)(paddingBottom := 15),
-		div(cls := "col-md-8")(ccZeroButton)(paddingBottom := 15),
+		div(cls := "col-md-10")(ccBy4Button, ccZeroButton)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("License name")),
 		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("License URI")),
