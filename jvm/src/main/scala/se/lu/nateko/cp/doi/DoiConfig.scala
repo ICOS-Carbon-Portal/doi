@@ -26,7 +26,8 @@ case class DoiConfig(
 	auth: PublicAuthConfig,
 	admins: Seq[UserId],
 	mailing: EmailConfig,
-	metaHost: String
+	metaHost: String,
+	development: Boolean
 )
 
 object DoiConfig {
@@ -43,7 +44,8 @@ object DoiConfig {
 			auth = ConfigLoader.authPubConfig(envri),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf),
-			metaHost = doiConf.getString("metaHost")
+			metaHost = doiConf.getString("metaHost"),
+			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false
 		)
 	}
 

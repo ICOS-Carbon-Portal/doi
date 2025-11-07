@@ -28,6 +28,14 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 				}
 			}
 		} ~
+		pathPrefix("meta"){
+			path(DoiPath){doi =>
+				onSuccess(client.getMetadata(doi)) {
+					case Some(meta) => complete(meta)
+					case None => complete((StatusCodes.NotFound, s"DOI not found: $doi"))
+				}
+			}
+		} ~
 		pathPrefix(Segment / Segment){(prefix, suffix) =>
 			complete((StatusCodes.BadRequest, s"Bad DOI: $prefix/$suffix"))
 		}

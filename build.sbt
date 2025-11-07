@@ -111,9 +111,11 @@ lazy val doiJvm = doi.jvm
 		).value,
 
 		Compile / resources ++= {
-			val jsFile = (doiJs / Compile / fastOptJS).value.data
-			val srcMap = new java.io.File(jsFile.getAbsolutePath + ".map")
-			Seq(jsFile, srcMap)
+			val fastFile = (doiJs / Compile / fastOptJS).value.data
+			val fastMap = new java.io.File(fastFile.getAbsolutePath + ".map")
+			val fullFile = (doiJs / Compile / fullOptJS).value.data
+			val fullMap = new java.io.File(fullFile.getAbsolutePath + ".map")
+			Seq(fastFile, fastMap, fullFile, fullMap)
 		},
 
 		watchSources ++= (doiJs / Compile / watchSources).value,

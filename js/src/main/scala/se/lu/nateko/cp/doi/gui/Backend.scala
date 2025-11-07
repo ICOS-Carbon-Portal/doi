@@ -50,6 +50,15 @@ object Backend {
 			}
 	}
 
+	def getDoi(doi: Doi): Future[Option[DoiMeta]] = dom
+		.fetch(s"/api/meta/$doi")
+		.flatMap { resp =>
+			if (resp.status == 404) Future.successful(None)
+			else checkResponseOk(s"fetch DOI $doi")(resp).flatMap(_.text()).map { txt =>
+				Some(Json.parse(txt).as[DoiMeta])
+			}
+		}
+
 	def delete(doi: Doi): Future[Unit] = dom
 		.fetch(s"/api/$doi/", new dom.RequestInit{method = dom.HttpMethod.DELETE})
 		.flatMap(checkResponseOk("delete DOI"))

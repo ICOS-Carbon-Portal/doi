@@ -21,7 +21,6 @@ import scala.concurrent.duration.DurationInt
 class MainView(d: DoiRedux.Dispatcher) {
 
 	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
-	private var currentDetailView: Option[DoiDetailView] = None
 
 	private val listElem = ul(cls := "list-unstyled").render
 
@@ -172,10 +171,6 @@ class MainView(d: DoiRedux.Dispatcher) {
 		})
 	}
 
-	def setSelected(doi: Doi, isSelected: Boolean): Unit = {
-		doiViews.get(doi).foreach(_.setSelected(isSelected))
-	}
-
 	def setSearchQuery(text: String): Unit = {
 		searchInput.value = text
 	}
@@ -188,48 +183,6 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def resetDoiAdder(): Unit = {
 		suffixInput.value = ""
-	}
-
-	def showDetailView(doi: Doi): Unit = {
-		// Find the DOI metadata from the current list
-		d.getState.dois.find(_.doi == doi).foreach { meta =>
-			val detailView = new DoiDetailView(meta, d)
-			currentDetailView = Some(detailView)
-			
-			// Replace the main element content
-			val mainWrapper = document.getElementById("main-wrapper")
-			mainWrapper.innerHTML = ""
-			mainWrapper.appendChild(detailView.element.render)
-			detailView.initialize()
-			
-			// Scroll to top after DOM renders and layout is complete
-			org.scalajs.dom.window.requestAnimationFrame { _ =>
-				org.scalajs.dom.window.requestAnimationFrame { _ =>
-					// Force instant scroll by setting scroll-behavior to auto temporarily
-					import org.scalajs.dom.HTMLElement
-					val html = org.scalajs.dom.document.documentElement.asInstanceOf[HTMLElement]
-					val body = org.scalajs.dom.document.body
-					val oldHtmlBehavior = html.style.getPropertyValue("scroll-behavior")
-					val oldBodyBehavior = body.style.getPropertyValue("scroll-behavior")
-					html.style.setProperty("scroll-behavior", "auto")
-					body.style.setProperty("scroll-behavior", "auto")
-					org.scalajs.dom.window.scrollTo(0, 0)
-					html.style.setProperty("scroll-behavior", oldHtmlBehavior)
-					body.style.setProperty("scroll-behavior", oldBodyBehavior)
-				}
-			}
-		}
-	}
-
-	def showListView(): Unit = {
-		currentDetailView = None
-		// Replace with list view
-		val mainWrapper = document.getElementById("main-wrapper")
-		mainWrapper.innerHTML = ""
-		mainWrapper.appendChild(element.render)
-		// Refresh the list display
-		supplyDoiList(d.getState.dois, d.getState.isLoading)
-		setPagination(d.getState.listMeta)
 	}
 
 	updateDefaultPrefix()

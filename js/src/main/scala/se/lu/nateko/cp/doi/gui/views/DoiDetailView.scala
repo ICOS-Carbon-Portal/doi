@@ -4,7 +4,6 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
-import se.lu.nateko.cp.doi.gui.NavigateToList
 import se.lu.nateko.cp.doi.gui.DoiMetaViewer
 import se.lu.nateko.cp.doi.gui.DoiCloneRequest
 import se.lu.nateko.cp.doi.gui.DoiJsonEditor
@@ -23,13 +22,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private[this] var meta = metaInit
 
-	private val backToList: Event => Unit = e => {
-		e.preventDefault()
-		d.dispatch(NavigateToList)
-	}
-
 	private val headerSection = div(cls := "mb-3")(
-		a(href := "#", cls := "btn btn-outline-primary mb-2", onclick := backToList)(
+		a(href := "/", cls := "btn btn-outline-primary mb-2")(
 			span(cls := "fas fa-arrow-left mr-2"),
 			"Back to list"
 		),

@@ -50,8 +50,12 @@ object Main{
 		def isAdmin(uid: UserId): Boolean = conf.admins.exists(auid => auid.email.equalsIgnoreCase(uid.email))
 		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
-		def mainPage(development: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), development))
+		def mainPage(isDev: Boolean) = authRouting.userOpt{uidOpt =>
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev))
+		}
+
+		def detailPage(doi: Doi, isDev: Boolean) = authRouting.userOpt{uidOpt =>
+			complete(views.html.doi.DoiDetailPage(doi, uidOpt.isDefined, isOptAdmin(uidOpt), isDev))
 		}
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(
@@ -106,8 +110,12 @@ object Main{
 				}
 			} ~
 			get{
-				pathSingleSlash(mainPage(false)) ~
-				path("develop")(mainPage(true)) ~
+				pathSingleSlash(mainPage(conf.development)) ~
+				pathPrefix("doi"){
+					path(DoiClientRouting.DoiPath){doi =>
+						detailPage(doi, conf.development)
+					}
+				} ~
 				path("buildInfo"){
 					complete(BuildInfo.toString)
 				} ~
