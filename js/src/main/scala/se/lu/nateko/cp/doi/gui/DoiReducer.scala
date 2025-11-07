@@ -21,11 +21,11 @@ object DoiReducer {
 
 		case FreshDoiList(dois, listMeta) => state.copy(dois = dois, listMeta = listMeta)
 
-		case SelectDoi(doi) =>
-			if(state.isSelected(doi))
-				state.copy(selected = None)
-			else
-				state.withSelected(doi)
+	case SelectDoi(doi) =>
+		state.copy(selected = Some(doi), viewMode = DetailView(doi))
+
+	case NavigateToList =>
+		state.copy(viewMode = ListView)
 
 		case DoiCloneRequest(meta) => {
 			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)

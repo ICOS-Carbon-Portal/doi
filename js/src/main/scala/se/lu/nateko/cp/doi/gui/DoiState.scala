@@ -6,13 +6,18 @@ import se.lu.nateko.cp.doi.DoiListMeta
 
 import scala.collection.Seq
 
+sealed trait ViewMode
+case object ListView extends ViewMode
+case class DetailView(doi: Doi) extends ViewMode
+
 case class DoiState(
 	prefix: String,
 	dois: Seq[DoiMeta],
 	listMeta: Option[DoiListMeta],
 	selected: Option[Doi],
 	error: Option[String],
-	isLoading: Boolean
+	isLoading: Boolean,
+	viewMode: ViewMode
 )
 
 object DoiStateUpgrades{

@@ -15,6 +15,7 @@ case object StopLoading extends DoiAction
 case class FreshDoiList(dois: Seq[DoiMeta], listMeta: Option[DoiListMeta]) extends DoiAction
 
 case class SelectDoi(doi: Doi) extends DoiAction
+case object NavigateToList extends DoiAction
 
 case class DoiCloneRequest(meta: DoiMeta) extends DoiAction
 
