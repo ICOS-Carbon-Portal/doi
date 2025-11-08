@@ -34,18 +34,21 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 
 	val element = div(
 		tabs,
-		titles,
-		subtitle,
-		description,
-		subjects,
-		p(
-			creators,
-			contributors
-		),
-		dates,
-		doiLink,
-		dataciteLink,
-		cloneButton
+		div(cls := "row")(
+			div(cls := "col-md-8")(
+				subtitle,
+				description,
+				subjects,
+				p(
+					creators,
+					contributors
+				),
+				dates,
+				doiLink,
+				dataciteLink,
+				cloneButton
+			)
+		)
 	).render
 
 	private def listPeople(list: Seq[Person], label: String): Option[String] = {

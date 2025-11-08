@@ -57,10 +57,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	).render
 
 	def updateContentVisibility(): Unit = {
-		val title = meta.titles
-			.flatMap(_.headOption)
-			.map(_.title)
-			.getOrElse("No title")
+		val title = DoiMetaHelpers.extractTitle(meta)
 
 		doiSpan.textContent = meta.doi.toString
 		titleSpan.textContent = title

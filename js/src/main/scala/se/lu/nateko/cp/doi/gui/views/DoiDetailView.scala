@@ -29,12 +29,15 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		d.dispatch(NavigateToRoute(ListRoute))
 	}
 
+	private val title = DoiMetaHelpers.extractTitle(meta)
+
 	private val headerSection = div(cls := "mb-3")(
 		a(href := "/", cls := "btn btn-outline-primary mb-2", onclick := backToList)(
-			span(cls := "fas fa-arrow-left mr-2"),
+			span(cls := "fas fa-arrow-left me-2"),
 			"Back to list"
 		),
-		h2(cls := "mt-2")(s"${meta.doi}")
+		h1(cls := "mt-2")(title),
+		p(cls := "text-muted")(s"${meta.doi}")
 	).render
 
 	private val contentBody = div().render
@@ -81,13 +84,15 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 				case Failure(exc) =>
 					d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
 				case Success(s) =>
-					if (!s.isEmpty()) d.dispatch(ReportError(s))
+				if (!s.isEmpty()) d.dispatch(ReportError(s))
 					//recreate the DOI metadata widget with the updated metadata
 					contentBody.innerHTML = ""
 					meta = updated
 					contentBody.appendChild(metaWidget.element)
-					// Update header with new DOI if it changed
-					headerSection.querySelector("h2").textContent = s"DOI: ${updated.doi}"
+					// Update header with new title and DOI if they changed
+					val newTitle = DoiMetaHelpers.extractTitle(updated)
+					headerSection.querySelector("h1").textContent = newTitle
+					headerSection.querySelector("p").textContent = s"${updated.doi}"
 			}
 		}))
 	}

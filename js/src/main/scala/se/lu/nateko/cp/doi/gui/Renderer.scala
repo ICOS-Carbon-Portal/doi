@@ -41,7 +41,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 	}
 
 	private def renderRoute(route: Route, state: State): Unit = {
-		val mainWrapper = document.getElementById("main-wrapper")
 		org.scalajs.dom.console.log(s"Rendering route: $route")
 		
 		route match {
@@ -50,16 +49,52 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				org.scalajs.dom.console.log("Warning: trying to render InitialRoute")
 				
 			case ListRoute =>
-				// Show list view
+				// Show list view in list-wrapper
 				currentDetailView = None
 				org.scalajs.dom.console.log("Switching to list view")
-				// Check if we're showing detail view (need to switch) or already on list
-				val showingDetail = mainWrapper.querySelector("#detail-view") != null
-				if (showingDetail || mainWrapper.querySelector("#main") == null) {
-					org.scalajs.dom.console.log("Rendering list view (was showing detail or nothing)")
+				
+				val mainWrapper = document.getElementById("main-wrapper")
+				var listWrapper = document.getElementById("list-wrapper")
+				
+				// Check if we're showing detail view (need to restore list structure)
+				if (listWrapper == null) {
+					org.scalajs.dom.console.log("Restoring list view structure from detail view")
+					// Recreate the list view structure with header
+					import scalatags.JsDom.all._
+					val permissions = mainWrapper.getAttribute("data-permissions")
 					mainWrapper.innerHTML = ""
-					mainWrapper.appendChild(mainView.element.render)
-					// Update with current data
+					mainWrapper.appendChild(
+						div(
+							div(cls := "row")(
+								div(cls := "col")(
+									div(cls := "page-header")(
+										h1("DOI minting")
+									)
+								)
+							),
+							div(cls := "row")(
+								div(cls := "col")(
+									p(raw(permissions))
+								)
+							),
+							hr,
+							div(cls := "row")(
+								div(cls := "col")(
+									div(id := "list-wrapper")
+								)
+							)
+						).render
+					)
+					listWrapper = document.getElementById("list-wrapper")
+				}
+				
+				val showingDetail = mainWrapper.querySelector("#detail-view") != null
+				if (showingDetail || listWrapper.querySelector("#main") == null) {
+					org.scalajs.dom.console.log("Rendering list view content")
+					listWrapper.innerHTML = ""
+					listWrapper.appendChild(mainView.element.render)
+					mainWrapper.classList.add("loaded")
+					// Update with current data from state (no refetch needed)
 					mainView.supplyDoiList(state.dois, state.isLoading)
 					mainView.setPagination(state.listMeta)
 					// Restore scroll position from history state
@@ -74,7 +109,8 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				}
 				
 			case DetailRoute(doi) =>
-				// Show detail view
+				// Show detail view, replacing entire main-wrapper content
+				val mainWrapper = document.getElementById("main-wrapper")
 				state.dois.find(_.doi == doi).orElse {
 					// DOI not in cache, fetch it
 					Backend.getDoi(doi).foreach {
@@ -83,10 +119,12 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 							currentDetailView = Some(detailView)
 							mainWrapper.innerHTML = ""
 							mainWrapper.appendChild(detailView.element.render)
+							mainWrapper.classList.add("loaded")
 							detailView.initialize()
 							org.scalajs.dom.window.scrollTo(0, 0)
 						case None =>
 							mainWrapper.innerHTML = """<div class="alert alert-danger">DOI not found</div>"""
+							mainWrapper.classList.add("loaded")
 					}(scala.scalajs.concurrent.JSExecutionContext.Implicits.queue)
 					None
 				}.foreach { meta =>
@@ -95,6 +133,7 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 					currentDetailView = Some(detailView)
 					mainWrapper.innerHTML = ""
 					mainWrapper.appendChild(detailView.element.render)
+					mainWrapper.classList.add("loaded")
 					detailView.initialize()
 					org.scalajs.dom.window.scrollTo(0, 0)
 				}

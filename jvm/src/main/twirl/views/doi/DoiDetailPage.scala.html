@@ -5,6 +5,10 @@
 @(doi: Doi, isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
 @CpCommonContainerPage(s"${devIcon}DOI ${doi}"){
 	<style type="text/css">
+		/* Hide initial header to prevent flash before JS loads */
+		.initial-header {
+			display: none;
+		}
 		@@media all and (max-width: 991px) {
 			.spacyrow{
 				margin-top: 15px;
@@ -45,11 +49,11 @@
 		}
 	</style>
 }{
-	<div class="row">
+	<div class="row initial-header">
 		<div class="col">
 			<div class="mb-3">
 				<a href="/" class="btn btn-outline-primary mb-2">
-					<span class="fas fa-arrow-left mr-2"></span>
+					<span class="fas fa-arrow-left me-2"></span>
 					Back to list
 				</a>
 				<h2 class="mt-2">DOI: @{doi}</h2>

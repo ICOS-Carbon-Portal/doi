@@ -4,6 +4,13 @@
 @(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
 @CpCommonContainerPage(s"${devIcon}DOI minting"){
 	<style type="text/css">
+		/* Hide content initially if on detail route to prevent flash */
+		#main-wrapper {
+			opacity: 0;
+		}
+		#main-wrapper.loaded {
+			opacity: 1;
+		}
 		/* Disable smooth scrolling for instant navigation */
 		html, body {
 			scroll-behavior: auto !important;
@@ -48,25 +55,27 @@
 		}
 	</style>
 }{
-	<div class="row">
-		<div class="col">
-			<div class="page-header">
-				<h1>DOI minting</h1>
+	<div id="main-wrapper" class="@isAdminClass @isLoggedInClass" data-permissions="@permissions">
+		<div class="row">
+			<div class="col">
+				<div class="page-header">
+					<h1>DOI minting</h1>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="row">
-		<div class="col">
-			<p>@permissions</p>
+		<div class="row">
+			<div class="col">
+				<p>@permissions</p>
+			</div>
 		</div>
-	</div>
 
-	<hr>
+		<hr>
 
-	<div class="row">
-		<div class="col">
-			<div id="main-wrapper" class="@isAdminClass @isLoggedInClass"></div>
+		<div class="row">
+			<div class="col">
+				<div id="list-wrapper"></div>
+			</div>
 		</div>
 	</div>
 
