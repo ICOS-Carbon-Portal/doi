@@ -22,8 +22,8 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 
 	val publicRoute = get{
 		pathPrefix("list"){
-			parameters("query".optional, "page".as[Int].optional){ (query, page) =>
-				onSuccess(client.listDoisMeta(query, page)) { payload =>
+			parameters("query".optional, "page".as[Int].optional, "state".optional){ (query, page, state) =>
+				onSuccess(client.listDoisMeta(query, page, state)) { payload =>
 					complete(payload)
 				}
 			}

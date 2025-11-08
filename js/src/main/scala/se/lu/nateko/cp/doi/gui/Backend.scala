@@ -35,10 +35,11 @@ object Backend {
 		.flatMap(_.text())
 		.map(s => Json.parse(s).as[String])
 
-	def getFreshDoiList(query: Option[String], page: Option[Int]): Future[FreshDoiList] = {
+	def getFreshDoiList(query: Option[String], page: Option[Int], state: Option[String]): Future[FreshDoiList] = {
 		//val startTime = System.currentTimeMillis()
+		val stateParam = state.map(s => s"&state=$s").getOrElse("")
 		dom
-			.fetch(s"/api/list/?query=${query.getOrElse("")}&page=${page.getOrElse(1)}")
+			.fetch(s"/api/list/?query=${query.getOrElse("")}&page=${page.getOrElse(1)}$stateParam")
 			//.andThen{case _ => println(s"Got list response in ${System.currentTimeMillis() - startTime} ms")}
 			.flatMap(checkResponseOk("fetch DOI list from DataCite REST API"))
 			.flatMap(_.text())

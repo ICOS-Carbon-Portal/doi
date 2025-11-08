@@ -56,6 +56,16 @@ class MainView(d: DoiRedux.Dispatcher) {
 		onclick := (addDoi _)
 	)("Add new DOI").render
 
+	private val stateFilterSelect = select(
+		cls := "form-select",
+		onchange := (searchDoi _)
+	)(
+		option(value := "", selected)("All states"),
+		option(value := "findable")("Findable"),
+		option(value := "registered")("Registered"),
+		option(value := "draft")("Draft")
+	).render
+
 	private val searchInput = input(
 		tpe := "search", cls := "form-control",
 		placeholder := "Search DOI",
@@ -63,7 +73,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 	).render
 
 	private def searchDoi(): Unit = {
-		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value)))
+		val stateFilter = if (stateFilterSelect.value.isEmpty) None else Some(stateFilterSelect.value)
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), None, stateFilter))
 	}
 
 	private val searchSubmitButton = button(
@@ -82,6 +93,9 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
 			cls := "d-flex",
+			div(cls := "input-group me-2", style := "max-width: 200px")(
+				stateFilterSelect
+			),
 			div(cls := "input-group")(
 				searchInput,
 				searchSubmitButton
@@ -133,7 +147,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def goToPage(event: Event, page: Int) = {
 		event.preventDefault()
-		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), Some(page)))
+		val stateFilter = if (stateFilterSelect.value.isEmpty) None else Some(stateFilterSelect.value)
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), Some(page), stateFilter))
 	}
 
 	def setPagination(listMeta: Option[DoiListMeta]): Unit = {
