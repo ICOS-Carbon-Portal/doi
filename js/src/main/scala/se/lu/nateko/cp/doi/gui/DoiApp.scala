@@ -16,44 +16,39 @@ object DoiApp {
 		listMeta = None,
 		selected = None,
 		error = None,
-		isLoading = true
+		isLoading = true,
+		currentRoute = InitialRoute // Start with placeholder to force initial render
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 
 	val mainView = new MainView(store)
-	val renderer = new Renderer(mainView)
+	val renderer = new Renderer(mainView, store)
 	store.subscribe(renderer)
 
 	def main(args: Array[String]): Unit = {
-		val mainWrapper = document.getElementById("main-wrapper")
-		val doiAttr = mainWrapper.getAttribute("data-doi")
+		org.scalajs.dom.console.log("DoiApp.main starting")
+		
+		// Setup router listener
+		Router.setupListener { route =>
+			org.scalajs.dom.console.log(s"Router listener triggered: $route")
+			store.dispatch(NavigateToRoute(route))
+		}
 		
 		store.dispatch(ThunkActions.FetchPrefixInfo)
 		
-		// Check if we're on a detail page
-		if (doiAttr != null && doiAttr.nonEmpty) {
-			// Detail page - fetch the specific DOI and render detail view
-			Doi.parse(doiAttr).toOption match {
-				case Some(doi) =>
-					Backend.getDoi(doi).foreach {
-						case Some(meta) =>
-							val detailView = new DoiDetailView(meta, store)
-							mainWrapper.appendChild(detailView.element.render)
-							detailView.initialize()
-						case None =>
-							mainWrapper.innerHTML = s"""<div class="alert alert-danger">DOI not found: $doi</div>"""
-					}
-				case None =>
-					mainWrapper.innerHTML = s"""<div class="alert alert-danger">Invalid DOI: $doiAttr</div>"""
-			}
-		} else {
-			// List page - normal initialization
-			mainWrapper.appendChild(mainView.element.render)
-			val url = new URL(window.location.href)
-			val searchQuery = Option(url.searchParams.get("q")).filter(_.nonEmpty)
-			searchQuery.foreach(q => mainView.setSearchQuery(q))
-			store.dispatch(ThunkActions.DoiListRefreshRequest(searchQuery))
-		}
+		// Get search query from URL if on list page
+		val url = new URL(window.location.href)
+		val searchQuery = Option(url.searchParams.get("q")).filter(_.nonEmpty)
+		searchQuery.foreach(q => mainView.setSearchQuery(q))
+		
+		// Fetch list data
+		store.dispatch(ThunkActions.DoiListRefreshRequest(searchQuery))
+		
+		// Trigger initial render based on current route
+		val initialRoute = Router.getCurrentRoute
+		org.scalajs.dom.console.log(s"Initial route: $initialRoute")
+		store.dispatch(NavigateToRoute(initialRoute))
+		org.scalajs.dom.console.log("DoiApp.main complete")
 	}
 
 }

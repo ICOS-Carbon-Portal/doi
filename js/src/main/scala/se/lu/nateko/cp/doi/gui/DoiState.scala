@@ -12,7 +12,8 @@ case class DoiState(
 	listMeta: Option[DoiListMeta],
 	selected: Option[Doi],
 	error: Option[String],
-	isLoading: Boolean
+	isLoading: Boolean,
+	currentRoute: Route
 )
 
 object DoiStateUpgrades{

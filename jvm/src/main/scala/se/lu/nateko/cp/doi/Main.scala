@@ -54,10 +54,6 @@ object Main{
 			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev))
 		}
 
-		def detailPage(doi: Doi, isDev: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiDetailPage(doi, uidOpt.isDefined, isOptAdmin(uidOpt), isDev))
-		}
-
 		def sendEmail(uid: UserId, doi: Doi) = Future(
 			emailSender.send(
 				conf.admins,
@@ -111,11 +107,6 @@ object Main{
 			} ~
 			get{
 				pathSingleSlash(mainPage(conf.development)) ~
-				pathPrefix("doi"){
-					path(DoiClientRouting.DoiPath){doi =>
-						detailPage(doi, conf.development)
-					}
-				} ~
 				path("buildInfo"){
 					complete(BuildInfo.toString)
 				} ~
@@ -130,7 +121,13 @@ object Main{
 						complete(StatusCodes.OK)
 					}
 				} ~
-				getFromResourceDirectory("")
+				getFromResourceDirectory("") ~
+				// SPA catch-all - serve index for any /doi/* path (after trying static resources)
+				pathPrefix("doi"){
+					path(DoiClientRouting.DoiPath){_ =>
+						mainPage(conf.development)
+					}
+				}
 			}
 		}
 

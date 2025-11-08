@@ -7,6 +7,8 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.console
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.NavigateToRoute
+import se.lu.nateko.cp.doi.gui.DetailRoute
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiMetaViewer
@@ -26,6 +28,10 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	private[this] var meta = metaInit
 
 	private val titleSpan = span().render
+	private val navigateToDetail: Event => Unit = e => {
+		e.preventDefault()
+		d.dispatch(NavigateToRoute(DetailRoute(meta.doi)))
+	}
 
 	def cardHeaderClasses = "card-header bg-opacity-50 bg-" + (if(meta.state == DoiPublicationState.draft) "warning" else "primary")
 	def cardClasses = "card " + (if(meta.state == DoiPublicationState.draft) "draft-doi" else "published-doi")
@@ -34,7 +40,8 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		a(
 			href := s"/doi/${meta.doi}",
 			cls := cardHeaderClasses + " d-block text-decoration-none text-body",
-			style := "cursor: pointer"
+			style := "cursor: pointer",
+			onclick := navigateToDetail
 		)(
 			span(cls := "fas fa-arrow-right", style := "width: 1em"),
 			titleSpan

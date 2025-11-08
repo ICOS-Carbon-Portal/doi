@@ -6,6 +6,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.DoiMetaViewer
 import se.lu.nateko.cp.doi.gui.DoiCloneRequest
+import se.lu.nateko.cp.doi.gui.NavigateToRoute
+import se.lu.nateko.cp.doi.gui.ListRoute
 import se.lu.nateko.cp.doi.gui.DoiJsonEditor
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
 import se.lu.nateko.cp.doi.gui.widgets.EditorTab
@@ -22,8 +24,13 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private[this] var meta = metaInit
 
+	private val backToList: Event => Unit = e => {
+		e.preventDefault()
+		d.dispatch(NavigateToRoute(ListRoute))
+	}
+
 	private val headerSection = div(cls := "mb-3")(
-		a(href := "/", cls := "btn btn-outline-primary mb-2")(
+		a(href := "/", cls := "btn btn-outline-primary mb-2", onclick := backToList)(
 			span(cls := "fas fa-arrow-left mr-2"),
 			"Back to list"
 		),
@@ -34,7 +41,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		div(cls := "card-body")
 	).render
 
-	val element = div(id := "main")(
+	val element = div(id := "detail-view")(
 		headerSection,
 		contentBody
 	)

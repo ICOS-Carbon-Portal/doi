@@ -4,6 +4,10 @@
 @(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
 @CpCommonContainerPage(s"${devIcon}DOI minting"){
 	<style type="text/css">
+		/* Disable smooth scrolling for instant navigation */
+		html, body {
+			scroll-behavior: auto !important;
+		}
 		@@media all and (max-width: 991px) {
 			.spacyrow{
 				margin-top: 15px;
@@ -67,7 +71,7 @@
 	</div>
 
 
-	<script src="doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
+	<script src="/doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
 
 }
 
