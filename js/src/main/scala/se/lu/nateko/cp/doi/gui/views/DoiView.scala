@@ -27,35 +27,45 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private[this] var meta = metaInit
 
-	private val titleSpan = span().render
+	private val doiSpan = span(cls := "text-muted small").render
+	private val titleSpan = span(cls := "fw-semibold").render
+	private val badgeSpan = span().render
 	private val navigateToDetail: Event => Unit = e => {
 		e.preventDefault()
 		d.dispatch(NavigateToRoute(DetailRoute(meta.doi)))
 	}
 
-	def cardHeaderClasses = "card-header bg-opacity-50 bg-" + (if(meta.state == DoiPublicationState.draft) "warning" else "primary")
-	def cardClasses = "card " + (if(meta.state == DoiPublicationState.draft) "draft-doi" else "published-doi")
+	def badgeClasses = "badge " + (meta.state match {
+		case DoiPublicationState.draft => "bg-warning text-dark"
+		case DoiPublicationState.registered => "bg-primary"
+		case DoiPublicationState.findable => "bg-success"
+	})
 
-	val element = div(cls := cardClasses)(
-		a(
-			href := s"/doi/${meta.doi}",
-			cls := cardHeaderClasses + " d-block text-decoration-none text-body",
-			style := "cursor: pointer",
-			onclick := navigateToDetail
-		)(
-			span(cls := "fas fa-arrow-right", style := "width: 1em"),
-			titleSpan
+	val element = a(
+		href := s"/doi/${meta.doi}",
+		cls := "list-group-item list-group-item-action d-block text-decoration-none",
+		style := "cursor: pointer",
+		onclick := navigateToDetail
+	)(
+		div(cls := "d-flex align-items-center justify-content-between")(
+			div(cls := "d-flex flex-column flex-grow-1")(
+				doiSpan,
+				titleSpan
+			),
+			badgeSpan
 		)
 	).render
 
 	def updateContentVisibility(): Unit = {
 		val title = meta.titles
 			.flatMap(_.headOption)
-			.map(" | " + _.title)
-			.getOrElse("")
+			.map(_.title)
+			.getOrElse("No title")
 
-		titleSpan.textContent = s" ${meta.doi} $title"
-		element.className = cardClasses
+		doiSpan.textContent = meta.doi.toString
+		titleSpan.textContent = title
+		badgeSpan.className = badgeClasses
+		badgeSpan.textContent = meta.state.toString.capitalize
 	}
 
 	def setSelected(selected: Boolean): Unit = {

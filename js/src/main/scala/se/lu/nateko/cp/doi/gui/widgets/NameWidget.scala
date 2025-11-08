@@ -49,7 +49,7 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 		div(
 		cls := "row",
 			form(
-				cls := "col offset-1",
+				cls := "col",
 				div(
 					nameTypeOption(true), label("Person", cls := "form-check-label"),
 					cls := "form-check form-check-inline"

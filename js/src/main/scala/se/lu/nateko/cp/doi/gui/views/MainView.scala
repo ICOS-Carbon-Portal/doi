@@ -22,7 +22,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
 
-	private val listElem = ul(cls := "list-unstyled").render
+	private val listElem = ul(cls := "list-group").render
 
 	private val prefixSpan = span(cls := "input-group-text").render
 

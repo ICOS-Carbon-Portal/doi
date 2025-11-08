@@ -37,9 +37,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		h2(cls := "mt-2")(s"${meta.doi}")
 	).render
 
-	private val contentBody = div(cls := "card")(
-		div(cls := "card-body")
-	).render
+	private val contentBody = div().render
 
 	val element = div(id := "detail-view")(
 		headerSection,
@@ -47,7 +45,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	)
 
 	def initialize(): Unit = {
-		contentBody.querySelector(".card-body").appendChild(metaViewer.element)
+		contentBody.appendChild(metaViewer.element)
 	}
 
 	private def metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, tabsCb, meta => d.dispatch(DoiCloneRequest(meta)))
@@ -65,16 +63,13 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private val tabsCb: Map[EditorTab, () => Unit] = Map(
 		EditorTab.view -> {() => 
-			val cardBody = contentBody.querySelector(".card-body")
-			cardBody.replaceChildren(metaViewer.element)
+			contentBody.replaceChildren(metaViewer.element)
 		},
 		EditorTab.edit -> {() => 
-			val cardBody = contentBody.querySelector(".card-body")
-			cardBody.replaceChildren(metaWidget.element)
+			contentBody.replaceChildren(metaWidget.element)
 		},
 		EditorTab.json -> {() => 
-			val cardBody = contentBody.querySelector(".card-body")
-			cardBody.replaceChildren(metaJsonEditor.element)
+			contentBody.replaceChildren(metaJsonEditor.element)
 		},
 	)
 
@@ -88,10 +83,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 				case Success(s) =>
 					if (!s.isEmpty()) d.dispatch(ReportError(s))
 					//recreate the DOI metadata widget with the updated metadata
-					val cardBody = contentBody.querySelector(".card-body")
-					cardBody.innerHTML = ""
+					contentBody.innerHTML = ""
 					meta = updated
-					cardBody.appendChild(metaWidget.element)
+					contentBody.appendChild(metaWidget.element)
 					// Update header with new DOI if it changed
 					headerSection.querySelector("h2").textContent = s"DOI: ${updated.doi}"
 			}
