@@ -90,6 +90,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val searchResultsStats = p.render
 
+	private val paginationElem = div(cls := "mt-3").render
+
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
 			cls := "d-flex",
@@ -115,7 +117,8 @@ class MainView(d: DoiRedux.Dispatcher) {
 	val element = div(id := "main")(
 		searchCreateControls,
 		searchResultsStats,
-		listElem
+		listElem,
+		paginationElem
 	)
 
 	def updateDefaultPrefix(): Unit = {
@@ -152,6 +155,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	}
 
 	def setPagination(listMeta: Option[DoiListMeta]): Unit = {
+		paginationElem.innerHTML = ""
 		listMeta.map(listMeta => {
 			val previousBtnClasses = "page-item" + (if(listMeta.page == 1) " disabled" else "")
 			val nextBtnClasses = "page-item" + (if(listMeta.page >= listMeta.totalPages) " disabled" else "")
@@ -165,7 +169,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 				).render
 			)
 
-			listElem.appendChild(
+			paginationElem.appendChild(
 				ul(cls := "pagination justify-content-center")(
 					li(cls := previousBtnClasses)(
 						a(
