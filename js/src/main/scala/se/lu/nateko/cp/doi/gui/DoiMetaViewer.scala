@@ -4,12 +4,9 @@ import se.lu.nateko.cp.doi.DoiMeta
 import scalatags.JsDom.all._
 import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.meta.Person
-import se.lu.nateko.cp.doi.gui.widgets.EditorTab
-import se.lu.nateko.cp.doi.gui.widgets.TabWidget
+import se.lu.nateko.cp.doi.gui.widgets.UnifiedToolbar
 
-class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: DoiMeta => Unit) {
-
-	private val tabs = new TabWidget(EditorTab.view, tabsCb).element
+class DoiMetaViewer(meta: DoiMeta, toolbar: UnifiedToolbar) {
 	
 	private val subtitleProperties =
 		Seq(
@@ -19,9 +16,19 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 			meta.publisher.map(publisher => s"by $publisher")
 		).filter(_.nonEmpty).flatten
 	
-	private val subtitle = div(cls := "text-muted mb-4")(
-		span(subtitleProperties.mkString(" "))
+	private val subtitle = if (subtitleProperties.nonEmpty) {
+	div(cls := "text-muted small mb-4")(
+		meta.types.map(t => 
+			div(cls := "mb-1")(
+				strong("Type: "),
+				Seq(t.resourceTypeGeneral, t.resourceType).filter(_.nonEmpty).flatten.mkString(" / ")
+			)
+		).toSeq,
+		meta.version.map(v => div(cls := "mb-1")(strong("Version: "), v.toString)).toSeq,
+		meta.publicationYear.map(y => div(cls := "mb-1")(strong("Published: "), y)).toSeq,
+		meta.publisher.map(p => div(cls := "mb-1")(strong("Publisher: "), p)).toSeq
 	)
+} else div()
 	
 	private val description = if (meta.descriptions.nonEmpty) {
 		Seq(
@@ -35,9 +42,11 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 	private val subjects = if (meta.subjects.nonEmpty) {
 		Seq(
 			h5(cls := "mt-4 mb-3")("Subjects"),
-			div(cls := "mb-3")(meta.subjects.map(subject => 
-				span(cls := "badge rounded-pill bg-secondary me-2 mb-2")(subject.subject)
-			).toSeq)
+			div(cls := "mb-3 d-flex flex-wrap gap-2")(
+				meta.subjects.map(subject => 
+					span(cls := "badge rounded-pill bg-secondary")(subject.subject)
+				).toSeq
+			)
 		)
 	} else Seq()
 	
@@ -59,45 +68,15 @@ class DoiMetaViewer(meta: DoiMeta, tabsCb: Map[EditorTab, () => Unit], cloneCb: 
 		)
 	}.getOrElse(Seq())
 	
-	private val doiUrl = "https://doi.org/" + meta.doi
-	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
-	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
-	
-	private val links = div(cls := "mb-4")(
-		div(cls := "mb-2")(
-			a(href := doiUrl, target := "_blank", cls := "text-decoration-none")(doiUrl)
-		),
-		div(cls := "mb-2")(
-			a(href := dataciteUrl, target := "_blank", cls := "text-decoration-none")("Commons")
-		),
-		div(
-			a(href := fabricaUrl, target := "_blank", cls := "text-decoration-none")("Fabrica")
-		)
-	)
-
-	private val cloneButton = button(
-		tpe := "button", 
-		cls := "btn btn-primary edit-control mt-4"
-	)(
-		i(cls := "fa-solid fa-copy me-2"),
-		"Clone DOI Metadata"
-	).render
-	cloneButton.onclick = (_: Event) => cloneCb(meta)
-
 	val element = div(
-		tabs,
 		div(cls := "row")(
 			div(cls := "col-md-8")(
 				div(cls := "mt-3")(
 					subtitle,
-					links,
 					description,
 					subjects,
 					creators,
-					contributors,
-					div(cls := "d-grid gap-2 mt-4 mb-5")(
-						cloneButton
-					)
+					contributors
 				)
 			)
 		)

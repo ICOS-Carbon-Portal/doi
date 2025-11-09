@@ -95,7 +95,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
 			cls := "d-flex",
-			div(cls := "input-group me-2", style := "max-width: 200px")(
+			div(cls := "input-group me-2", style := "max-width: 120px")(
 				stateFilterSelect
 			),
 			div(cls := "input-group")(

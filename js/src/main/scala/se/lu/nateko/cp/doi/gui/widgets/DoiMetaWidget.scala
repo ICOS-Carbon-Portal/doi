@@ -21,8 +21,7 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	tabsCb: Map[EditorTab, () => Unit],
-	deleteCb: Doi => Unit
+	toolbar: UnifiedToolbar
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
@@ -80,8 +79,10 @@ class DoiMetaWidget(
 	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
 		_meta = upd(prop)(_meta)
 		validateMeta()
-		resetButton.disabled = false
+		if (toolbarInitialized) toolbar.setResetButtonEnabled(true)
 	}
+
+	private var toolbarInitialized = false
 
 	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
 
@@ -96,10 +97,11 @@ class DoiMetaWidget(
 			else errors.isEmpty
 		}
 
-		updateButton.disabled = !canUpdate
-		publishButton.disabled = !errors.isEmpty
-		submitButton.disabled = !errors.isEmpty
-		updateButton.className = "btn btn-update-doi btn-" + (if(canUpdate) "primary" else "secondary")
+		if (toolbarInitialized) {
+			toolbar.setUpdateButtonEnabled(canUpdate)
+			toolbar.setPublishButtonEnabled(errors.isEmpty)
+			toolbar.setSubmitButtonEnabled(errors.isEmpty)
+		}
 	}
 
 	private def resetForms(): Unit = {
@@ -107,78 +109,58 @@ class DoiMetaWidget(
 		formElems.innerHTML = ""
 		formElements.foreach(formElems.appendChild)
 		validateMeta()
-		resetButton.disabled = true
+		if (toolbarInitialized) toolbar.setResetButtonEnabled(false)
 	}
 
-	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
-	updateButton.onclick = (_: Event) => {
-		updateButton.disabled = true
-		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
-	}
-
-	private[this] val submitButton = button(tpe := "button", cls := "btn btn-secondary btn-submit")("Submit for publication").render
-	submitButton.onclick = (_: Event) => {
-		val originalText = submitButton.textContent
-		submitButton.textContent = "Submitting..."
-		submitButton.disabled = true
-		updater(_meta).map{ _ =>
-			Backend.submitForPublication(_meta.doi)
-		}.andThen{
-			case Failure(exc) =>
-				submitButton.textContent = originalText
-				submitButton.disabled = false
-				errorMessages.appendChild(p(exc.getMessage()).render)
-			case Success(_) =>
-				submitButton.textContent = "Submitted"
+	// Expose methods to wire toolbar callbacks
+	def wireToolbarCallbacks(): Unit = {
+		toolbarInitialized = true
+		// Run validation now that toolbar is initialized
+		validateMeta()
+		toolbar.setUpdateButtonCallback { (_: Event) =>
+			toolbar.setUpdateButtonEnabled(false)
+			updater(_meta).failed.foreach{_ => toolbar.setUpdateButtonEnabled(true)}
 		}
-	}
 
-	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Publish").render
-	publishButton.onclick = (_: Event) => {
-		publishButton.disabled = true
-		updater(
-			_meta.copy(event = Some(DoiPublicationEvent.publish))
-		).failed.foreach{
-			_ => publishButton.disabled = false
+		toolbar.setSubmitButtonCallback { (_: Event) =>
+			toolbar.setSubmitButtonEnabled(false)
+			updater(_meta).map{ _ =>
+				Backend.submitForPublication(_meta.doi)
+			}.andThen{
+				case Failure(exc) =>
+					toolbar.setSubmitButtonEnabled(true)
+					errorMessages.appendChild(p(exc.getMessage()).render)
+				case Success(_) =>
+					// Keep button disabled after successful submission
+			}
 		}
-	}
 
-	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Delete").render
-	deleteButton.onclick = (_: Event) => {
-		deleteButton.disabled = true
-		deleteCb(_meta.doi)
-	}
+		toolbar.setPublishButtonCallback { (_: Event) =>
+			toolbar.setPublishButtonEnabled(false)
+			updater(
+				_meta.copy(event = Some(DoiPublicationEvent.publish))
+			).failed.foreach{
+				_ => toolbar.setPublishButtonEnabled(true)
+			}
+		}
 
-	private[this] val resetButton = button(tpe := "button", cls := "btn btn-secondary", disabled := true)("Reset").render
-	resetButton.onclick = (_: Event) => resetForms()
+		toolbar.setResetButtonCallback { (_: Event) => resetForms() }
+	}
 
 	private[this] val formElems = div.render
 
-	private[this] val buttons = {
-		_meta.state match {
-			case DoiPublicationState.draft =>
-				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group edit-control")(deleteButton, resetButton),
-					div(cls := "col-auto btn-group edit-control ms-auto")(publishButton, submitButton, updateButton)
-				)
-			case _ =>
-				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group edit-control")(resetButton),
-					div(cls := "col-auto btn-group edit-control")(updateButton)
-				)
-		}
-	}
-
-	private val tabs = new TabWidget(EditorTab.edit, tabsCb).element
-
 	val element = div(
-		tabs,
 		formElems,
-		errorMessages,
-		buttons
+		errorMessages
 	).render
 
-	resetForms()
+	// Initialize forms (deferred to avoid calling toolbar during construction)
+	private def initialize(): Unit = {
+		resetForms()
+	}
+
+	// Call initialization when the widget is first accessed
+	initialize()
 }
 
 object DoiMetaWidget{
