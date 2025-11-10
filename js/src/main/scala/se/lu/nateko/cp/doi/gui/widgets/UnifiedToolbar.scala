@@ -55,37 +55,14 @@ class UnifiedToolbar(
 		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"} edit-control"
 	}
 
-	// External links
-	private val doiUrl = "https://doi.org/" + meta.doi
-	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
-	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
+	// State badge
+	private def badgeClasses = "badge " + (_meta.state match {
+		case DoiPublicationState.draft => "bg-warning text-dark"
+		case DoiPublicationState.registered => "bg-primary"
+		case DoiPublicationState.findable => "bg-success"
+	})
 
-	private val doiLink = a(
-		href := doiUrl,
-		target := "_blank",
-		cls := "btn btn-sm btn-outline-secondary"
-	)(
-		i(cls := "fa-solid fa-link me-1"),
-		"DOI"
-	).render
-
-	private val dataciteLink = a(
-		href := dataciteUrl,
-		target := "_blank",
-		cls := "btn btn-sm btn-outline-secondary"
-	)(
-		i(cls := "fa-solid fa-database me-1"),
-		"Commons"
-	).render
-
-	private val fabricaLink = a(
-		href := fabricaUrl,
-		target := "_blank",
-		cls := "btn btn-sm btn-outline-secondary"
-	)(
-		i(cls := "fa-solid fa-pen-to-square me-1"),
-		"Fabrica"
-	).render
+	private val badgeSpan = span(cls := badgeClasses)(_meta.state.toString.capitalize).render
 
 	// Clone button
 	private val cloneButton = button(
@@ -239,17 +216,11 @@ class UnifiedToolbar(
 				jsonButton
 			),
 			
-			// External links
-			div(cls := "btn-group me-2")(
-				doiLink,
-				dataciteLink,
-				fabricaLink
-			),
-			
 			// Spacer to push action buttons to the right
 			div(cls := "flex-grow-1"),
 			
-			// Clone button
+			div(cls := "me-2")(badgeSpan),
+
 			div(cls := "me-2")(cloneButton),
 			
 			// Action buttons
@@ -336,5 +307,11 @@ class UnifiedToolbar(
 			closeDropdown(deleteDropdownItem.parentElement.parentElement)
 			cb(e)
 		}
+	}
+
+	def updateBadge(state: DoiPublicationState): Unit = {
+		_meta = _meta.copy(state = state)
+		badgeSpan.className = badgeClasses
+		badgeSpan.textContent = state.toString.capitalize
 	}
 }

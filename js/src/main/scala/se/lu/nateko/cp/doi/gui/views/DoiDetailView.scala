@@ -41,9 +41,22 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private val title = DoiMetaHelpers.extractTitle(meta)
 
+	// External links for DOI and DataCite
+	private val doiUrl = "https://doi.org/" + meta.doi
+	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
+	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
+
 	private val headerSection = div(cls := "mb-3")(
 		h1(cls := "mt-2")(title),
-		p(cls := "text-muted", style := "user-select: all;")(s"${meta.doi}")
+		div(cls := "d-flex align-items-center gap-2")(
+			p(cls := "text-muted mb-0", style := "user-select: all;")(s"${meta.doi}"),
+			span(cls := "text-muted")("|"),
+			a(href := doiUrl, target := "_blank", cls := "link-secondary")("DOI"),
+			span(cls := "text-muted")("|"),
+			a(href := dataciteUrl, target := "_blank", cls := "link-secondary")("Commons"),
+			span(cls := "text-muted")("|"),
+			a(href := fabricaUrl, target := "_blank", cls := "link-secondary")("Fabrica")
+		)
 	).render
 
 	private val contentBody = div().render
@@ -123,6 +136,15 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 					val newTitle = DoiMetaHelpers.extractTitle(updated)
 					headerSection.querySelector("h1").textContent = newTitle
 					headerSection.querySelector("p").textContent = s"${updated.doi}"
+					// Update external link hrefs
+					val links = headerSection.querySelectorAll("a[target='_blank']")
+					if (links.length >= 3) {
+						links(0).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://doi.org/${updated.doi}"
+						links(1).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://commons.datacite.org/doi.org/${updated.doi}"
+						links(2).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://doi.datacite.org/doi.org/${updated.doi}"
+					}
+					// Update toolbar badge
+					toolbar.updateBadge(updated.state)
 			}
 		}))
 	}
