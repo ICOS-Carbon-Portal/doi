@@ -33,6 +33,10 @@ class DoiMetaWidget(
 		joinErrors(err, _meta.url.flatMap(DoiTargetWidget.targetUrlError))
 
 	private def formElements: Seq[Div] = Seq(
+		
+		div(cls := "row mt-5")(h4("Required properties")).render,
+
+		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
 
 		new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element.render,
 
@@ -50,11 +54,23 @@ class DoiMetaWidget(
 			new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
 		).render,
 
+		div(cls := "row mt-5")(h4("Recommended properties")).render,
+
 		new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element.render,
 
 		new ContributorsEditWidget(init.contributors, cb(cs => _.copy(contributors = cs))).element.render,
 
 		new DatesEditWidget(init.dates, cb(ds => _.copy(dates = ds))).element.render,
+
+		new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element.render,
+
+		new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element.render,
+
+		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
+
+		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
+
+		div(cls := "row mt-5")(h4("Optional properties")).render,
 
 		new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element.render,
 
@@ -62,17 +78,7 @@ class DoiMetaWidget(
 			new VersionWidget(init.version, cb(v => _.copy(version = v))).element
 		).render,
 
-		new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element.render,
-
-		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
-
-		new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element.render,
-
 		new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
-
-		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
-
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
 
 	)
 

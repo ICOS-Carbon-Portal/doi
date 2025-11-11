@@ -42,10 +42,8 @@ class CompositeDateWidget(init: Date, protected val updateCb: Date => Unit) exte
 		val checkedModifier = if(range == isRange) Seq(checked := true) else Nil
 		input(tpe := "radio", name := "dateType", onchange := changeDateType(range))(checkedModifier)
 
-	val element = Bootstrap.basicCard(
-		Bootstrap.propValueRow(strong("Date format"))(
-			form(dateTypeOption(false), " Single date", br, dateTypeOption(true), " Date range")
-		)(paddingBottom := 15),
+	val element = Bootstrap.basicPropValueWidget("Date format")(
+		form(dateTypeOption(false), " Single date", br, dateTypeOption(true), " Date range"),
 		div(cls := "row")(dateElem)
 	).render
 
