@@ -4,7 +4,6 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiAction
 import org.scalajs.dom.Event
-import org.scalajs.dom.console
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.NavigateToRoute

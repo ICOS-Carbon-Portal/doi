@@ -14,7 +14,7 @@ class SelectWidget[T](
 	protected val updateCb: Option[T] => Unit
 ) extends EntityWidget[Option[T]] {
 
-	val element: html.Select = select(cls := "form-control")(options.map(optionElem)).render
+	val element: html.Select = select(cls := "form-select flex-grow-0", style := "flex-basis: content")(options.map(optionElem)).render
 
 	element.onchange = (_: Event) => updateCb(options(element.selectedIndex).value)
 

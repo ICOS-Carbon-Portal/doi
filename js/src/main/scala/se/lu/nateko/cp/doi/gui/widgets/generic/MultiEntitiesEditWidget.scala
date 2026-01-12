@@ -16,9 +16,8 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
-	private def setRemovability(): Unit = if(minAmount > 0) {
+	private def setRemovability(): Unit = 
 		widgets.foreach(_.setRemovability(widgets.length > minAmount))
-	}
 
 	private def setOrderability(): Unit = {
 		widgets.foreach(widget => {
@@ -39,7 +38,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private def notifyUpstream(): Unit = cb(widgets.map(_.entityValue))
 
-	private val widgetsParent = div(cls := "col-md-10").render
+	private val widgetsParent = div().render
 
 	private def produceWidget(value: E): Unit = {
 		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
@@ -87,17 +86,18 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	}
 
 	private val collapseIcon = span().render
+
 	private val collapseButton = span(
-			onclick := collapseWidget,
 			width := "1rem"
 		)(collapseIcon).render
 
 	private val addWidgetButton = button(
-			tpe := "button", cls := "btn btn-success",
+			tpe := "button", cls := "btn btn-sm btn-outline-primary mt-2",
 			htmlTitle := "Add another item to the list",
 			onclick := addWidget, marginBottom := 5
 		)(
-			span(cls := "fas fa-plus")
+			span(cls := "fas fa-plus me-1"),
+			"Add " + title.dropRight(1).toLowerCase
 		).render
 
 	private def setCollapsedness(): Unit = {
@@ -114,7 +114,10 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			div(cls := "col-md-2")(
 				div(onclick := collapseWidget, cursor := "pointer")(collapseButton, strong(title))
 			),
-			widgetsParent
+			div(cls := "col-md-10")(
+				widgetsParent,
+				addWidgetButton
+			)
 		)
 
 	initValues.foreach(produceWidget)

@@ -17,7 +17,7 @@ object DoiApp {
 		selected = None,
 		error = None,
 		isLoading = true,
-		currentRoute = InitialRoute // Start with placeholder to force initial render
+		currentRoute = InitialRoute
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 
@@ -26,29 +26,21 @@ object DoiApp {
 	store.subscribe(renderer)
 
 	def main(args: Array[String]): Unit = {
-		org.scalajs.dom.console.log("DoiApp.main starting")
 		
-		// Setup router listener
 		Router.setupListener { route =>
-			org.scalajs.dom.console.log(s"Router listener triggered: $route")
 			store.dispatch(NavigateToRoute(route))
 		}
 		
 		store.dispatch(ThunkActions.FetchPrefixInfo)
 		
-		// Get search query from URL if on list page
 		val url = new URL(window.location.href)
 		val searchQuery = Option(url.searchParams.get("q")).filter(_.nonEmpty)
 		searchQuery.foreach(q => mainView.setSearchQuery(q))
 		
-		// Fetch list data
 		store.dispatch(ThunkActions.DoiListRefreshRequest(searchQuery))
 		
-		// Trigger initial render based on current route
 		val initialRoute = Router.getCurrentRoute
-		org.scalajs.dom.console.log(s"Initial route: $initialRoute")
 		store.dispatch(NavigateToRoute(initialRoute))
-		org.scalajs.dom.console.log("DoiApp.main complete")
 	}
 
 }

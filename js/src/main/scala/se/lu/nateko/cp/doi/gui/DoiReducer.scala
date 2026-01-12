@@ -22,10 +22,8 @@ object DoiReducer {
 		case FreshDoiList(dois, listMeta) => state.copy(dois = dois, listMeta = listMeta)
 
 		case NavigateToRoute(route) =>
-			org.scalajs.dom.console.log(s"Reducer handling NavigateToRoute: $route (current route was: ${state.currentRoute})")
 			Router.navigateTo(route) // This saves scroll position in history.state
 			val newState = state.copy(currentRoute = route)
-			org.scalajs.dom.console.log(s"New route is: ${newState.currentRoute}")
 			newState
 
 		case DoiCloneRequest(meta) => {

@@ -20,7 +20,7 @@ class RemovableEntityWidget[E](
 	})
 
 	private[this] val removeButton =
-		button(tpe := "button", cls := "btn btn-outline-warning m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-trash")
 		).render
 
@@ -29,15 +29,16 @@ class RemovableEntityWidget[E](
 
 	def setRemovability(removable: Boolean): Unit = {
 		removeButton.disabled = !removable
+		removeButton.classList.add(if(removable) "text-warning" else "text-secondary")
 	}
 
 	private[this] val moveUpButton =
-		button(tpe := "button", cls := "btn btn-link m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-arrow-up")
 		).render
 
 	private[this] val moveDownButton =
-		button(tpe := "button", cls := "btn btn-link m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-arrow-down")
 		).render
 
@@ -54,7 +55,7 @@ class RemovableEntityWidget[E](
 	val element =
 		div(cls := "row row-cols-auto")(
 			div(cls := "col-md")(widget.element),
-			div(cls := "col-md")(div(moveUpButton, moveDownButton, removeButton))
+			div(cls := "col-md-3 text-end")(div(moveUpButton, moveDownButton, removeButton))
 		)
 	.render
 }

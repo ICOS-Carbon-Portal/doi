@@ -62,7 +62,6 @@ object Router {
 	def setupListener(onChange: Route => Unit): Unit = {
 		// Handle browser back/forward
 		window.addEventListener("popstate", (_: PopStateEvent) => {
-			org.scalajs.dom.console.log("popstate event - user clicked back/forward")
 			onChange(getCurrentRoute)
 		})
 	}

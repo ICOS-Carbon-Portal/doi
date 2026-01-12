@@ -34,9 +34,9 @@ class NameIdentifierWidget(
 		}
 	)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(idInput.element),
-		div(cls := "col-md-3")(schemeInput.element)
+	val element = div(cls := "input-group")(
+		idInput.element,
+		schemeInput.element
 	).render
 
 	validate()

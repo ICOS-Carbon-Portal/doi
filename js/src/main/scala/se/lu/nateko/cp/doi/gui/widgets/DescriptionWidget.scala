@@ -18,8 +18,6 @@ class DescriptionWidget(init: Description, protected val updateCb: Description =
 		updateCb(_descr)
 	})(overflowY := "scroll", rows := 5)
 
-	descrInput.element.style.setProperty("resize", "none")
-
 	private[this] val descrTypeInput = new SelectWidget[DescriptionType](
 		SelectWidget.selectOptions(Some("Description type"), DescriptionType.values),
 		Option(init.descriptionType),

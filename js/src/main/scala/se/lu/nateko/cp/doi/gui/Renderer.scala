@@ -11,8 +11,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 	private var currentDetailView: Option[DoiDetailView] = None
 
 	def notify(state: State, oldState: State): Unit = {
-		org.scalajs.dom.console.log("Renderer.notify called")
-
 		if(state.prefix != oldState.prefix) mainView.updateDefaultPrefix()
 
 		if(oldState.error != state.error){
@@ -33,32 +31,24 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 
 		// Handle route changes
 		if(state.currentRoute != oldState.currentRoute) {
-			org.scalajs.dom.console.log(s"Route changed from ${oldState.currentRoute} to ${state.currentRoute}")
 			renderRoute(state.currentRoute, state)
-		} else {
-			org.scalajs.dom.console.log(s"Route unchanged: ${state.currentRoute}")
 		}
 	}
 
 	private def renderRoute(route: Route, state: State): Unit = {
-		org.scalajs.dom.console.log(s"Rendering route: $route")
-		
 		route match {
 			case InitialRoute =>
 				// Should never render this, just a placeholder
-				org.scalajs.dom.console.log("Warning: trying to render InitialRoute")
 				
 			case ListRoute =>
 				// Show list view in list-wrapper
 				currentDetailView = None
-				org.scalajs.dom.console.log("Switching to list view")
 				
 				val mainWrapper = document.getElementById("main-wrapper")
 				var listWrapper = document.getElementById("list-wrapper")
 				
 				// Check if we're showing detail view (need to restore list structure)
 				if (listWrapper == null) {
-					org.scalajs.dom.console.log("Restoring list view structure from detail view")
 					// Recreate the list view structure with header
 					import scalatags.JsDom.all._
 					val permissions = mainWrapper.getAttribute("data-permissions")
@@ -90,7 +80,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				
 				val showingDetail = mainWrapper.querySelector("#detail-view") != null
 				if (showingDetail || listWrapper.querySelector("#main") == null) {
-					org.scalajs.dom.console.log("Rendering list view content")
 					listWrapper.innerHTML = ""
 					listWrapper.appendChild(mainView.element.render)
 					mainWrapper.classList.add("loaded")
@@ -100,12 +89,10 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 					// Restore scroll position from history state
 					if (showingDetail) {
 						Router.getScrollPosition.foreach { scrollY =>
-							org.scalajs.dom.console.log(s"Restoring scroll position from history: $scrollY")
 							org.scalajs.dom.window.scrollTo(0, scrollY.toInt)
 						}
 					}
 				} else {
-					org.scalajs.dom.console.log("List view already rendered, keeping it")
 				}
 				
 			case DetailRoute(doi) =>

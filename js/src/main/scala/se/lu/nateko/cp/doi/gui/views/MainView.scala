@@ -1,6 +1,5 @@
 package se.lu.nateko.cp.doi.gui.views
 
-import org.scalajs.dom.console
 import org.scalajs.dom.{Event, KeyboardEvent, html}
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._

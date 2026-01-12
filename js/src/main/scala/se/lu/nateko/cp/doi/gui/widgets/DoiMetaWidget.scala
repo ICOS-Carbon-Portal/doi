@@ -245,7 +245,7 @@ object DoiMetaWidget{
 	}
 
 	class FundingEditWidget(init: Seq[FundingReference], cb: Seq[FundingReference] => Unit) extends
-		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Funding"){
+		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Fundings"){
 
 			protected def makeWidget(value: FundingReference, updateCb: FundingReference => Unit) = new FundingWidget(value, updateCb)
 
