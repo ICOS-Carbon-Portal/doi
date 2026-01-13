@@ -1,8 +1,8 @@
-@import views.html.CpCommonContainerPage
+@import views.html.CpCommonPage
 @import eu.icoscp.envri.Envri
 
 @(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
-@CpCommonContainerPage(s"${devIcon}DOI minting"){
+@CpCommonPage(s"${devIcon}DOI minting"){
 	<style type="text/css">
 		/* Hide content initially if on detail route to prevent flash */
 		#main-wrapper {
@@ -58,7 +58,7 @@
 		}
 	</style>
 }{
-	<div id="main-wrapper" class="@isAdminClass @isLoggedInClass" data-permissions="@permissions">
+	<div id="main-wrapper" class="container-xl @isAdminClass @isLoggedInClass" data-permissions="@permissions">
 		<div class="row">
 			<div class="col">
 				<div class="page-header">
