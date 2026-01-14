@@ -90,7 +90,7 @@ class UnifiedToolbar(
 			cls := s"btn btn-sm btn-update-doi btn-secondary dropdown-toggle dropdown-toggle-split${if (_meta.state != DoiPublicationState.draft) " edit-control" else ""}"
 		)
 		val attrs = if (_meta.state != DoiPublicationState.draft) baseAttrs :+ (disabled := true) else baseAttrs
-		button(attrs: _*)(
+		button(baseAttrs: _*)(
 			span(cls := "visually-hidden")("Toggle Dropdown")
 		).render
 	}
@@ -148,6 +148,16 @@ class UnifiedToolbar(
 						li(deleteDropdownItem),
 						li(publishDropdownItem)
 					)
+				)
+			).render
+
+		case DoiPublicationState.registered =>
+			div(cls := "btn-group doi-split-button", style := "position: relative;")(
+				updateButton,
+				updateDropdownToggle,
+				ul(cls := "dropdown-menu", style := "position: absolute; top: 100%; right: 0; z-index: 1000;")(
+					li(resetDropdownItem),
+					li(publishDropdownItem)
 				)
 			).render
 		case _ =>
@@ -262,7 +272,7 @@ class UnifiedToolbar(
 	def setUpdateButtonEnabled(enabled: Boolean): Unit = {
 		updateButton.disabled = !enabled
 		// For draft DOIs, keep dropdown toggle always enabled to allow access to Delete/Publish
-		val dropdownEnabled = enabled || _meta.state == DoiPublicationState.draft
+		val dropdownEnabled = enabled || _meta.state == DoiPublicationState.draft || _meta.state == DoiPublicationState.registered
 		updateDropdownToggle.disabled = !dropdownEnabled
 		updateButton.className = "btn btn-sm btn-update-doi edit-control btn-" + (if(enabled) "primary" else "secondary")
 		updateDropdownToggle.className = "btn btn-sm btn-update-doi dropdown-toggle dropdown-toggle-split edit-control btn-" + (if(enabled) "primary" else "secondary")
