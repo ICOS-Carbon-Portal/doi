@@ -51,7 +51,7 @@ object Main{
 		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
 		def mainPage(isDev: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev))
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev, conf.auth.authHost))
 		}
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(

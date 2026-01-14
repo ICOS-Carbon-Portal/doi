@@ -1,7 +1,7 @@
 @import views.html.CpCommonPage
 @import eu.icoscp.envri.Envri
 
-@(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false)(implicit env: Envri)
+@(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false, authHost: String)(implicit env: Envri)
 @CpCommonPage(s"${devIcon}DOI minting"){
 	<style type="text/css">
 		/* Hide content initially if on detail route to prevent flash */
@@ -93,7 +93,11 @@
 	else if(isLoggedIn)
 		"You can create draft DOIs and submit them for publication. We will review your submission before publishing the DOI. You can also clone an existing DOI to update it after it has been published."
 	else
-		"Please log in to create or update DOIs."
+		loginText
+}
+
+@loginText = {
+	Please <a href='https://@{authHost}'>log in</a> to create or update DOIs.
 }
 
 @isAdminClass = @{
