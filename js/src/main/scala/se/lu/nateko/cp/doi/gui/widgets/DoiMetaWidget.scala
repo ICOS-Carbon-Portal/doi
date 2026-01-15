@@ -151,6 +151,21 @@ class DoiMetaWidget(
 		}
 
 		toolbar.setResetButtonCallback { (_: Event) => resetForms() }
+
+		toolbar.setStateChangeCallback { (newState: DoiPublicationState) =>
+			val event = (init.state, newState) match {
+				case (_, DoiPublicationState.findable) => Some(DoiPublicationEvent.publish)
+				case (DoiPublicationState.draft, DoiPublicationState.registered) => Some(DoiPublicationEvent.register)
+				case (DoiPublicationState.findable, DoiPublicationState.registered) => Some(DoiPublicationEvent.hide)
+				case _ => None
+			}
+
+			val metaWithEvent = _meta.copy(state = newState, event = event)
+			updater(metaWithEvent).foreach { _ =>
+				_meta = metaWithEvent.copy(event = None)
+				toolbar.updateBadge(newState)
+			}
+		}
 	}
 
 	private[this] val formElems = div.render

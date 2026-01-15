@@ -55,14 +55,51 @@ class UnifiedToolbar(
 		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"} edit-control"
 	}
 
-	// State badge
-	private def badgeClasses = "badge " + (_meta.state match {
-		case DoiPublicationState.draft => "bg-warning text-dark"
-		case DoiPublicationState.registered => "bg-primary"
-		case DoiPublicationState.findable => "bg-success"
-	})
+	private def stateDotColor = _meta.state match {
+		case DoiPublicationState.draft => "#ffc107"
+		case DoiPublicationState.registered => "#0d6efd"
+		case DoiPublicationState.findable => "#198754"
+	}
 
-	private val badgeSpan = span(cls := badgeClasses)(_meta.state.toString.capitalize).render
+	private def createStateDot() = span(
+		style := s"display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: $stateDotColor; margin-right: 6px;"
+	).render
+
+	private val stateDropdownButton = button(
+		tpe := "button",
+		cls := "btn btn-sm btn-outline-secondary dropdown-toggle",
+		data("bs-toggle") := "dropdown",
+		aria.expanded := "false"
+	)(
+		createStateDot(),
+		_meta.state.toString.capitalize
+	).render
+
+	private val stateDropdownMenu = ul(
+		cls := "dropdown-menu state-dropdown-menu",
+		style := "min-width: auto;"
+	)(
+		li(a(
+			cls := "dropdown-item",
+			href := "#"
+		)("Registered").render),
+		li(a(
+			cls := "dropdown-item",
+			href := "#"
+		)("Findable").render)
+	).render
+
+	private val stateDropdown = div(
+		cls := "dropdown admin-control"
+	)(
+		stateDropdownButton,
+		stateDropdownMenu
+	).render
+
+	// Toggle state dropdown manually
+	stateDropdownButton.onclick = (_: Event) => {
+		stateDropdownMenu.classList.toggle("show")
+	}
 
 	// Clone button
 	private val cloneButton = button(
@@ -214,6 +251,39 @@ class UnifiedToolbar(
 			.doi-split-button .dropdown-toggle-split::after {
 				margin-left: 0;
 			}
+			.state-dropdown-menu {
+				display: none;
+				position: absolute;
+				min-width: 10rem;
+				padding: 0.5rem 0;
+				margin: 0.125rem 0 0;
+				background-color: #fff;
+				border: 1px solid rgba(0,0,0,.15);
+				border-radius: 0.25rem;
+				box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+				list-style: none;
+				z-index: 1000;
+			}
+			.state-dropdown-menu.show {
+				display: block;
+			}
+			.state-dropdown-menu .dropdown-item {
+				display: block;
+				width: 100%;
+				padding: 0.25rem 1rem;
+				clear: both;
+				font-weight: 400;
+				color: #212529;
+				text-align: inherit;
+				white-space: nowrap;
+				background-color: transparent;
+				border: 0;
+				cursor: pointer;
+				text-decoration: none;
+			}
+			.state-dropdown-menu .dropdown-item:hover {
+				background-color: #f8f9fa;
+			}
 		"""),
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
 			// Left section: Back button
@@ -229,7 +299,7 @@ class UnifiedToolbar(
 			// Spacer to push action buttons to the right
 			div(cls := "flex-grow-1"),
 			
-			div(cls := "me-2")(badgeSpan),
+			div(cls := "me-2")(stateDropdown),
 
 			div(cls := "me-2")(cloneButton),
 			
@@ -249,14 +319,14 @@ class UnifiedToolbar(
 		while (node != null && !isInside) {
 			if (node.isInstanceOf[org.scalajs.dom.Element]) {
 				val elem = node.asInstanceOf[org.scalajs.dom.Element]
-				if (elem.classList.contains("doi-split-button")) {
+				if (elem.classList.contains("doi-split-button") || elem.classList.contains("dropdown")) {
 					isInside = true
 				}
 			}
 			node = node.parentNode
 		}
 		if (!isInside) {
-			val dropdowns = org.scalajs.dom.document.querySelectorAll(".doi-split-button .dropdown-menu.show")
+			val dropdowns = org.scalajs.dom.document.querySelectorAll(".doi-split-button .dropdown-menu.show, .state-dropdown-menu.show")
 			for (i <- 0 until dropdowns.length) {
 				dropdowns(i).classList.remove("show")
 			}
@@ -321,7 +391,29 @@ class UnifiedToolbar(
 
 	def updateBadge(state: DoiPublicationState): Unit = {
 		_meta = _meta.copy(state = state)
-		badgeSpan.className = badgeClasses
-		badgeSpan.textContent = state.toString.capitalize
+		stateDropdownButton.innerHTML = ""
+		stateDropdownButton.appendChild(createStateDot())
+		stateDropdownButton.appendChild(org.scalajs.dom.document.createTextNode(state.toString.capitalize))
+	}
+
+	def setStateChangeCallback(cb: DoiPublicationState => Unit): Unit = {
+		val items = stateDropdownMenu.querySelectorAll(".dropdown-item")
+		for (i <- 0 until items.length) {
+			val item = items(i).asInstanceOf[org.scalajs.dom.html.Anchor]
+			val stateText = item.textContent.toLowerCase
+			item.onclick = (e: Event) => {
+				e.preventDefault()
+				stateDropdownMenu.classList.remove("show")
+				val newState = stateText match {
+					case "draft" => DoiPublicationState.draft
+					case "registered" => DoiPublicationState.registered
+					case "findable" => DoiPublicationState.findable
+					case _ => _meta.state
+				}
+				if (newState != _meta.state) {
+					cb(newState)
+				}
+			}
+		}
 	}
 }
