@@ -42,11 +42,11 @@ class DoiMetaWidget(
 
 		new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element.render,
 
-		Bootstrap.basicPropValueWidget("Publisher")(
+		Bootstrap.singlePropValueWidget("Publisher")(
 			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
 		).render,
 
-		Bootstrap.basicPropValueWidget("Publication year")(
+		Bootstrap.singlePropValueWidget("Publication year")(
 			new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
 		).render,
 
@@ -74,7 +74,7 @@ class DoiMetaWidget(
 
 		new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element.render,
 
-		Bootstrap.basicPropValueWidget("Version")(
+		Bootstrap.singlePropValueWidget("Version")(
 			new VersionWidget(init.version, cb(v => _.copy(version = v))).element
 		).render,
 
@@ -245,7 +245,7 @@ object DoiMetaWidget{
 	}
 
 	class FundingEditWidget(init: Seq[FundingReference], cb: Seq[FundingReference] => Unit) extends
-		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Fundings"){
+		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Funding references"){
 
 			protected def makeWidget(value: FundingReference, updateCb: FundingReference => Unit) = new FundingWidget(value, updateCb)
 

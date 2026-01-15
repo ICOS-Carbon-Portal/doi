@@ -18,23 +18,20 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 	private[this] val relatedIdentifierInput = new TextInputWidget(init.relatedIdentifier, ri => {
 		_relatedIdentifier = _relatedIdentifier.copy(relatedIdentifier = ri)
 		updateCb(_relatedIdentifier)
-	}, "Related identifier", required = true)
+	}, required = true)
 
 	private[this] val relationTypeInput = new SelectWidget[RelationType](
 		SelectWidget.selectOptions(Some("Relation type"), RelationType.values),
 		init.relationType,
 		rtOpt => {
 			_relatedIdentifier = _relatedIdentifier.copy(relationType = rtOpt)
-			rtOpt.getOrElse("") match {
-				case RelationType.HasMetadata | RelationType.IsMetadataFor => relatedMetadataDiv.classList.remove("d-none")
-				case _ => relatedMetadataDiv.classList.add("d-none")
-			}
+			updateRelatedMetadataVisibility(rtOpt)
 			updateCb(_relatedIdentifier)
 		}
 	)
 
 	private[this] val relatedIdentifierTypeInput = new SelectWidget[RelatedIdentifierType](
-		SelectWidget.selectOptions(Some("Related identifier type"), RelatedIdentifierType.values),
+		SelectWidget.selectOptions(Some("Select type"), RelatedIdentifierType.values),
 		init.relatedIdentifierType,
 		rit => {
 			_relatedIdentifier = _relatedIdentifier.copy(relatedIdentifierType = rit)
@@ -43,7 +40,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 	)
 
 	private[this] val resourceTypeGeneralInput = new SelectWidget[ResourceTypeGeneral](
-		SelectWidget.selectOptions(Some("Resource type general"), ResourceTypeGeneral.values),
+		SelectWidget.selectOptions(Some("Select type"), ResourceTypeGeneral.values),
 		init.resourceTypeGeneral,
 		rtgOpt => {
 			_relatedIdentifier = _relatedIdentifier.copy(resourceTypeGeneral = rtgOpt)
@@ -55,45 +52,71 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		val rmsiOpt = if (rmsi.isEmpty) None else Some(rmsi)
 		_relatedIdentifier = _relatedIdentifier.copy(relatedMetadataScheme = rmsiOpt)
 		updateCb(_relatedIdentifier)
-	}, "Related metadata scheme", required = false)
+	}, required = false)
 
 	private[this] val schemeUriInput = new TextInputWidget(init.schemeUri.getOrElse(""), uri => {
 		val uriOpt = if (uri.isEmpty) None else Some(uri)
 		_relatedIdentifier = _relatedIdentifier.copy(schemeUri = uriOpt)
 		updateCb(_relatedIdentifier)
-	}, "Scheme uri", required = false)
+	}, required = false)
 
 	private[this] val schemeTypeInput = new TextInputWidget(init.schemeType.getOrElse(""), st => {
 		val stOpt = if (st.isEmpty) None else Some(st)
 		_relatedIdentifier = _relatedIdentifier.copy(schemeType = stOpt)
 		updateCb(_relatedIdentifier)
-	}, "Scheme type", required = false)
+	}, required = false)
 
-	var initialRelationType = init.relationType.getOrElse("") match {
-		case RelationType.HasMetadata | RelationType.IsMetadataFor => "row spacyrow"
-		case _ => "row spacyrow d-none"
-	}
+	private def shouldShowMetadata(relationType: Option[RelationType]): Boolean = relationType match
+		case Some(RelationType.HasMetadata) | Some(RelationType.IsMetadataFor) => true
+		case _ => false
 
-	private[this] var relatedMetadataDiv = div(cls := initialRelationType)(
-		div(cls := "col-md-2")(strong("Metadata scheme")),
-		div(cls := "col-md-4")(relatedMetadataSchemeInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Scheme uri")),
-		div(cls := "col-md-4")(schemeUriInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Scheme type")),
-		div(cls := "col-md-4")(schemeTypeInput.element)(paddingBottom := 15),
+	private def getInitialClass = if (shouldShowMetadata(init.relationType)) "col-md-6" else "col-md-6 d-none"
+
+	private[this] val metadataSchemeCol = div(cls := getInitialClass)(
+		label(cls := "form-label")("Metadata scheme"),
+		div(relatedMetadataSchemeInput.element),
 	).render
 
-	val element = div(cls := "row spacyrow")(
-		div(cls := "row")(
-			div(cls := "col-md-2")(strong("Related identifier")),
-			div(cls := "col-md-4")(relatedIdentifierInput.element)(paddingBottom := 15),
-			div(cls := "col-md-2")(strong("Relation type")),
-			div(cls := "col-md-4")(relationTypeInput.element)(paddingBottom := 15),
-			div(cls := "col-md-2")(strong("Identifier type")),
-			div(cls := "col-md-4")(relatedIdentifierTypeInput.element)(paddingBottom := 15),
-			div(cls := "col-md-2")(strong("Resource type general")),
-			div(cls := "col-md-4")(resourceTypeGeneralInput.element)(paddingBottom := 15),
+	private[this] val schemeUriCol = div(cls := getInitialClass)(
+		label(cls := "form-label")("Scheme uri"),
+		div(schemeUriInput.element),
+	).render
+
+	private[this] val schemeTypeCol = div(cls := getInitialClass)(
+		label(cls := "form-label")("Scheme type"),
+		div(schemeTypeInput.element),
+	).render
+
+	private def updateRelatedMetadataVisibility(relationType: Option[RelationType]): Unit = {
+		val shouldShow = shouldShowMetadata(relationType)
+		val cols = Seq(metadataSchemeCol, schemeUriCol, schemeTypeCol)
+
+		if (shouldShow) {
+			cols.foreach(_.classList.remove("d-none"))
+		} else {
+			cols.foreach(_.classList.add("d-none"))
+		}
+	}
+
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Related identifier"),
+			div(relatedIdentifierInput.element),
 		),
-		relatedMetadataDiv
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Relation type"),
+			div(relationTypeInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Identifier type"),
+			div(relatedIdentifierTypeInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Resource type general"),
+			div(resourceTypeGeneralInput.element),
+		),
+		metadataSchemeCol,
+		schemeUriCol,
+		schemeTypeCol,
 	).render
 }

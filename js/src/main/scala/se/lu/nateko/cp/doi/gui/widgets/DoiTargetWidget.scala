@@ -28,7 +28,11 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 
 	val element: html.Div = div(cls := "row gy-2")(
 		div(cls := "col-md-2")(strong("Target URL")),
-		div(cls := "col-md-10")(urlInput)
+		div(cls := "col-md-10")(
+			div(cls := "row")(
+				div(cls := "col-md-9")(urlInput)
+			)
+		)
 	).render
 }
 

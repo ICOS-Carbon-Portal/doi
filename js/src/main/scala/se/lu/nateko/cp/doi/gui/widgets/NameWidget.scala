@@ -19,6 +19,8 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 		case _: GenericName => false
 	}
 
+	private def isGeneric = !isPersonal
+
 	private def getNameElem: Element = _name match{
 		case pn: PersonalName => new PersonalNameWidget(pn, newPn => {
 				_name = newPn
@@ -32,7 +34,7 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 
 	private var nameElem = getNameElem
 
-	private def checkedModifier(personal: Boolean) = if(personal == isPersonal) Seq(checked := true) else Nil
+	private def checkedModifier(isPersonal: Boolean) = if(isPersonal) Seq(checked := true) else Nil
 
 	private def changeNameType(personal: Boolean): Event => Unit = e => if(isPersonal != personal){
 		_name = if(personal) PersonalName("", "") else GenericName("")
@@ -51,11 +53,15 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 			form(
 				cls := "col",
 				div(
-					nameTypeOption(true), label("Person", cls := "form-check-label"),
+					label("Person", cls := "form-check-label")(
+						input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(true))(checkedModifier(isPersonal)),
+					),
 					cls := "form-check form-check-inline"
 				),
 				div(
-					nameTypeOption(false), label("Organization", cls := "form-check-label"),
+					label("Organization", cls := "form-check-label")(
+						input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(false))(checkedModifier(isGeneric)),
+					),
 					cls := "form-check form-check-inline"
 				)
 			),

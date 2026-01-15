@@ -13,7 +13,7 @@ class ContributorWidget(init: Contributor, protected val updateCb: Contributor =
 	private[this] var _contributor = init
 
 	private[this] val contributorTypeSelect = new SelectWidget[ContributorType](
-		SelectWidget.selectOptions(Some("Contributor type"), ContributorType.values),
+		SelectWidget.selectOptions(Some("Select contributor type"), ContributorType.values),
 		init.contributorType,
 		typeOpt => {
 			_contributor = _contributor.copy(contributorType = typeOpt)
@@ -37,7 +37,7 @@ class ContributorWidget(init: Contributor, protected val updateCb: Contributor =
 	})
 
 	val element = div(
-		Bootstrap.basicPropValueWidget("Contributor type")(contributorTypeSelect.element),
+		Bootstrap.basicPropValueWidget("Type")(contributorTypeSelect.element),
 		nameInput.element,
 		nameIdsInput.element,
 		affiliationsInput.element
