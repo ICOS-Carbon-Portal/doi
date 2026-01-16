@@ -16,13 +16,14 @@ import se.lu.nateko.cp.doi.gui.widgets.UnifiedToolbar
 import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.Backend
 import se.lu.nateko.cp.doi.gui.ReportError
+import se.lu.nateko.cp.doi.gui.ClearLastClonedDoi
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.scalajs.dom.Event
 
-class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
+class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean = false) {
 
 	private[this] var meta = metaInit
 
@@ -47,6 +48,29 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
 	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
 
+	private val contentBody = div().render
+
+	private lazy val toolbar = new UnifiedToolbar(
+		meta,
+		backToList,
+		tabsCb,
+		meta => d.dispatch(ThunkActions.requestDoiClone(meta)),
+		updateDoiMeta,
+		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
+		initialTab
+	)
+
+	private val cloneBanner = div(
+		id := "clone-banner",
+		cls := "alert alert-info",
+		role := "alert",
+		style := "display: none; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(-10px); opacity: 0;"
+	)(
+		i(cls := "fa-solid fa-copy me-2"),
+		strong("Editing Clone: "),
+		"This is a cloned draft. You are now editing a new copy with a different DOI."
+	).render
+
 	private val headerSection = div(cls := "mb-3 pt-3")(
 		h1(id := "detail-title", style := "transition: font-size 0.2s ease;")(title),
 		div(cls := "d-flex align-items-center gap-2 mb-3")(
@@ -64,28 +88,27 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		id := "sticky-header",
 		style := "position: sticky; top: 0; z-index: 1000; background-color: white;"
 	)(
+		cloneBanner,
 		headerSection,
 		toolbar.element
 	).render
 
-	private val contentBody = div().render
-
-	private lazy val toolbar = new UnifiedToolbar(
-		meta,
-		backToList,
-		tabsCb,
-		meta => d.dispatch(DoiCloneRequest(meta)),
-		updateDoiMeta,
-		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
-		initialTab
-	)
-
-	val element = div(id := "detail-view")(
+	val element = div(
+		id := "detail-view",
+		style := "transition: opacity 0.5s ease; opacity: 1;"
+	)(
 		stickyHeader,
 		contentBody
 	)
 
 	def initialize(): Unit = {
+		// Show clone banner if this is a cloned DOI
+		if (isClone) {
+			showCloneBanner()
+			// Clear the clone flag after showing the banner
+			d.dispatch(ClearLastClonedDoi)
+		}
+
 		if (isAdmin) {
 			// For admins, start with edit view
 			contentBody.appendChild(metaWidget.element)
@@ -172,5 +195,32 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 					d.dispatch(DoiUpdated(updated))
 			}
 		}))
+	}
+
+	private def showCloneBanner(): Unit = {
+		// Delay slightly to ensure DOM is fully rendered
+		org.scalajs.dom.window.setTimeout(() => {
+			// Show the clone banner with animation
+			cloneBanner.style.display = "block"
+			// Force a reflow to ensure the transition works
+			val _ = cloneBanner.offsetHeight
+			// Trigger the animation
+			cloneBanner.style.opacity = "1"
+			cloneBanner.style.transform = "translateY(0)"
+
+			// Auto-dismiss after 8 seconds
+			org.scalajs.dom.window.setTimeout(() => {
+				hideCloneBanner()
+			}, 8000)
+		}, 100)
+	}
+
+	private def hideCloneBanner(): Unit = {
+		cloneBanner.style.opacity = "0"
+		cloneBanner.style.transform = "translateY(-10px)"
+		// Wait for transition to complete before hiding
+		org.scalajs.dom.window.setTimeout(() => {
+			cloneBanner.style.display = "none"
+		}, 300)
 	}
 }

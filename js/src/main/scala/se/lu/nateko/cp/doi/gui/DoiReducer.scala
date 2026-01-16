@@ -26,14 +26,18 @@ object DoiReducer {
 			val newState = state.copy(currentRoute = route)
 			newState
 
-		case DoiCloneRequest(meta) => {
-			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
-			val newMeta = meta.copy(doi = newDoi, titles = None, state = DoiPublicationState.draft)
+	case DoiCloneRequest(originalMeta, clonedMeta) => {
+		// Navigate to the new cloned DOI
+		Router.navigateTo(DetailRoute(clonedMeta.doi))
 
-			state.copy(dois = newMeta +: state.dois)
-				.withSelected(newDoi)
-				.incrementTotal
-		}
+		val newState = state.copy(
+			dois = clonedMeta +: state.dois,
+			lastClonedDoi = Some(clonedMeta.doi),
+			currentRoute = DetailRoute(clonedMeta.doi)
+		).withSelected(clonedMeta.doi)
+			.incrementTotal
+		newState
+	}
 
 		case EmptyDoiCreation(doi) => state.copy(dois = DoiMeta(doi) +: state.dois)
 			.incrementTotal
@@ -51,6 +55,8 @@ object DoiReducer {
 	case DoiUpdated(updatedMeta) => state.copy(
 		dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)
 	)
+
+	case ClearLastClonedDoi => state.copy(lastClonedDoi = None)
 
 	}
 

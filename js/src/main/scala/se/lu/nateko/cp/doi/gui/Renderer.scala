@@ -98,11 +98,12 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 			case DetailRoute(doi) =>
 				// Show detail view, replacing entire main-wrapper content
 				val mainWrapper = document.getElementById("main-wrapper")
+				val isCloned = state.lastClonedDoi.contains(doi)
 				state.dois.find(_.doi == doi).orElse {
 					// DOI not in cache, fetch it
 					Backend.getDoi(doi).foreach {
 						case Some(meta) =>
-							val detailView = new DoiDetailView(meta, dispatcher)
+							val detailView = new DoiDetailView(meta, dispatcher, isCloned)
 							currentDetailView = Some(detailView)
 							mainWrapper.innerHTML = ""
 							mainWrapper.appendChild(detailView.element.render)
@@ -116,7 +117,7 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 					None
 				}.foreach { meta =>
 					// DOI is in cache
-					val detailView = new DoiDetailView(meta, dispatcher)
+					val detailView = new DoiDetailView(meta, dispatcher, isCloned)
 					currentDetailView = Some(detailView)
 					mainWrapper.innerHTML = ""
 					mainWrapper.appendChild(detailView.element.render)

@@ -43,4 +43,25 @@ object ThunkActions {
 		dispatchFut(Backend.delete(doi).map(_ => DoiDeleted(doi)))
 	}
 
+	def requestDoiClone(meta: DoiMeta): ThunkAction = implicit d => {
+		import se.lu.nateko.cp.doi.CoolDoi
+		import se.lu.nateko.cp.doi.meta.DoiPublicationState
+
+		val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
+		val newMeta = meta.copy(doi = newDoi, titles = None, state = DoiPublicationState.draft)
+
+		// First dispatch the clone request to update state with the new metadata
+		d.dispatch(DoiCloneRequest(meta, newMeta))
+
+		// Then save the cloned DOI to the backend
+		Backend.updateMeta(newMeta).onComplete {
+			case Success(result) =>
+				if (!result.isEmpty) {
+					d.dispatch(ReportError(s"Failed to save clone: $result"))
+				}
+			case Failure(err) =>
+				d.dispatch(ReportError(s"Failed to save clone $newDoi: ${err.getMessage}"))
+		}
+	}
+
 }

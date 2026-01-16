@@ -13,7 +13,8 @@ case class DoiState(
 	selected: Option[Doi],
 	error: Option[String],
 	isLoading: Boolean,
-	currentRoute: Route
+	currentRoute: Route,
+	lastClonedDoi: Option[Doi] = None
 )
 
 object DoiStateUpgrades{

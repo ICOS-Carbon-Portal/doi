@@ -16,7 +16,7 @@ case class FreshDoiList(dois: Seq[DoiMeta], listMeta: Option[DoiListMeta]) exten
 
 case class NavigateToRoute(route: Route) extends DoiAction
 
-case class DoiCloneRequest(meta: DoiMeta) extends DoiAction
+case class DoiCloneRequest(originalMeta: DoiMeta, clonedMeta: DoiMeta) extends DoiAction
 
 case class DoiDeleted(doi: Doi) extends DoiAction
 case class DoiUpdated(meta: DoiMeta) extends DoiAction
@@ -24,3 +24,4 @@ case class EmptyDoiCreation(doi: Doi) extends DoiAction
 
 case class ReportError(msg: String) extends DoiAction
 case object ResetErrors extends DoiAction
+case object ClearLastClonedDoi extends DoiAction
