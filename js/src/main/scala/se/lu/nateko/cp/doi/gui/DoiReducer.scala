@@ -43,10 +43,14 @@ object DoiReducer {
 
 		case ResetErrors => state.copy(error = None)
 
-		case DoiDeleted(doi) => state.copy(
-			dois = state.dois.filter(_.doi != doi),
-			selected = None
-		).decrementTotal
+	case DoiDeleted(doi) => state.copy(
+		dois = state.dois.filter(_.doi != doi),
+		selected = None
+	).decrementTotal
+
+	case DoiUpdated(updatedMeta) => state.copy(
+		dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)
+	)
 
 	}
 

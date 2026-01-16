@@ -35,10 +35,8 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: U
 				}
 			}
 		}
-		// Reset and other callbacks don't apply for JSON editor
-		toolbar.setResetButtonCallback { (_: Event) => () }
+		// Other callbacks don't apply for JSON editor
 		toolbar.setSubmitButtonCallback { (_: Event) => () }
-		toolbar.setPublishButtonCallback { (_: Event) => () }
 	}
 
 	val element = div(

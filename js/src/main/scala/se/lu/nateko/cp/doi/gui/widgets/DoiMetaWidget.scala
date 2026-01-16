@@ -85,7 +85,6 @@ class DoiMetaWidget(
 	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
 		_meta = upd(prop)(_meta)
 		validateMeta()
-		if (toolbarInitialized) toolbar.setResetButtonEnabled(true)
 	}
 
 	private var toolbarInitialized = false
@@ -105,7 +104,6 @@ class DoiMetaWidget(
 
 		if (toolbarInitialized) {
 			toolbar.setUpdateButtonEnabled(canUpdate)
-			toolbar.setPublishButtonEnabled(errors.isEmpty)
 			toolbar.setSubmitButtonEnabled(errors.isEmpty)
 		}
 	}
@@ -115,7 +113,6 @@ class DoiMetaWidget(
 		formElems.innerHTML = ""
 		formElements.foreach(formElems.appendChild)
 		validateMeta()
-		if (toolbarInitialized) toolbar.setResetButtonEnabled(false)
 	}
 
 	// Expose methods to wire toolbar callbacks
@@ -140,17 +137,6 @@ class DoiMetaWidget(
 					// Keep button disabled after successful submission
 			}
 		}
-
-		toolbar.setPublishButtonCallback { (_: Event) =>
-			toolbar.setPublishButtonEnabled(false)
-			updater(
-				_meta.copy(event = Some(DoiPublicationEvent.publish))
-			).failed.foreach{
-				_ => toolbar.setPublishButtonEnabled(true)
-			}
-		}
-
-		toolbar.setResetButtonCallback { (_: Event) => resetForms() }
 
 		toolbar.setStateChangeCallback { (newState: DoiPublicationState) =>
 			val event = (init.state, newState) match {

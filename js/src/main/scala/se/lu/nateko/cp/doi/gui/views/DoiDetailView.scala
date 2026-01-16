@@ -6,6 +6,7 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.DoiMetaViewer
 import se.lu.nateko.cp.doi.gui.DoiCloneRequest
+import se.lu.nateko.cp.doi.gui.DoiUpdated
 import se.lu.nateko.cp.doi.gui.NavigateToRoute
 import se.lu.nateko.cp.doi.gui.ListRoute
 import se.lu.nateko.cp.doi.gui.DoiJsonEditor
@@ -145,6 +146,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 					}
 					// Update toolbar badge
 					toolbar.updateBadge(updated.state)
+					// Update the list view with the new state
+					d.dispatch(DoiUpdated(updated))
 			}
 		}))
 	}

@@ -75,19 +75,47 @@ class UnifiedToolbar(
 		_meta.state.toString.capitalize
 	).render
 
-	private val stateDropdownMenu = ul(
-		cls := "dropdown-menu state-dropdown-menu",
-		style := "min-width: auto;"
-	)(
-		li(a(
-			cls := "dropdown-item",
-			href := "#"
-		)("Registered").render),
-		li(a(
-			cls := "dropdown-item",
-			href := "#"
-		)("Findable").render)
-	).render
+	private def createStateMenuItem(action: String, description: String, isCurrent: Boolean, isDisabled: Boolean = false) = {
+		if (isCurrent) {
+			None
+		} else {
+			val itemClass = if (isDisabled) "dropdown-item disabled" else "dropdown-item"
+			Some(li(a(
+				cls := itemClass,
+				href := "#",
+				data("action") := action
+			)(
+				div(
+					div(cls := "fw-bold")(action),
+					div(cls := "small text-muted")(description)
+				)
+			).render))
+		}
+	}
+
+	private val stateDropdownMenu = {
+		val items = _meta.state match {
+			case DoiPublicationState.draft =>
+				Seq(
+					createStateMenuItem("Register", "Set state to Registered", isCurrent = false),
+					createStateMenuItem("Publish", "Set state to Findable", isCurrent = false)
+				).flatten
+			case DoiPublicationState.registered =>
+				Seq(
+					createStateMenuItem("Register", "Set state to Registered", isCurrent = true),
+					createStateMenuItem("Publish", "Set state to Findable", isCurrent = false)
+				).flatten
+			case DoiPublicationState.findable =>
+				Seq(
+					createStateMenuItem("Hide", "Set state to Registered", isCurrent = false),
+					createStateMenuItem("Publish", "Set state to Findable", isCurrent = true)
+				).flatten
+		}
+		ul(
+			cls := "dropdown-menu state-dropdown-menu",
+			style := "min-width: 16rem;"
+		)(items: _*).render
+	}
 
 	private val stateDropdown = div(
 		cls := "dropdown admin-control"
@@ -117,57 +145,24 @@ class UnifiedToolbar(
 		cls := "btn btn-sm btn-update-doi btn-secondary edit-control",
 		disabled := true
 	)(
-		i(cls := "fa-solid fa-arrows-rotate me-1"),
-		"Update"
+		i(cls := "fa-solid fa-floppy-disk me-1"),
+		"Save"
 	).render
 
-	private val updateDropdownToggle = {
-		val baseAttrs = Seq(
-			tpe := "button",
-			cls := s"btn btn-sm btn-update-doi btn-secondary dropdown-toggle dropdown-toggle-split${if (_meta.state != DoiPublicationState.draft) " edit-control" else ""}"
-		)
-		val attrs = if (_meta.state != DoiPublicationState.draft) baseAttrs :+ (disabled := true) else baseAttrs
-		button(baseAttrs: _*)(
-			span(cls := "visually-hidden")("Toggle Dropdown")
-		).render
-	}
-	
-	// Toggle dropdown menu visibility
-	updateDropdownToggle.onclick = (_: Event) => {
-		val menu = updateDropdownToggle.nextElementSibling
-		if (menu != null && menu.classList.contains("dropdown-menu")) {
-			menu.classList.toggle("show")
-		}
-	}
 
 	private val submitButton = button(
 		tpe := "button",
 		cls := "btn btn-sm btn-secondary btn-submit edit-control"
 	)("Submit for publication").render
 
-	// Dropdown menu items for split button
-	private val resetDropdownItem = button(
+	// Delete button
+	private val deleteButton = button(
 		tpe := "button",
-		cls := "dropdown-item edit-control",
-		disabled := true
-	)("Reset").render
-
-	private val deleteDropdownItem = button(
-		tpe := "button",
-		cls := "dropdown-item admin-control edit-control"
-	)("Delete").render
-
-	private val publishDropdownItem = button(
-		tpe := "button",
-		cls := "dropdown-item admin-control edit-control"
-	)("Publish").render
-	
-	// Close dropdown menu
-	private def closeDropdown(menu: org.scalajs.dom.Element): Unit = {
-		if (menu != null && menu.classList.contains("dropdown-menu")) {
-			menu.classList.remove("show")
-		}
-	}
+		cls := "btn btn-sm btn-outline-secondary admin-control edit-control"
+	)(
+		i(cls := "fa-solid fa-trash me-1"),
+		"Delete draft"
+	).render
 
 	// Action button groups based on state
 	private val actionButtons: Div = _meta.state match {
@@ -177,33 +172,17 @@ class UnifiedToolbar(
 					tpe := "button",
 					cls := "btn btn-sm btn-secondary btn-submit edit-control"
 				)("Submit for publication").render,
-				div(cls := "btn-group doi-split-button", style := "position: relative;")(
-					updateButton,
-					updateDropdownToggle,
-					ul(cls := "dropdown-menu", style := "position: absolute; top: 100%; right: 0; z-index: 1000;")(
-						li(resetDropdownItem),
-						li(deleteDropdownItem),
-						li(publishDropdownItem)
-					)
-				)
+				deleteButton,
+				updateButton
 			).render
 
-		case DoiPublicationState.registered =>
-			div(cls := "btn-group doi-split-button", style := "position: relative;")(
-				updateButton,
-				updateDropdownToggle,
-				ul(cls := "dropdown-menu", style := "position: absolute; top: 100%; right: 0; z-index: 1000;")(
-					li(resetDropdownItem),
-					li(publishDropdownItem)
-				)
+	case DoiPublicationState.registered =>
+			div(cls := "d-flex gap-2")(
+				updateButton
 			).render
-		case _ =>
-			div(cls := "btn-group doi-split-button", style := "position: relative;")(
-				updateButton,
-				updateDropdownToggle,
-				ul(cls := "dropdown-menu", style := "position: absolute; top: 100%; right: 0; z-index: 1000;")(
-					li(resetDropdownItem)
-				)
+	case _ =>
+			div(cls := "d-flex gap-2")(
+				updateButton
 			).render
 	}
 
@@ -213,44 +192,6 @@ class UnifiedToolbar(
 		cls := "border-bottom py-2 mb-3"
 	)(
 		tag("style")("""
-			.doi-split-button .dropdown-menu {
-				display: none;
-				min-width: 10rem;
-				padding: 0.5rem 0;
-				margin: 0.125rem 0 0;
-				background-color: #fff;
-				border: 1px solid rgba(0,0,0,.15);
-				border-radius: 0.25rem;
-				box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
-				list-style: none;
-			}
-			.doi-split-button .dropdown-menu.show {
-				display: block;
-			}
-			.doi-split-button .dropdown-item {
-				display: block;
-				width: 100%;
-				padding: 0.25rem 1rem;
-				clear: both;
-				font-weight: 400;
-				color: #212529;
-				text-align: inherit;
-				white-space: nowrap;
-				background-color: transparent;
-				border: 0;
-				cursor: pointer;
-			}
-			.doi-split-button .dropdown-item:hover:not(:disabled) {
-				background-color: #f8f9fa;
-			}
-			.doi-split-button .dropdown-item:disabled {
-				color: #6c757d;
-				cursor: not-allowed;
-				opacity: 0.5;
-			}
-			.doi-split-button .dropdown-toggle-split::after {
-				margin-left: 0;
-			}
 			.state-dropdown-menu {
 				display: none;
 				position: absolute;
@@ -270,19 +211,27 @@ class UnifiedToolbar(
 			.state-dropdown-menu .dropdown-item {
 				display: block;
 				width: 100%;
-				padding: 0.25rem 1rem;
+				padding: 0.5rem 1rem;
 				clear: both;
 				font-weight: 400;
 				color: #212529;
 				text-align: inherit;
-				white-space: nowrap;
+				white-space: normal;
 				background-color: transparent;
 				border: 0;
 				cursor: pointer;
 				text-decoration: none;
 			}
-			.state-dropdown-menu .dropdown-item:hover {
+			.state-dropdown-menu .dropdown-item:hover:not(.disabled) {
 				background-color: #f8f9fa;
+			}
+			.state-dropdown-menu .dropdown-item.disabled {
+				color: #6c757d;
+				cursor: not-allowed;
+				opacity: 0.6;
+			}
+			.state-dropdown-menu .dropdown-item-text {
+				display: block;
 			}
 		"""),
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
@@ -299,34 +248,31 @@ class UnifiedToolbar(
 			// Spacer to push action buttons to the right
 			div(cls := "flex-grow-1"),
 			
-			div(cls := "me-2")(stateDropdown),
-
-			div(cls := "me-2")(cloneButton),
-			
-			// Action buttons
-			div(cls := "ms-auto")(actionButtons)
+			stateDropdown,
+			cloneButton,
+			actionButtons
 		),
 		// Inline style for sticky positioning with white background
 		style := "position: sticky; top: 0; z-index: 1000; background-color: white;"
 	).render
 	
-	// Close dropdown when clicking outside
+	// Close state dropdown when clicking outside
 	org.scalajs.dom.document.addEventListener("click", (e: Event) => {
 		val target = e.target.asInstanceOf[org.scalajs.dom.Node]
-		// Check if click is outside split button by traversing parents
+		// Check if click is outside state dropdown by traversing parents
 		var node = target
 		var isInside = false
 		while (node != null && !isInside) {
 			if (node.isInstanceOf[org.scalajs.dom.Element]) {
 				val elem = node.asInstanceOf[org.scalajs.dom.Element]
-				if (elem.classList.contains("doi-split-button") || elem.classList.contains("dropdown")) {
+				if (elem.classList.contains("dropdown")) {
 					isInside = true
 				}
 			}
 			node = node.parentNode
 		}
 		if (!isInside) {
-			val dropdowns = org.scalajs.dom.document.querySelectorAll(".doi-split-button .dropdown-menu.show, .state-dropdown-menu.show")
+			val dropdowns = org.scalajs.dom.document.querySelectorAll(".state-dropdown-menu.show")
 			for (i <- 0 until dropdowns.length) {
 				dropdowns(i).classList.remove("show")
 			}
@@ -341,19 +287,7 @@ class UnifiedToolbar(
 
 	def setUpdateButtonEnabled(enabled: Boolean): Unit = {
 		updateButton.disabled = !enabled
-		// For draft DOIs, keep dropdown toggle always enabled to allow access to Delete/Publish
-		val dropdownEnabled = enabled || _meta.state == DoiPublicationState.draft || _meta.state == DoiPublicationState.registered
-		updateDropdownToggle.disabled = !dropdownEnabled
 		updateButton.className = "btn btn-sm btn-update-doi edit-control btn-" + (if(enabled) "primary" else "secondary")
-		updateDropdownToggle.className = "btn btn-sm btn-update-doi dropdown-toggle dropdown-toggle-split edit-control btn-" + (if(enabled) "primary" else "secondary")
-	}
-
-	def setResetButtonEnabled(enabled: Boolean): Unit = {
-		resetDropdownItem.disabled = !enabled
-	}
-
-	def setPublishButtonEnabled(enabled: Boolean): Unit = {
-		publishDropdownItem.disabled = !enabled
 	}
 
 	def setSubmitButtonEnabled(enabled: Boolean): Unit = {
@@ -364,29 +298,12 @@ class UnifiedToolbar(
 		updateButton.onclick = cb
 	}
 
-	def setResetButtonCallback(cb: Event => Unit): Unit = {
-		resetDropdownItem.onclick = (e: Event) => {
-			closeDropdown(resetDropdownItem.parentElement.parentElement)
-			cb(e)
-		}
-	}
-
-	def setPublishButtonCallback(cb: Event => Unit): Unit = {
-		publishDropdownItem.onclick = (e: Event) => {
-			closeDropdown(publishDropdownItem.parentElement.parentElement)
-			cb(e)
-		}
-	}
-
 	def setSubmitButtonCallback(cb: Event => Unit): Unit = {
 		submitButton.onclick = cb
 	}
 
 	def setDeleteButtonCallback(cb: Event => Unit): Unit = {
-		deleteDropdownItem.onclick = (e: Event) => {
-			closeDropdown(deleteDropdownItem.parentElement.parentElement)
-			cb(e)
-		}
+		deleteButton.onclick = cb
 	}
 
 	def updateBadge(state: DoiPublicationState): Unit = {
@@ -400,18 +317,20 @@ class UnifiedToolbar(
 		val items = stateDropdownMenu.querySelectorAll(".dropdown-item")
 		for (i <- 0 until items.length) {
 			val item = items(i).asInstanceOf[org.scalajs.dom.html.Anchor]
-			val stateText = item.textContent.toLowerCase
+			val action = item.getAttribute("data-action")
 			item.onclick = (e: Event) => {
 				e.preventDefault()
-				stateDropdownMenu.classList.remove("show")
-				val newState = stateText match {
-					case "draft" => DoiPublicationState.draft
-					case "registered" => DoiPublicationState.registered
-					case "findable" => DoiPublicationState.findable
-					case _ => _meta.state
-				}
-				if (newState != _meta.state) {
-					cb(newState)
+				if (!item.classList.contains("disabled")) {
+					stateDropdownMenu.classList.remove("show")
+					val newState = action.toLowerCase match {
+						case "register" => DoiPublicationState.registered
+						case "publish" => DoiPublicationState.findable
+						case "hide" => DoiPublicationState.registered
+						case _ => _meta.state
+					}
+					if (newState != _meta.state) {
+						cb(newState)
+					}
 				}
 			}
 		}
