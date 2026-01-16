@@ -47,9 +47,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
 	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
 
-	private val headerSection = div(cls := "mb-3")(
-		h1(cls := "mt-2")(title),
-		div(cls := "d-flex align-items-center gap-2")(
+	private val headerSection = div(cls := "mb-3 pt-3")(
+		h1(id := "detail-title", style := "transition: font-size 0.2s ease;")(title),
+		div(cls := "d-flex align-items-center gap-2 mb-3")(
 			p(cls := "text-muted mb-0", style := "user-select: all;")(s"${meta.doi}"),
 			span(cls := "text-muted")("|"),
 			a(href := doiUrl, target := "_blank", cls := "link-secondary")("DOI"),
@@ -58,6 +58,14 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 			span(cls := "text-muted")("|"),
 			a(href := fabricaUrl, target := "_blank", cls := "link-secondary")("Fabrica")
 		)
+	).render
+
+	private val stickyHeader = div(
+		id := "sticky-header",
+		style := "position: sticky; top: 0; z-index: 1000; background-color: white;"
+	)(
+		headerSection,
+		toolbar.element
 	).render
 
 	private val contentBody = div().render
@@ -73,8 +81,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 	)
 
 	val element = div(id := "detail-view")(
-		headerSection,
-		toolbar.element,
+		stickyHeader,
 		contentBody
 	)
 
@@ -87,6 +94,21 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 			// For non-admins, start with view-only mode
 			contentBody.appendChild(metaViewer.element)
 		}
+
+		// Add scroll listener to reduce h1 size when header is sticky
+		val h1Element = org.scalajs.dom.document.getElementById("detail-title").asInstanceOf[org.scalajs.dom.html.Heading]
+		val stickyHeaderElement = org.scalajs.dom.document.getElementById("sticky-header").asInstanceOf[org.scalajs.dom.html.Div]
+		val headerOffsetTop = stickyHeaderElement.offsetTop
+
+		org.scalajs.dom.window.addEventListener("scroll", (_: Event) => {
+			val scrollY = org.scalajs.dom.window.pageYOffset
+			// Only reduce size when the header has reached the top (is stuck)
+			if (scrollY >= headerOffsetTop) {
+				h1Element.style.fontSize = "1.75rem"
+			} else {
+				h1Element.style.fontSize = ""
+			}
+		})
 	}
 
 	private lazy val metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)

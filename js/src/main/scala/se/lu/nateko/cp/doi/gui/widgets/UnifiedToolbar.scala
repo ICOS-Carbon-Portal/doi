@@ -251,9 +251,7 @@ class UnifiedToolbar(
 			stateDropdown,
 			cloneButton,
 			actionButtons
-		),
-		// Inline style for sticky positioning with white background
-		style := "position: sticky; top: 0; z-index: 1000; background-color: white;"
+		)
 	).render
 	
 	// Close state dropdown when clicking outside
