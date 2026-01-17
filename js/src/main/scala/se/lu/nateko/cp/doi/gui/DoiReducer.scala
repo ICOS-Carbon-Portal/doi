@@ -47,10 +47,14 @@ object DoiReducer {
 
 		case ResetErrors => state.copy(error = None)
 
-	case DoiDeleted(doi) => state.copy(
-		dois = state.dois.filter(_.doi != doi),
-		selected = None
-	).decrementTotal
+	case DoiDeleted(doi) =>
+		Router.navigateTo(ListRoute)
+		state.copy(
+			dois = state.dois.filter(_.doi != doi),
+			selected = None,
+			currentRoute = ListRoute,
+			error = Some(s"DOI $doi was deleted successfully")
+		).decrementTotal
 
 	case DoiUpdated(updatedMeta) => state.copy(
 		dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)

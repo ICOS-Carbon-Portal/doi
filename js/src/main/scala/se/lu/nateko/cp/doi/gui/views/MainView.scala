@@ -8,6 +8,7 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
+import se.lu.nateko.cp.doi.gui.ResetErrors
 
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
@@ -110,14 +111,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 				makeSuffixButton,
 				addDoiButton
 			)
-		),
-	)
-
-	val element = div(id := "main")(
-		searchCreateControls,
-		searchResultsStats,
-		listElem,
-		paginationElem
+	),
 	)
 
 	def updateDefaultPrefix(): Unit = {
@@ -193,11 +187,63 @@ class MainView(d: DoiRedux.Dispatcher) {
 		searchInput.value = text
 	}
 
-	private[this] val errorView = new ErrorView(400, 300, d)
+	private[this] val errorMessagesContainer = div(cls := "error-messages")
 
-	def appendError(msg: String): Unit = errorView.appendError(msg)
+	private[this] val errorBanner = div(
+		cls := "alert alert-danger alert-dismissible fade",
+		role := "alert",
+		style := "display: none;"
+	)(
+		errorMessagesContainer,
+		button(
+			tpe := "button",
+			cls := "btn-close",
+			attr("data-bs-dismiss") := "alert",
+			attr("aria-label") := "Close",
+			onclick := { (_: Event) => d.dispatch(ResetErrors) }
+		)
+	)
 
-	def clearErrors(): Unit = errorView.clearErrors()
+	val element = div(id := "main")(
+		errorBanner,
+		searchCreateControls,
+		searchResultsStats,
+		listElem,
+		paginationElem
+	).render
+
+	def appendError(msg: String): Unit = {
+		val errorMessage = if(msg == null || msg.isEmpty) "Unknown error" else msg
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val banner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			if(banner != null) {
+				val messagesContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(messagesContainer != null) {
+					for(messageLine <- errorMessage.split("\n")){
+						messagesContainer.appendChild(p(cls := "mb-1")(messageLine).render)
+					}
+					banner.style.display = "block"
+					banner.classList.add("show")
+				}
+			}
+		}
+	}
+
+	def clearErrors(): Unit = {
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val banner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			if(banner != null) {
+				val messagesContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(messagesContainer != null) {
+					banner.style.display = "none"
+					banner.classList.remove("show")
+					messagesContainer.innerHTML = ""
+				}
+			}
+		}
+	}
 
 	def resetDoiAdder(): Unit = {
 		suffixInput.value = ""

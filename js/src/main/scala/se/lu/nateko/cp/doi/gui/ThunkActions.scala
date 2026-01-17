@@ -40,7 +40,10 @@ object ThunkActions {
 	}
 
 	def requestDoiDeletion(doi: Doi): ThunkAction = implicit d => {
-		dispatchFut(Backend.delete(doi).map(_ => DoiDeleted(doi)))
+		val confirmed = org.scalajs.dom.window.confirm(s"Are you sure you want to delete DOI $doi? This action cannot be undone.")
+		if (confirmed) {
+			dispatchFut(Backend.delete(doi).map(_ => DoiDeleted(doi)))
+		}
 	}
 
 	def requestDoiClone(meta: DoiMeta): ThunkAction = implicit d => {
@@ -48,7 +51,7 @@ object ThunkActions {
 		import se.lu.nateko.cp.doi.meta.DoiPublicationState
 
 		val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
-		val newMeta = meta.copy(doi = newDoi, titles = None, state = DoiPublicationState.draft)
+		val newMeta = meta.copy(doi = newDoi, state = DoiPublicationState.draft)
 
 		// First dispatch the clone request to update state with the new metadata
 		d.dispatch(DoiCloneRequest(meta, newMeta))

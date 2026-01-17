@@ -137,7 +137,7 @@ class UnifiedToolbar(
 		i(cls := "fa-solid fa-copy me-1"),
 		"Clone"
 	).render
-	cloneButton.onclick = (_: Event) => cloneCb(meta)
+	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
 	// Action buttons (edit mode)
 	private val updateButton = button(
@@ -163,6 +163,7 @@ class UnifiedToolbar(
 		i(cls := "fa-solid fa-trash me-1"),
 		"Delete draft"
 	).render
+	deleteButton.onclick = (_: Event) => deleteCb(_meta.doi)
 
 	// Action button groups based on state
 	private val actionButtons: Div = _meta.state match {

@@ -81,11 +81,15 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				val showingDetail = mainWrapper.querySelector("#detail-view") != null
 				if (showingDetail || listWrapper.querySelector("#main") == null) {
 					listWrapper.innerHTML = ""
-					listWrapper.appendChild(mainView.element.render)
+					listWrapper.appendChild(mainView.element)
 					mainWrapper.classList.add("loaded")
 					// Update with current data from state (no refetch needed)
 					mainView.supplyDoiList(state.dois, state.isLoading)
 					mainView.setPagination(state.listMeta)
+					// Show error message if present
+					if (state.error.isDefined) {
+						mainView.appendError(state.error.get)
+					}
 					// Restore scroll position from history state
 					if (showingDetail) {
 						Router.getScrollPosition.foreach { scrollY =>
