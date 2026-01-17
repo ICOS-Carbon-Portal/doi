@@ -17,7 +17,14 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 			if(state.error.isDefined)
 				mainView.appendError(state.error.get)
 			else
-				mainView.clearErrors()
+				mainView.clearError()
+		}
+
+		if(oldState.success != state.success){
+			if(state.success.isDefined)
+				mainView.appendSuccess(state.success.get)
+			else
+				mainView.clearSuccess()
 		}
 
 		if(state.dois.ne(oldState.dois) || state.dois.isEmpty){
@@ -86,9 +93,11 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 					// Update with current data from state (no refetch needed)
 					mainView.supplyDoiList(state.dois, state.isLoading)
 					mainView.setPagination(state.listMeta)
-					// Show error message if present
+					// Show error or success message if present
 					if (state.error.isDefined) {
 						mainView.appendError(state.error.get)
+					} else if (state.success.isDefined) {
+						mainView.appendSuccess(state.success.get)
 					}
 					// Restore scroll position from history state
 					if (showingDetail) {

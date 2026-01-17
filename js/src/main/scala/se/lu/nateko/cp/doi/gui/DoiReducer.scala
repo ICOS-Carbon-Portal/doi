@@ -43,9 +43,11 @@ object DoiReducer {
 			.incrementTotal
 			.withSelected(doi)
 
-		case ReportError(msg) => state.copy(error = Some(msg))
+		case ReportError(msg) => state.copy(error = Some(msg), success = None)
 
-		case ResetErrors => state.copy(error = None)
+		case ReportSuccess(msg) => state.copy(success = Some(msg), error = None)
+
+		case ResetErrors => state.copy(error = None, success = None)
 
 	case DoiDeleted(doi) =>
 		Router.navigateTo(ListRoute)
@@ -53,7 +55,7 @@ object DoiReducer {
 			dois = state.dois.filter(_.doi != doi),
 			selected = None,
 			currentRoute = ListRoute,
-			error = Some(s"DOI $doi was deleted successfully")
+			success = Some(s"DOI $doi was deleted successfully")
 		).decrementTotal
 
 	case DoiUpdated(updatedMeta) => state.copy(

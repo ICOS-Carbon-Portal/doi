@@ -23,5 +23,6 @@ case class DoiUpdated(meta: DoiMeta) extends DoiAction
 case class EmptyDoiCreation(doi: Doi) extends DoiAction
 
 case class ReportError(msg: String) extends DoiAction
+case class ReportSuccess(msg: String) extends DoiAction
 case object ResetErrors extends DoiAction
 case object ClearLastClonedDoi extends DoiAction

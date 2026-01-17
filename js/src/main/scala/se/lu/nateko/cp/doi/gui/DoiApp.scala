@@ -16,6 +16,7 @@ object DoiApp {
 		listMeta = None,
 		selected = None,
 		error = None,
+		success = None,
 		isLoading = true,
 		currentRoute = InitialRoute
 	)

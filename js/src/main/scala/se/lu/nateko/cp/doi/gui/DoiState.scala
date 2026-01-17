@@ -12,6 +12,7 @@ case class DoiState(
 	listMeta: Option[DoiListMeta],
 	selected: Option[Doi],
 	error: Option[String],
+	success: Option[String],
 	isLoading: Boolean,
 	currentRoute: Route,
 	lastClonedDoi: Option[Doi] = None

@@ -204,8 +204,26 @@ class MainView(d: DoiRedux.Dispatcher) {
 		)
 	)
 
+	private[this] val successMessagesContainer = div(cls := "success-messages")
+
+	private[this] val successBanner = div(
+		cls := "alert alert-success alert-dismissible fade",
+		role := "alert",
+		style := "display: none;"
+	)(
+		successMessagesContainer,
+		button(
+			tpe := "button",
+			cls := "btn-close",
+			attr("data-bs-dismiss") := "alert",
+			attr("aria-label") := "Close",
+			onclick := { (_: Event) => d.dispatch(ResetErrors) }
+		)
+	)
+
 	val element = div(id := "main")(
 		errorBanner,
+		successBanner,
 		searchCreateControls,
 		searchResultsStats,
 		listElem,
@@ -218,10 +236,11 @@ class MainView(d: DoiRedux.Dispatcher) {
 		if(mainElem != null) {
 			val banner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
 			if(banner != null) {
-				val messagesContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
-				if(messagesContainer != null) {
-					for(messageLine <- errorMessage.split("\n")){
-						messagesContainer.appendChild(p(cls := "mb-1")(messageLine).render)
+				val msgContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(msgContainer != null) {
+					msgContainer.innerHTML = ""
+					for(messageLine <- errorMessage.split("\\n")){
+						msgContainer.appendChild(p(cls := "mb-1")(messageLine).render)
 					}
 					banner.style.display = "block"
 					banner.classList.add("show")
@@ -230,19 +249,58 @@ class MainView(d: DoiRedux.Dispatcher) {
 		}
 	}
 
-	def clearErrors(): Unit = {
+	def appendSuccess(msg: String): Unit = {
+		val successMessage = if(msg == null || msg.isEmpty) "Success" else msg
 		val mainElem = document.getElementById("main")
 		if(mainElem != null) {
-			val banner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			val banner = mainElem.querySelector(".alert-success").asInstanceOf[html.Div]
 			if(banner != null) {
-				val messagesContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
-				if(messagesContainer != null) {
-					banner.style.display = "none"
-					banner.classList.remove("show")
-					messagesContainer.innerHTML = ""
+				val msgContainer = banner.querySelector(".success-messages").asInstanceOf[html.Div]
+				if(msgContainer != null) {
+					msgContainer.innerHTML = ""
+					for(messageLine <- successMessage.split("\\n")){
+						msgContainer.appendChild(p(cls := "mb-1")(messageLine).render)
+					}
+					banner.style.display = "block"
+					banner.classList.add("show")
 				}
 			}
 		}
+	}
+
+	def clearError(): Unit = {
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val errorBanner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			if(errorBanner != null) {
+				val errorContainer = errorBanner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(errorContainer != null) {
+					errorBanner.style.display = "none"
+					errorBanner.classList.remove("show")
+					errorContainer.innerHTML = ""
+				}
+			}
+		}
+	}
+
+	def clearSuccess(): Unit = {
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val successBanner = mainElem.querySelector(".alert-success").asInstanceOf[html.Div]
+			if(successBanner != null) {
+				val successContainer = successBanner.querySelector(".success-messages").asInstanceOf[html.Div]
+				if(successContainer != null) {
+					successBanner.style.display = "none"
+					successBanner.classList.remove("show")
+					successContainer.innerHTML = ""
+				}
+			}
+		}
+	}
+
+	def clearMessages(): Unit = {
+		clearError()
+		clearSuccess()
 	}
 
 	def resetDoiAdder(): Unit = {
