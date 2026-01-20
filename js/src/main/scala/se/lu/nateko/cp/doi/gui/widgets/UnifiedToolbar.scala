@@ -49,10 +49,138 @@ class UnifiedToolbar(
 	private val editButton = makeTabButton(EditorTab.edit, "Edit")
 	private val jsonButton = makeTabButton(EditorTab.json, "Edit as JSON")
 
+	private val tocButton = button(
+		tpe := "button",
+		cls := "btn btn-sm btn-outline-secondary toc-toggle-button",
+		style := s"display: ${if (initialTab == EditorTab.edit) "block" else "none"};"
+	)(
+		i(cls := "fa-solid fa-list me-1")
+	).render
+
+	private val tocContent = ul(cls := "list-unstyled mb-0")(
+		li(cls := "toc-section")(
+			a(href := "#toc-required", cls := "toc-link toc-section-link")("Required properties")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-doi-target", cls := "toc-link")("DOI target")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-creators", cls := "toc-link")("Creators")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-titles", cls := "toc-link")("Titles")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-publisher", cls := "toc-link")("Publisher")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-publication-year", cls := "toc-link")("Publication year")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-resource-type", cls := "toc-link")("Resource type")
+		),
+		li(cls := "toc-section mt-3")(
+			a(href := "#toc-recommended", cls := "toc-link toc-section-link")("Recommended properties")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-subjects", cls := "toc-link")("Subjects")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-contributors", cls := "toc-link")("Contributors")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-dates", cls := "toc-link")("Dates")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-related-identifiers", cls := "toc-link")("Related identifiers")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-rights", cls := "toc-link")("Rights")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-descriptions", cls := "toc-link")("Descriptions")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-geolocations", cls := "toc-link")("Geolocations")
+		),
+		li(cls := "toc-section mt-3")(
+			a(href := "#toc-optional", cls := "toc-link toc-section-link")("Optional properties")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-formats", cls := "toc-link")("Formats")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-version", cls := "toc-link")("Version")
+		),
+		li(cls := "toc-item")(
+			a(href := "#toc-funding", cls := "toc-link")("Funding references")
+		)
+	).render
+
+	private val tocPanel = div(
+		id := "toc-panel",
+		cls := "toc-panel"
+	)(
+		div(cls := "toc-header d-flex justify-content-between align-items-center")(
+			strong("Contents"),
+			button(
+				tpe := "button",
+				cls := "btn-close btn-sm",
+				aria.label := "Close"
+			).render
+		),
+		div(cls := "toc-body")(
+			tocContent
+		)
+	).render
+
+	private val tocButtonContainer = div(cls := "toc-button-container")(
+		tocButton,
+		tocPanel
+	).render
+
+	tocButton.onclick = (_: Event) => {
+		tocPanel.classList.toggle("show")
+	}
+
+	private val tocCloseButton = tocPanel.querySelector(".btn-close").asInstanceOf[Button]
+	tocCloseButton.onclick = (_: Event) => {
+		tocPanel.classList.remove("show")
+	}
+
+	private def setupTOCLinks(): Unit = {
+		val links = tocPanel.querySelectorAll(".toc-link")
+		for (i <- 0 until links.length) {
+			val link = links(i).asInstanceOf[org.scalajs.dom.html.Anchor]
+			link.onclick = (e: Event) => {
+				e.preventDefault()
+				val href = link.getAttribute("href")
+				if (href != null && href.startsWith("#")) {
+					val targetId = href.substring(1)
+					val targetElement = org.scalajs.dom.document.getElementById(targetId)
+					if (targetElement != null) {
+						targetElement.asInstanceOf[scala.scalajs.js.Dynamic].scrollIntoView(
+							scala.scalajs.js.Dynamic.literal(
+								behavior = "smooth",
+								block = "start"
+							)
+						)
+						tocPanel.classList.remove("show")
+					}
+				}
+			}
+		}
+	}
+
+	setupTOCLinks()
+
 	private def updateTabButtons(): Unit = {
 		viewButton.className = s"btn btn-sm${if (currentTab == EditorTab.view) " btn-secondary" else " btn-outline-secondary"}"
 		editButton.className = s"btn btn-sm${if (currentTab == EditorTab.edit) " btn-secondary" else " btn-outline-secondary"} edit-control"
 		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"} edit-control"
+		
+		tocButton.style.display = if (currentTab == EditorTab.edit) "block" else "none"
+		tocPanel.classList.remove("show")
 	}
 
 	private def stateDotColor = _meta.state match {
@@ -187,10 +315,10 @@ class UnifiedToolbar(
 			).render
 	}
 
-	// Main toolbar structure with custom dropdown styles
-	val element: Div = div(
+	val element = div(
 		id := "unified-toolbar",
-		cls := "border-bottom py-2 mb-3"
+		cls := "border-bottom py-2 mb-3",
+		style := "position: relative;"
 	)(
 		tag("style")("""
 			.state-dropdown-menu {
@@ -234,25 +362,81 @@ class UnifiedToolbar(
 			.state-dropdown-menu .dropdown-item-text {
 				display: block;
 			}
+			.toc-panel {
+				position: absolute;
+				top: calc(100% + 0.5rem);
+				right: 0;
+				width: 300px;
+				max-height: calc(100vh - 200px);
+				background-color: #fff;
+				border: 1px solid rgba(0,0,0,.15);
+				border-radius: 0.25rem;
+				box-shadow: 0 4px 8px rgba(0,0,0,.1);
+				z-index: 900;
+				display: none;
+				flex-direction: column;
+			}
+			.toc-panel.show {
+				display: flex;
+			}
+			.toc-header {
+				padding: 1rem;
+				border-bottom: 1px solid rgba(0,0,0,.1);
+			}
+			.toc-body {
+				padding: 1rem;
+				overflow-y: auto;
+				flex: 1;
+			}
+			.toc-link {
+				display: block;
+				padding: 0.4rem 0.5rem;
+				color: #212529;
+				text-decoration: none;
+				border-radius: 0.25rem;
+				transition: background-color 0.15s ease;
+			}
+			.toc-link:hover {
+				background-color: #f8f9fa;
+			}
+			.toc-section-link {
+				font-weight: 600;
+			}
+			.toc-section {
+				scroll-margin-top: 130px;
+				margin-top: 1rem;
+			}
+			@media (max-width: 768px) {
+				.toc-panel {
+					width: 250px;
+				}
+			}
+			.toc-button-container {
+				position: absolute;
+				right: 0;
+				z-index: 950;
+			}
+			.toc-toggle-button {
+				position: relative;
+				background-color: white !important;
+			}
 		"""),
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
-			// Left section: Back button
 			div(cls := "me-2")(backButton),
 			
-			// Tab buttons
 			div(cls := "btn-group me-2 admin-control")(
 				viewButton,
 				editButton,
 				jsonButton
 			),
 			
-			// Spacer to push action buttons to the right
 			div(cls := "flex-grow-1"),
 			
 			stateDropdown,
 			cloneButton,
 			actionButtons
-		)
+		),
+		tocButtonContainer
 	).render
 	
 	// Close state dropdown when clicking outside
@@ -278,7 +462,16 @@ class UnifiedToolbar(
 		}
 	})
 
-	// Public methods to control the toolbar from outside
+	def getTocPanel: org.scalajs.dom.html.Div = tocPanel
+	
+	def updateTocButtonPosition(): Unit = {
+		val toolbarElement = org.scalajs.dom.document.getElementById("unified-toolbar")
+		if (toolbarElement != null) {
+			val toolbarHeight = toolbarElement.getBoundingClientRect().height
+			tocButtonContainer.style.top = s"${toolbarHeight + 30}px"
+		}
+	}
+	
 	def setTab(tab: EditorTab): Unit = {
 		currentTab = tab
 		updateTabButtons()

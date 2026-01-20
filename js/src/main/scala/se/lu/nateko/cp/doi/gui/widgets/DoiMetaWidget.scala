@@ -34,51 +34,59 @@ class DoiMetaWidget(
 
 	private def formElements: Seq[Div] = Seq(
 		
-		div(cls := "row mt-5")(h4("Required properties")).render,
+		div(cls := "row mt-5 toc-section", id := "toc-required")(h4("Required properties")).render,
 
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
+		div(cls := "toc-section", id := "toc-doi-target")(new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element).render,
 
-		new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element.render,
+		div(cls := "toc-section", id := "toc-creators")(new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element).render,
 
-		new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element.render,
+		div(cls := "toc-section", id := "toc-titles")(new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element).render,
 
-		Bootstrap.singlePropValueWidget("Publisher")(
-			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
+		div(cls := "toc-section", id := "toc-publisher")(
+			Bootstrap.singlePropValueWidget("Publisher")(
+				new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
+			)
 		).render,
 
-		Bootstrap.singlePropValueWidget("Publication year")(
-			new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
+		div(cls := "toc-section", id := "toc-publication-year")(
+			Bootstrap.singlePropValueWidget("Publication year")(
+				new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
+			)
 		).render,
 
-		Bootstrap.basicPropValueWidget("Resource type")(
-			new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
+		div(cls := "toc-section", id := "toc-resource-type")(
+			Bootstrap.basicPropValueWidget("Resource type")(
+				new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
+			)
 		).render,
 
-		div(cls := "row mt-5")(h4("Recommended properties")).render,
+		div(cls := "row mt-5 toc-section", id := "toc-recommended")(h4("Recommended properties")).render,
 
-		new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element.render,
+		div(cls := "toc-section", id := "toc-subjects")(new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element).render,
 
-		new ContributorsEditWidget(init.contributors, cb(cs => _.copy(contributors = cs))).element.render,
+		div(cls := "toc-section", id := "toc-contributors")(new ContributorsEditWidget(init.contributors, cb(cs => _.copy(contributors = cs))).element).render,
 
-		new DatesEditWidget(init.dates, cb(ds => _.copy(dates = ds))).element.render,
+		div(cls := "toc-section", id := "toc-dates")(new DatesEditWidget(init.dates, cb(ds => _.copy(dates = ds))).element).render,
 
-		new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element.render,
+		div(cls := "toc-section", id := "toc-related-identifiers")(new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element).render,
 
-		new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element.render,
+		div(cls := "toc-section", id := "toc-rights")(new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element).render,
 
-		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
+		div(cls := "toc-section", id := "toc-descriptions")(new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element).render,
 
-		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
+		div(cls := "toc-section", id := "toc-geolocations")(new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element).render,
 
-		div(cls := "row mt-5")(h4("Optional properties")).render,
+		div(cls := "row mt-5 toc-section", id := "toc-optional")(h4("Optional properties")).render,
 
-		new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element.render,
+		div(cls := "toc-section", id := "toc-formats")(new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element).render,
 
-		Bootstrap.singlePropValueWidget("Version")(
-			new VersionWidget(init.version, cb(v => _.copy(version = v))).element
+		div(cls := "toc-section", id := "toc-version")(
+			Bootstrap.singlePropValueWidget("Version")(
+				new VersionWidget(init.version, cb(v => _.copy(version = v))).element
+			)
 		).render,
 
-		new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
+		div(cls := "toc-section", id := "toc-funding")(new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element).render,
 
 	)
 

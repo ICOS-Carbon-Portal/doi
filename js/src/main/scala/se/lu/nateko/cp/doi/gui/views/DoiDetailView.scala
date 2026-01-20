@@ -95,6 +95,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	val element = div(
 		id := "detail-view",
+		cls := "position-relative",
 		style := "transition: opacity 0.5s ease; opacity: 1;"
 	)(
 		stickyHeader,
@@ -118,20 +119,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			contentBody.appendChild(metaViewer.element)
 		}
 
-		// Add scroll listener to reduce h1 size when header is sticky
-		val h1Element = org.scalajs.dom.document.getElementById("detail-title").asInstanceOf[org.scalajs.dom.html.Heading]
-		val stickyHeaderElement = org.scalajs.dom.document.getElementById("sticky-header").asInstanceOf[org.scalajs.dom.html.Div]
-		val headerOffsetTop = stickyHeaderElement.offsetTop
-
-		org.scalajs.dom.window.addEventListener("scroll", (_: Event) => {
-			val scrollY = org.scalajs.dom.window.pageYOffset
-			// Only reduce size when the header has reached the top (is stuck)
-			if (scrollY >= headerOffsetTop) {
-				h1Element.style.fontSize = "1.75rem"
-			} else {
-				h1Element.style.fontSize = ""
-			}
-		})
+		toolbar.updateTocButtonPosition()
 	}
 
 	private lazy val metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
