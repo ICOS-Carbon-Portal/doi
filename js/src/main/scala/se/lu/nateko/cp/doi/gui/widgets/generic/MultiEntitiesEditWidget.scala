@@ -12,7 +12,6 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
-	private var isCollapsed = false
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
@@ -49,7 +48,6 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			setRemovability()
 			setOrderability()
 			setAppendability()
-			setCollapsedness()
 			notifyUpstream()
 		}, (initiatingWidget, moveWidgetUp) => {
 			val initiatingWidgetIndex = widgets.indexOf(initiatingWidget)
@@ -76,20 +74,8 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		setAppendability()
 		setRemovability()
 		setOrderability()
-		setCollapsedness()
 		notifyUpstream()
 	}
-
-	private val collapseWidget: Event => Unit = (_: Event) => {
-		isCollapsed = !isCollapsed
-		setCollapsedness()
-	}
-
-	private val collapseIcon = span().render
-
-	private val collapseButton = span(
-			width := "1rem"
-		)(collapseIcon).render
 
 	private val addWidgetButton = button(
 			tpe := "button", cls := "btn btn-sm btn-outline-primary mt-2",
@@ -100,19 +86,10 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			"Add " + title.dropRight(1).toLowerCase
 		).render
 
-	private def setCollapsedness(): Unit = {
-		val canCollapse: Boolean = widgetsParent.childNodes.length > 0
-		collapseButton.style.display = if(canCollapse) "inline-block" else "none"
-		collapseIcon.className = "fas fa-caret-" + (if(isCollapsed) "right" else "down")
-		collapseButton.title = if(isCollapsed) "Expand this list back down" else "Collapse this list up"
-		widgetsParent.style.display = if(isCollapsed) "none" else "block"
-		addWidgetButton.style.display = if(isCollapsed) "none" else "inline-block"
-	}
-
 	val element =
 		div(cls := "row")(
 			div(cls := "col-md-2")(
-				div(onclick := collapseWidget, cursor := "pointer")(collapseButton, strong(title))
+				div(cls := "fw-bold pt-2")(title)
 			),
 			div(cls := "col-md-10")(
 				widgetsParent,
@@ -124,6 +101,5 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	setRemovability()
 	setOrderability()
 	setAppendability()
-	setCollapsedness()
 
 }
