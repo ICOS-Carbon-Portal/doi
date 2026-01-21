@@ -183,14 +183,14 @@ class UnifiedToolbar(
 		tocPanel.classList.remove("show")
 	}
 
-	private def stateDotColor = _meta.state match {
-		case DoiPublicationState.draft => "#ffc107"
-		case DoiPublicationState.registered => "#0d6efd"
-		case DoiPublicationState.findable => "#198754"
+	private def stateDotClass = _meta.state match {
+		case DoiPublicationState.draft => "state-dot state-dot-draft"
+		case DoiPublicationState.registered => "state-dot state-dot-registered"
+		case DoiPublicationState.findable => "state-dot state-dot-findable"
 	}
 
 	private def createStateDot() = span(
-		style := s"display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: $stateDotColor; margin-right: 6px;"
+		cls := stateDotClass
 	).render
 
 	private val stateDropdownButton = button(
@@ -317,110 +317,9 @@ class UnifiedToolbar(
 
 	val element = div(
 		id := "unified-toolbar",
-		cls := "border-bottom py-2 mb-3",
+		cls := "unified-toolbar border-bottom py-2 mb-3",
 		style := "position: relative;"
 	)(
-		tag("style")("""
-			.state-dropdown-menu {
-				display: none;
-				position: absolute;
-				min-width: 10rem;
-				padding: 0.5rem 0;
-				margin: 0.125rem 0 0;
-				background-color: #fff;
-				border: 1px solid rgba(0,0,0,.15);
-				border-radius: 0.25rem;
-				box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
-				list-style: none;
-				z-index: 1000;
-			}
-			.state-dropdown-menu.show {
-				display: block;
-			}
-			.state-dropdown-menu .dropdown-item {
-				display: block;
-				width: 100%;
-				padding: 0.5rem 1rem;
-				clear: both;
-				font-weight: 400;
-				color: #212529;
-				text-align: inherit;
-				white-space: normal;
-				background-color: transparent;
-				border: 0;
-				cursor: pointer;
-				text-decoration: none;
-			}
-			.state-dropdown-menu .dropdown-item:hover:not(.disabled) {
-				background-color: #f8f9fa;
-			}
-			.state-dropdown-menu .dropdown-item.disabled {
-				color: #6c757d;
-				cursor: not-allowed;
-				opacity: 0.6;
-			}
-			.state-dropdown-menu .dropdown-item-text {
-				display: block;
-			}
-			.toc-panel {
-				position: absolute;
-				top: calc(100% + 0.5rem);
-				right: 0;
-				width: 300px;
-				max-height: calc(100vh - 200px);
-				background-color: #fff;
-				border: 1px solid rgba(0,0,0,.15);
-				border-radius: 0.25rem;
-				box-shadow: 0 4px 8px rgba(0,0,0,.1);
-				z-index: 900;
-				display: none;
-				flex-direction: column;
-			}
-			.toc-panel.show {
-				display: flex;
-			}
-			.toc-header {
-				padding: 1rem;
-				border-bottom: 1px solid rgba(0,0,0,.1);
-			}
-			.toc-body {
-				padding: 1rem;
-				overflow-y: auto;
-				flex: 1;
-			}
-			.toc-link {
-				display: block;
-				padding: 0.4rem 0.5rem;
-				color: #212529;
-				text-decoration: none;
-				border-radius: 0.25rem;
-				transition: background-color 0.15s ease;
-			}
-			.toc-link:hover {
-				background-color: #f8f9fa;
-			}
-			.toc-section-link {
-				font-weight: 600;
-			}
-			.toc-section {
-				scroll-margin-top: 130px;
-				margin-top: 1rem;
-			}
-			@media (max-width: 768px) {
-				.toc-panel {
-					width: 250px;
-				}
-			}
-			.toc-button-container {
-				position: absolute;
-				right: 0;
-				z-index: 950;
-			}
-			.toc-toggle-button {
-				position: relative;
-				background-color: white !important;
-			}
-		"""),
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
 			div(cls := "me-2")(backButton),
 			

@@ -3,60 +3,7 @@
 
 @(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false, authHost: String)(implicit env: Envri)
 @CpCommonPage(s"${devIcon}DOI minting"){
-	<style type="text/css">
-		/* Hide content initially if on detail route to prevent flash */
-		#main-wrapper {
-			opacity: 0;
-		}
-		#main-wrapper.loaded {
-			opacity: 1;
-		}
-		/* Disable smooth scrolling for instant navigation */
-		html, body {
-			scroll-behavior: auto !important;
-		}
-		@@media all and (max-width: 991px) {
-			.spacyrow{
-				margin-top: 15px;
-				margin-bottom: 15px;
-			}
-		}
-		.page-header {
-			margin-top: 2rem;
-			margin-bottom: 1rem;
-		}
-		.card {
-			margin-bottom: 1rem;
-		}
-		.row + .row {
-			margin-top: 1rem;
-		}
-		.row .row + .row {
-			margin-top: 0.5rem;
-		}
-		span.label{
-			font-size: 100%;
-			color: #000;
-		}
-		.is-anonymous .edit-control,
-		.is-not-admin .admin-control,
-		.is-not-admin .published-doi .btn-update-doi,
-		.is-logged-in.is-not-admin .published-doi .nav-edit,
-		.is-admin .btn-submit {
-			display: none;
-		}
-		.is-not-admin .published-doi .card input,
-		.is-not-admin .published-doi .card button,
-		.is-not-admin .published-doi .card select,
-		.is-anonymous .draft-doi .card input,
-		.is-anonymous .draft-doi .card button,
-		.is-anonymous .draft-doi .card select{
-			pointer-events: none;
-		}
-		.is-not-admin .published-doi .card-body input{
-			background-color: lightgrey;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="/styles.css">
 }{
 	<div id="main-wrapper" class="container-xl @isAdminClass @isLoggedInClass" data-permissions="@permissions">
 		<div class="row">
