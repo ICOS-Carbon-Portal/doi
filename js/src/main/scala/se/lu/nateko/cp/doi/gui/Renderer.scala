@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi.gui
 import DoiRedux._
 import se.lu.nateko.cp.doi.gui.views.MainView
 import se.lu.nateko.cp.doi.gui.views.DoiDetailView
+import se.lu.nateko.cp.doi.gui.views.DoiMetaHelpers
 import DoiStateUpgrades._
 import org.scalajs.dom.document
 
@@ -50,6 +51,8 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 			case ListRoute =>
 				// Show list view in list-wrapper
 				currentDetailView = None
+				// Restore default page title
+				document.title = DoiMetaHelpers.pageTitle("DOI minting")
 				
 				val mainWrapper = document.getElementById("main-wrapper")
 				var listWrapper = document.getElementById("list-wrapper")

@@ -50,8 +50,8 @@ object Main{
 		def isAdmin(uid: UserId): Boolean = conf.admins.exists(auid => auid.email.equalsIgnoreCase(uid.email))
 		def isOptAdmin(uidOpt: Option[UserId]) = uidOpt.fold(false)(isAdmin)
 
-		def mainPage(isDev: Boolean) = authRouting.userOpt{uidOpt =>
-			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev, conf.auth.authHost))
+		def mainPage(isDev: Boolean, doiSuffix: Option[String] = None) = authRouting.userOpt{uidOpt =>
+			complete(views.html.doi.DoiPage(uidOpt.isDefined, isOptAdmin(uidOpt), isDev, conf.auth.authHost, doiSuffix))
 		}
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(
@@ -124,8 +124,8 @@ object Main{
 				getFromResourceDirectory("") ~
 				// SPA catch-all - serve index for any /doi/* path (after trying static resources)
 				pathPrefix("doi"){
-					path(DoiClientRouting.DoiPath){_ =>
-						mainPage(conf.development)
+					path(DoiClientRouting.DoiPath){doi =>
+						mainPage(conf.development, Some(doi.suffix))
 					}
 				}
 			}

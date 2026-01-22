@@ -103,6 +103,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	)
 
 	def initialize(): Unit = {
+		// Update page title to include DOI suffix
+		org.scalajs.dom.document.title = DoiMetaHelpers.pageTitle(meta.doi.suffix)
+
 		// Show clone banner if this is a cloned DOI
 		if (isClone) {
 			showCloneBanner()
