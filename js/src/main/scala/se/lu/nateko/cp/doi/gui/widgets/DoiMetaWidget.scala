@@ -185,7 +185,7 @@ object DoiMetaWidget{
 
 		protected def makeWidget(value: Creator, updateCb: Creator => Unit) = new CreatorWidget(value, updateCb)
 
-		protected def defaultValue = Creator(GenericName(""), Nil, Nil)
+		protected def defaultValue = Creator(PersonalName("", ""), Nil, Nil)
 	}
 
 
