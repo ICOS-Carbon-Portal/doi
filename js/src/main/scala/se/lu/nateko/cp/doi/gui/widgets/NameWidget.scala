@@ -34,38 +34,35 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 
 	private var nameElem = getNameElem
 
-	private def checkedModifier(isPersonal: Boolean) = if(isPersonal) Seq(checked := true) else Nil
-
-	private def changeNameType(personal: Boolean): Event => Unit = e => if(isPersonal != personal){
-		_name = if(personal) PersonalName("", "") else GenericName("")
-		val newNameElem = getNameElem
-		nameElem.parentNode.replaceChild(newNameElem, nameElem)
-		nameElem = newNameElem
-		updateCb(_name)
+	private def changeNameType(): Event => Unit = e => {
+		val selectElem = e.target.asInstanceOf[org.scalajs.dom.html.Select]
+		val personal = selectElem.value == "personal"
+		if(isPersonal != personal){
+			_name = if(personal) PersonalName("", "") else GenericName("")
+			val newNameElem = getNameElem
+			nameElem.parentNode.replaceChild(newNameElem, nameElem)
+			nameElem = newNameElem
+			updateCb(_name)
+		}
 	}
 
-	private def nameTypeOption(personal: Boolean) =
-		input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(personal))(checkedModifier(personal))
-
-	val element = div(
+	val element =
 		div(
-		cls := "row",
-			form(
-				cls := "col",
-				div(
-					label("Person", cls := "form-check-label")(
-						input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(true))(checkedModifier(isPersonal)),
-					),
-					cls := "form-check form-check-inline"
-				),
-				div(
-					label("Organization", cls := "form-check-label")(
-						input(tpe := "radio", name := "nameType", cls := "form-check-input", onchange := changeNameType(false))(checkedModifier(isGeneric)),
-					),
-					cls := "form-check form-check-inline"
+			cls := "row",
+			div(
+				cls := "col-md-auto",
+				select(
+					cls := "form-select",
+					onchange := changeNameType()
+				)(
+					if(isPersonal) option(value := "personal", selected := true)("Person") else option(value := "personal")("Person"),
+					if(isGeneric) option(value := "organization", selected := true)("Organization") else option(value := "organization")("Organization")
 				)
 			),
-		),
-		Bootstrap.propValueRow(strong("Name"))(nameElem)
-	).render
+			div(
+				cls := "col",
+				nameElem
+			)
+		)
+	.render
 }
