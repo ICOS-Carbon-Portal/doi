@@ -23,6 +23,7 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: U
 
 	// Expose method to wire toolbar callbacks
 	def wireToolbarCallbacks(): Unit = {
+		toolbar.setUpdateButtonEnabled(true)
 		toolbar.setUpdateButtonCallback { (_: Event) =>
 			try {
 				toolbar.setUpdateButtonEnabled(false)

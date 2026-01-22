@@ -139,10 +139,10 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	private lazy val metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
 
 	private lazy val tabsCb: Map[EditorTab, () => Unit] = Map(
-		EditorTab.view -> {() => 
+		EditorTab.view -> {() =>
 			contentBody.replaceChildren(metaViewer.element)
 			toolbar.setTab(EditorTab.view)
-			// No special callbacks for view mode
+			toolbar.setUpdateButtonEnabled(false)
 		},
 		EditorTab.edit -> {() => 
 			contentBody.replaceChildren(metaWidget.element)
