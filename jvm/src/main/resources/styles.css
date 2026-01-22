@@ -51,6 +51,12 @@ span.label{
 	background-color: lightgrey;
 }
 
+#detail-title {
+	overflow-y: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 /* Unified Toolbar Styles */
 .unified-toolbar .state-dropdown-menu {
 	display: none;
@@ -93,7 +99,7 @@ span.label{
 .unified-toolbar .state-dropdown-menu .dropdown-item-text {
 	display: block;
 }
-.unified-toolbar .toc-panel {
+.toc-panel {
 	position: absolute;
 	top: calc(100% + 0.5rem);
 	right: 0;
@@ -107,19 +113,19 @@ span.label{
 	display: none;
 	flex-direction: column;
 }
-.unified-toolbar .toc-panel.show {
+.toc-panel.show {
 	display: flex;
 }
-.unified-toolbar .toc-header {
+.toc-panel .toc-header {
 	padding: 1rem;
 	border-bottom: 1px solid rgba(0,0,0,.1);
 }
-.unified-toolbar .toc-body {
+.toc-panel .toc-body {
 	padding: 1rem;
 	overflow-y: auto;
 	flex: 1;
 }
-.unified-toolbar .toc-link {
+.toc-panel .toc-link {
 	display: block;
 	padding: 0.4rem 0.5rem;
 	color: #212529;
@@ -127,13 +133,13 @@ span.label{
 	border-radius: 0.25rem;
 	transition: background-color 0.15s ease;
 }
-.unified-toolbar .toc-link:hover {
+.toc-panel .toc-link:hover {
 	background-color: #f8f9fa;
 }
-.unified-toolbar .toc-section-link {
+.toc-panel .toc-section-link {
 	font-weight: 600;
 }
-.unified-toolbar .toc-section {
+.toc-section {
 	scroll-margin-top: 130px;
 	margin-top: 1rem;
 }

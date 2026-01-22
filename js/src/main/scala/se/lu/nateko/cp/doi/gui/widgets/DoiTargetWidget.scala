@@ -27,7 +27,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 	urlInput.onkeyup = (_: Event) => validateTargetUrl()
 
 	val element: html.Div = div(cls := "row gy-2")(
-		div(cls := "col-md-2")(strong("Target URL")),
+		div(cls := "col-md-2")(div(cls := "fw-bold pt-2")("Target URL")),
 		div(cls := "col-md-10")(
 			div(cls := "row")(
 				div(cls := "col-md-9")(urlInput)

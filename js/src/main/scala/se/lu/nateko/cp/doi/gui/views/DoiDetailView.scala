@@ -72,9 +72,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	).render
 
 	private val headerSection = div(cls := "mb-3 pt-3")(
-		h1(id := "detail-title", style := "transition: font-size 0.2s ease;")(title),
+		h1(id := "detail-title", cls := "fs-2", attr("title"):= title)(title),
 		div(cls := "d-flex align-items-center gap-2 mb-3")(
-			p(cls := "text-muted mb-0", style := "user-select: all;")(s"${meta.doi}"),
+			p(cls := "text-muted mb-0")(s"${meta.doi}"),
 			span(cls := "text-muted")("|"),
 			a(href := doiUrl, target := "_blank", cls := "link-secondary")("DOI"),
 			span(cls := "text-muted")("|"),
