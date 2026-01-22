@@ -39,7 +39,7 @@ class CreatorWidget(init: Creator, protected val updateCb: Creator => Unit) exte
 object CreatorWidget{
 
 	class NameIdsInput(init: Seq[NameIdentifier], updateCb: Seq[NameIdentifier] => Unit) extends
-		MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb)("Identifiers"){
+		MultiEntitiesEditWidget[NameIdentifier, NameIdentifierWidget](init, updateCb)("Identifiers", showTitle = false){
 
 		protected def makeWidget(value: NameIdentifier, updateCb: NameIdentifier => Unit) =
 			new NameIdentifierWidget(value, updateCb)
@@ -49,6 +49,6 @@ object CreatorWidget{
 
 
 	class AffiliationsInput(init: Seq[Affiliation], updateCb: Seq[Affiliation] => Unit) extends
-		MultiStringsWidget(init.map(_.name), (aff => updateCb(aff.map(Affiliation.apply))), "Affiliation", required = true)("Affiliations")
+		MultiStringsWidget(init.map(_.name), (aff => updateCb(aff.map(Affiliation.apply))), "Affiliation", required = true)("Affiliations", showTitle = false)
 
 }

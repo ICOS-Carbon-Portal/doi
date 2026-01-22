@@ -8,7 +8,7 @@ import scala.collection.Seq
 
 abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	initValues: Seq[E], cb: Seq[E] => Unit
-)(protected val title: String, protected val minAmount: Int = 0, protected val maxAmount: Int = 0){
+)(protected val title: String, protected val minAmount: Int = 0, protected val maxAmount: Int = 0, showTitle: Boolean = true){
 
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
@@ -77,8 +77,9 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		notifyUpstream()
 	}
 
+	private val buttonType = if (showTitle) "btn-outline-primary mt-2" else "btn-link"
 	private val addWidgetButton = button(
-			tpe := "button", cls := "btn btn-sm btn-outline-primary mt-2",
+			tpe := "button", cls := "btn btn-sm " + buttonType,
 			htmlTitle := "Add another item to the list",
 			onclick := addWidget, marginBottom := 5
 		)(
@@ -88,9 +89,9 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	val element =
 		div(cls := "row")(
-			div(cls := "col-md-2")(
+			if (showTitle) div(cls := "col-md-2")(
 				div(cls := "fw-bold pt-2")(title)
-			),
+			) else div(),
 			div(cls := "col-md-10")(
 				widgetsParent,
 				addWidgetButton

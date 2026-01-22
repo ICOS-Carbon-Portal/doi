@@ -37,7 +37,12 @@ class ContributorWidget(init: Contributor, protected val updateCb: Contributor =
 	})
 
 	val element = div(
-		Bootstrap.basicPropValueWidget("Type")(contributorTypeSelect.element),
+		div(cls := "row")(
+			div(cls := "col input-group")(
+				label(cls := "input-group-text")("Type"),
+				(contributorTypeSelect.element),
+			)
+		),
 		nameInput.element,
 		nameIdsInput.element,
 		affiliationsInput.element
