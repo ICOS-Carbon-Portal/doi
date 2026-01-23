@@ -30,10 +30,23 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 
 	private def handleLicenseChange(): Unit = {
 		licenseSelect.value match {
-			case "CC-BY-4.0" => fillForm(Constants.ccBy4Rights)
-			case "CC0-1.0" => fillForm(Constants.cc0Rights)
-			case _ => // Custom - do nothing
+			case "CC-BY-4.0" =>
+				fillForm(Constants.ccBy4Rights)
+				hideDetails()
+			case "CC0-1.0" =>
+				fillForm(Constants.cc0Rights)
+				hideDetails()
+			case _ => // Custom
+				showDetails()
 		}
+	}
+
+	private def showDetails(): Unit = {
+		detailsContainer.style.display = "contents"
+	}
+
+	private def hideDetails(): Unit = {
+		detailsContainer.style.display = "none"
 	}
 
 	private def fillForm(rights: Rights): Unit = {
@@ -85,8 +98,7 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		updateCb(_rights)
 	}, "Language", required = false)
 
-	val element = div(cls := "row spacyrow")(
-		div(cls := "col-md-12")(licenseSelect)(paddingBottom := 15),
+	private[this] val detailsContainer = div(cls := "row spacyrow")(
 		div(cls := "col-md-2")(strong("License name")),
 		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("License URI")),
@@ -99,5 +111,12 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		div(cls := "col-md-4")(schemeUri.element)(paddingBottom := 15),
 		div(cls := "col-md-2")(strong("Language")),
 		div(cls := "col-md-4")(lang.element)(paddingBottom := 15)
+	).render
+
+	if (initialLicenseValue != "custom") hideDetails()
+
+	val element = div(cls := "row spacyrow")(
+		div(cls := "col-md-auto")(licenseSelect)(paddingBottom := 15),
+		detailsContainer
 	).render
 }
