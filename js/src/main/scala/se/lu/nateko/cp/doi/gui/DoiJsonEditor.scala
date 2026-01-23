@@ -28,7 +28,11 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: U
 			try {
 				toolbar.setUpdateButtonEnabled(false)
 				val meta = Json.parse(_json).as[DoiMeta]
-				updateCb(meta).failed.foreach { _ => toolbar.setUpdateButtonEnabled(true) }
+				val updateFuture = updateCb(meta)
+				updateFuture.foreach { _ =>
+					toolbar.showSaveSuccess()
+				}
+				updateFuture.failed.foreach { _ => toolbar.setUpdateButtonEnabled(true) }
 			} catch {
 				case e: Throwable => {
 					errorMessages.innerText = e.getMessage

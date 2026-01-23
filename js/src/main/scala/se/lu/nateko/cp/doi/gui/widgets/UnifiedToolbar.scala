@@ -7,6 +7,7 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import org.scalajs.dom.html.{Button, Div}
 import scala.concurrent.Future
+import scala.scalajs.js.timers.{setTimeout, clearTimeout}
 
 class UnifiedToolbar(
 	meta: DoiMeta,
@@ -20,6 +21,7 @@ class UnifiedToolbar(
 
 	private[this] var _meta = meta
 	private[this] var currentTab: EditorTab = initialTab
+	private[this] var successTimeoutHandle: Option[scala.scalajs.js.timers.SetTimeoutHandle] = None
 
 	// Back to list button
 	private val backButton = a(
@@ -178,7 +180,7 @@ class UnifiedToolbar(
 		viewButton.className = s"btn btn-sm${if (currentTab == EditorTab.view) " btn-secondary" else " btn-outline-secondary"}"
 		editButton.className = s"btn btn-sm${if (currentTab == EditorTab.edit) " btn-secondary" else " btn-outline-secondary"} edit-control"
 		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"} edit-control"
-		
+
 		tocButton.style.display = if (currentTab == EditorTab.edit) "block" else "none"
 		tocPanel.classList.remove("show")
 	}
@@ -268,13 +270,15 @@ class UnifiedToolbar(
 	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
 	// Action buttons (edit mode)
+	private val updateButtonIcon = i(cls := "fa-solid fa-floppy-disk me-1").render
+	private val updateButtonText = span("Save").render
 	private val updateButton = button(
 		tpe := "button",
 		cls := "btn btn-sm btn-update-doi btn-secondary edit-control",
 		disabled := true
 	)(
-		i(cls := "fa-solid fa-floppy-disk me-1"),
-		"Save"
+		updateButtonIcon,
+		updateButtonText
 	).render
 
 
@@ -322,22 +326,22 @@ class UnifiedToolbar(
 	)(
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
 			div(cls := "me-2")(backButton),
-			
+
 			div(cls := "btn-group me-2 admin-control")(
 				viewButton,
 				editButton,
 				jsonButton
 			),
-			
+
 			div(cls := "flex-grow-1"),
-			
+
 			stateDropdown,
 			cloneButton,
 			actionButtons
 		),
 		tocButtonContainer
 	).render
-	
+
 	// Close state dropdown when clicking outside
 	org.scalajs.dom.document.addEventListener("click", (e: Event) => {
 		val target = e.target.asInstanceOf[org.scalajs.dom.Node]
@@ -362,7 +366,7 @@ class UnifiedToolbar(
 	})
 
 	def getTocPanel: org.scalajs.dom.html.Div = tocPanel
-	
+
 	def updateTocButtonPosition(): Unit = {
 		val toolbarElement = org.scalajs.dom.document.getElementById("unified-toolbar")
 		if (toolbarElement != null) {
@@ -370,15 +374,45 @@ class UnifiedToolbar(
 			tocButtonContainer.style.top = s"${toolbarHeight + 30}px"
 		}
 	}
-	
+
 	def setTab(tab: EditorTab): Unit = {
 		currentTab = tab
 		updateTabButtons()
 	}
 
 	def setUpdateButtonEnabled(enabled: Boolean): Unit = {
+		if (enabled) {
+			// Clear any pending success animation timeout since we have new changes
+			successTimeoutHandle.foreach(clearTimeout)
+			successTimeoutHandle = None
+
+			// Reset button icon and text from success state to normal save state
+			updateButtonIcon.className = "fa-solid fa-floppy-disk me-1"
+			updateButtonText.textContent = "Save"
+		}
+
 		updateButton.disabled = !enabled
 		updateButton.className = "btn btn-sm btn-update-doi edit-control btn-" + (if(enabled) "primary" else "secondary")
+	}
+
+	def showSaveSuccess(): Unit = {
+		// Clear any existing timeout
+		successTimeoutHandle.foreach(clearTimeout)
+
+		// Change button to success state
+		updateButton.disabled = true
+		updateButton.className = "btn btn-sm btn-update-doi edit-control btn-success"
+		updateButtonIcon.className = "fa-solid fa-check me-1"
+		updateButtonText.textContent = "Saved!"
+
+		// Revert to normal state after 3 seconds
+		val handle = setTimeout(3000) {
+			updateButton.className = "btn btn-sm btn-update-doi edit-control btn-secondary"
+			updateButtonIcon.className = "fa-solid fa-floppy-disk me-1"
+			updateButtonText.textContent = "Save"
+			successTimeoutHandle = None
+		}
+		successTimeoutHandle = Some(handle)
 	}
 
 	def setSubmitButtonEnabled(enabled: Boolean): Unit = {

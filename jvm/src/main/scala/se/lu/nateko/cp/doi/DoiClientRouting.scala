@@ -50,34 +50,40 @@ class DoiClientRouting(client: DoiClient, conf: DoiConfig)(using ActorSystem) {
 
 							import meta.doi.{prefix, suffix}
 
-							val metaHost = meta.url.fold(conf.metaHost)(url => {
-								val targetHost = new URI(url).getHost()
-								if (targetHost == "citymeta.icos-cp.eu")
-									targetHost
-								else
-									conf.metaHost
-							})
+							if (conf.skipCacheInvalidation) {
+								// Skip cache invalidation (typically for dev environments)
+								complete("")
+							} else {
+								// Production: perform cache invalidation
+								val metaHost = meta.url.fold(conf.metaHost)(url => {
+									val targetHost = new URI(url).getHost()
+									if (targetHost == "citymeta.icos-cp.eu")
+										targetHost
+									else
+										conf.metaHost
+								})
 
-							def cacheInvalidationError(exc: Throwable): String = exc match
-								case ee: ExecutionException => cacheInvalidationError(ee.getCause)
-								case exc: Throwable =>
-									s"Cache invalidation for DOI citation on server ${metaHost} for DOI $prefix/$suffix failed\n" +
-										s"Error message: ${exc.getMessage}"
+								def cacheInvalidationError(exc: Throwable): String = exc match
+									case ee: ExecutionException => cacheInvalidationError(ee.getCause)
+									case exc: Throwable =>
+										s"Cache invalidation for DOI citation on server ${metaHost} for DOI $prefix/$suffix failed\n" +
+											s"Error message: ${exc.getMessage}"
 
-							val cacheInvalidationDone: Future[NotUsed] = Http().singleRequest(
-									HttpRequest(uri = s"https://${metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
-								).flatMap{resp =>
-									if(resp.status.isSuccess) Future.successful(NotUsed)
-									else resp.entity.toStrict(3.seconds).flatMap{entity =>
-										Future.failed(new Error(entity.data.utf8String) with NoStackTrace)
+								val cacheInvalidationDone: Future[NotUsed] = Http().singleRequest(
+										HttpRequest(uri = s"https://${metaHost}/dois/dropCache/$prefix/$suffix", method = HttpMethods.POST)
+									).flatMap{resp =>
+										if(resp.status.isSuccess) Future.successful(NotUsed)
+										else resp.entity.toStrict(3.seconds).flatMap{entity =>
+											Future.failed(new Error(entity.data.utf8String) with NoStackTrace)
+										}
 									}
-								}
 
-							onComplete(cacheInvalidationDone){doneTry =>
-								val resp: String = doneTry match
-									case Success(_) => ""
-									case Failure(ex) => cacheInvalidationError(ex)
-								complete(resp)
+								onComplete(cacheInvalidationDone){doneTry =>
+									val resp: String = doneTry match
+										case Success(_) => ""
+										case Failure(ex) => cacheInvalidationError(ex)
+									complete(resp)
+								}
 							}
 						}
 					else forbid

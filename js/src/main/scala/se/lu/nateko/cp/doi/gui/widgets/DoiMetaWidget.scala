@@ -130,7 +130,13 @@ class DoiMetaWidget(
 		validateMeta()
 		toolbar.setUpdateButtonCallback { (_: Event) =>
 			toolbar.setUpdateButtonEnabled(false)
-			updater(_meta).failed.foreach{_ => toolbar.setUpdateButtonEnabled(true)}
+			val updateFuture = updater(_meta)
+			updateFuture.foreach { _ =>
+				toolbar.showSaveSuccess()
+			}
+			updateFuture.failed.foreach{ _ =>
+				toolbar.setUpdateButtonEnabled(true)
+			}
 		}
 
 		toolbar.setSubmitButtonCallback { (_: Event) =>

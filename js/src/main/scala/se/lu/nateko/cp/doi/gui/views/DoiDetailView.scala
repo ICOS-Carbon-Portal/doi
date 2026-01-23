@@ -127,7 +127,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private lazy val metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
 
-	private lazy val metaWidget = {
+	private var metaWidget = {
 		val widget = new DoiMetaWidget(
 			meta,
 			updateDoiMeta,
@@ -144,12 +144,12 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			toolbar.setTab(EditorTab.view)
 			toolbar.setUpdateButtonEnabled(false)
 		},
-		EditorTab.edit -> {() => 
+		EditorTab.edit -> {() =>
 			contentBody.replaceChildren(metaWidget.element)
 			toolbar.setTab(EditorTab.edit)
 			metaWidget.wireToolbarCallbacks()
 		},
-		EditorTab.json -> {() => 
+		EditorTab.json -> {() =>
 			contentBody.replaceChildren(metaJsonEditor.element)
 			toolbar.setTab(EditorTab.json)
 			metaJsonEditor.wireToolbarCallbacks()
@@ -157,35 +157,46 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	)
 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
-		val updateDone = Backend.updateMeta(updated)
-		
-		Future(updateDone.onComplete(s => {
-			s match {
-				case Failure(exc) =>
-					d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
-				case Success(s) =>
-				if (!s.isEmpty()) d.dispatch(ReportError(s))
-					//recreate the DOI metadata widget with the updated metadata
-					contentBody.innerHTML = ""
-					meta = updated
-					contentBody.appendChild(metaWidget.element)
-					// Update header with new title and DOI if they changed
-					val newTitle = DoiMetaHelpers.extractTitle(updated)
-					headerSection.querySelector("h1").textContent = newTitle
-					headerSection.querySelector("p").textContent = s"${updated.doi}"
-					// Update external link hrefs
-					val links = headerSection.querySelectorAll("a[target='_blank']")
-					if (links.length >= 3) {
-						links(0).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://doi.org/${updated.doi}"
-						links(1).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://commons.datacite.org/doi.org/${updated.doi}"
-						links(2).asInstanceOf[org.scalajs.dom.html.Anchor].href = s"https://doi.datacite.org/doi.org/${updated.doi}"
-					}
-					// Update toolbar badge
-					toolbar.updateBadge(updated.state)
-					// Update the list view with the new state
-					d.dispatch(DoiUpdated(updated))
+		Backend.updateMeta(updated).flatMap { errorMsg =>
+			if (errorMsg.isEmpty) {
+				// Success - update UI
+				meta = updated
+
+				// Create a new widget instance with updated metadata as the new baseline
+				metaWidget = new DoiMetaWidget(
+					updated,
+					updateDoiMeta,
+					toolbar
+				)
+
+				contentBody.innerHTML = ""
+				contentBody.appendChild(metaWidget.element)
+
+				// Wire toolbar callbacks for the new widget
+				metaWidget.wireToolbarCallbacks()
+
+				// Update header with new title and DOI if they changed
+				val newTitle = DoiMetaHelpers.extractTitle(updated)
+				headerSection.querySelector("h1").textContent = newTitle
+				headerSection.querySelector("p").textContent = s"${updated.doi}"
+
+				// Update toolbar badge
+				toolbar.updateBadge(updated.state)
+
+				// Update the list view with the new state
+				d.dispatch(DoiUpdated(updated))
+
+				Future.successful(())
+			} else {
+				// Backend returned error message
+				d.dispatch(ReportError(errorMsg))
+				Future.failed(new Exception(errorMsg))
 			}
-		}))
+		}.recoverWith {
+			case exc: Throwable =>
+				d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
+				Future.failed(exc)
+		}
 	}
 
 	private def showCloneBanner(): Unit = {

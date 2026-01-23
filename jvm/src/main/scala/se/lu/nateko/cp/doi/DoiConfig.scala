@@ -27,7 +27,8 @@ case class DoiConfig(
 	admins: Seq[UserId],
 	mailing: EmailConfig,
 	metaHost: String,
-	development: Boolean
+	development: Boolean,
+	skipCacheInvalidation: Boolean
 )
 
 object DoiConfig {
@@ -45,7 +46,8 @@ object DoiConfig {
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf),
 			metaHost = doiConf.getString("metaHost"),
-			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false
+			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false,
+			skipCacheInvalidation = if doiConf.hasPath("skipCacheInvalidation") then doiConf.getBoolean("skipCacheInvalidation") else false
 		)
 	}
 
