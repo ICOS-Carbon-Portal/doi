@@ -37,8 +37,21 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 				fillForm(Constants.cc0Rights)
 				hideDetails()
 			case _ => // Custom
+				clearForm()
 				showDetails()
 		}
+	}
+
+	private def clearForm(): Unit = {
+		statementInput.element.value = ""
+		urlInput.element.value = ""
+		rightsIdentifier.element.value = ""
+		_rights = _rights.copy(
+			rights = "",
+			rightsUri = None,
+			rightsIdentifier = None
+		)
+		updateCb(_rights)
 	}
 
 	private def showDetails(): Unit = {
@@ -98,25 +111,39 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		updateCb(_rights)
 	}, "Language", required = false)
 
-	private[this] val detailsContainer = div(cls := "row spacyrow")(
-		div(cls := "col-md-2")(strong("License name")),
-		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License URI")),
-		div(cls := "col-md-4")(urlInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License id")),
-		div(cls := "col-md-4")(rightsIdentifier.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License id scheme")),
-		div(cls := "col-md-4")(rightsIdentifierScheme.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Scheme uri")),
-		div(cls := "col-md-4")(schemeUri.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Language")),
-		div(cls := "col-md-4")(lang.element)(paddingBottom := 15)
+	private[this] val detailsContainer = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-12")(
+			label(cls := "form-label")("License name"),
+			div(statementInput.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("License URI"),
+			div(urlInput.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("License id"),
+			div(rightsIdentifier.element)
+		),
+		div(cls := "col-md-3")(
+			label(cls := "form-label")("License id scheme"),
+			div(rightsIdentifierScheme.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Scheme URI"),
+			div(schemeUri.element)
+		),
+		div(cls := "col-md-3")(
+			label(cls := "form-label")("Language"),
+			div(lang.element)
+		)
 	).render
 
 	if (initialLicenseValue != "custom") hideDetails()
 
-	val element = div(cls := "row spacyrow")(
-		div(cls := "col-md-auto")(licenseSelect)(paddingBottom := 15),
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-auto")(
+			licenseSelect
+		),
 		detailsContainer
 	).render
 }
