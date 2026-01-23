@@ -233,7 +233,7 @@ object DoiMetaWidget{
 
 		protected def makeWidget(value: Rights, updateCb: Rights => Unit) = new RightsWidget(value, updateCb)
 
-		protected def defaultValue = Rights("", None, None, Some("https://spdx.org/licenses"), Some("SPDX"), Some("eng"))
+		protected def defaultValue = Constants.ccBy4Rights
 	}
 
 
