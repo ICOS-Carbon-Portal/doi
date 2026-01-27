@@ -29,9 +29,9 @@ class ResourceTypeWidget(
 	)
 
 	val element = div(cls := "row")(
-		div(cls := "col-md-4")(rtGenInput.element),
-		div(cls := "col-md-1")(h4(cls := "text-center")("/")),
-		div(cls := "col-md-4")(rtInput.element)
+		div(cls := "col-md-auto")(rtGenInput.element),
+		div(cls := "col-md-auto")(h4(cls := "text-center")("/")),
+		div(cls := "col-md-auto")(rtInput.element)
 	).render
 
 }

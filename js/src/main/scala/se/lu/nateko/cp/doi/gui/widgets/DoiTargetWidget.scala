@@ -30,7 +30,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 		div(cls := "col-md-2")(div(cls := "fw-bold pt-2")("Target URL")),
 		div(cls := "col-md-10")(
 			div(cls := "row")(
-				div(cls := "col-md-9")(urlInput)
+				div(cls := "col-xl-10 col-lg-9")(urlInput)
 			)
 		)
 	).render

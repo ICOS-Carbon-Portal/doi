@@ -33,7 +33,7 @@ object Bootstrap {
 	def singlePropValueWidget(name: String)(valHtml: Modifier*) =
 		propValueRow(div(cls := "fw-bold pt-2")(name))(
 			div(cls := "row")(
-				div(cls := "col-md-9")(valHtml)
+				div(cls := "col-xl-10 col-lg-9")(valHtml)
 			)
 		)
 }

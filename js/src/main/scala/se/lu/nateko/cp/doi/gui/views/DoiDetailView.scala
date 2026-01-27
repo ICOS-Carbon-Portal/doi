@@ -11,6 +11,7 @@ import se.lu.nateko.cp.doi.gui.NavigateToRoute
 import se.lu.nateko.cp.doi.gui.ListRoute
 import se.lu.nateko.cp.doi.gui.DoiJsonEditor
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
+import se.lu.nateko.cp.doi.gui.widgets.DoiMetaEditorWithSidebar
 import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 import se.lu.nateko.cp.doi.gui.widgets.UnifiedToolbar
 import se.lu.nateko.cp.doi.gui.ThunkActions
@@ -114,11 +115,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		}
 
 		if (isAdmin) {
-			// For admins, start with edit view
-			contentBody.appendChild(metaWidget.element)
-			metaWidget.wireToolbarCallbacks()
+			contentBody.appendChild(metaEditorWithSidebar.element)
+			metaEditorWithSidebar.wireToolbarCallbacks()
 		} else {
-			// For non-admins, start with view-only mode
 			contentBody.appendChild(metaViewer.element)
 		}
 
@@ -127,14 +126,11 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private lazy val metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
 
-	private var metaWidget = {
-		val widget = new DoiMetaWidget(
-			meta,
-			updateDoiMeta,
-			toolbar
-		)
-		widget
-	}
+	private var metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
+		meta,
+		updateDoiMeta,
+		toolbar
+	)
 
 	private lazy val metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
 
@@ -145,9 +141,9 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			toolbar.setUpdateButtonEnabled(false)
 		},
 		EditorTab.edit -> {() =>
-			contentBody.replaceChildren(metaWidget.element)
+			contentBody.replaceChildren(metaEditorWithSidebar.element)
 			toolbar.setTab(EditorTab.edit)
-			metaWidget.wireToolbarCallbacks()
+			metaEditorWithSidebar.wireToolbarCallbacks()
 		},
 		EditorTab.json -> {() =>
 			contentBody.replaceChildren(metaJsonEditor.element)
@@ -162,18 +158,18 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 				// Success - update UI
 				meta = updated
 
-				// Create a new widget instance with updated metadata as the new baseline
-				metaWidget = new DoiMetaWidget(
+				// Create a new editor instance with updated metadata as the new baseline
+				metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 					updated,
 					updateDoiMeta,
 					toolbar
 				)
 
 				contentBody.innerHTML = ""
-				contentBody.appendChild(metaWidget.element)
+				contentBody.appendChild(metaEditorWithSidebar.element)
 
-				// Wire toolbar callbacks for the new widget
-				metaWidget.wireToolbarCallbacks()
+				// Wire toolbar callbacks for the new editor
+				metaEditorWithSidebar.wireToolbarCallbacks()
 
 				// Update header with new title and DOI if they changed
 				val newTitle = DoiMetaHelpers.extractTitle(updated)

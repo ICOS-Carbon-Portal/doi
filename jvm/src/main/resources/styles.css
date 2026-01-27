@@ -57,7 +57,6 @@ span.label{
 	text-overflow: ellipsis;
 }
 
-/* Unified Toolbar Styles */
 .unified-toolbar .state-dropdown-menu {
 	display: none;
 	position: absolute;
@@ -158,7 +157,70 @@ span.label{
 	background-color: white !important;
 }
 
-/* State dot styles */
+.doi-editor-with-sidebar {
+	display: flex;
+	gap: 2rem;
+	align-items: flex-start;
+}
+
+.doi-editor-with-sidebar .editor-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor {
+	position: sticky;
+	top: 150px;
+	width: 250px;
+	flex-shrink: 0;
+	background-color: #fff;
+	padding: 1rem;
+	max-height: calc(100vh - 160px);
+	overflow-y: auto;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-header {
+	font-weight: 600;
+	margin-bottom: 1rem;
+	padding: 0.4rem 0.5rem;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-body {
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-link {
+	display: block;
+	padding: 0.4rem 0.5rem;
+	color: #212529;
+	text-decoration: none;
+	border-radius: 0.25rem;
+	transition: background-color 0.15s ease;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-link:hover {
+	background-color: #f8f9fa;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-section-link {
+	font-weight: 600;
+}
+
+@media (min-width: 992px) {
+	.unified-toolbar .toc-button-container {
+		display: none;
+	}
+}
+
+@media (max-width: 991px) {
+	.doi-editor-with-sidebar {
+		flex-direction: column;
+	}
+
+	.doi-editor-with-sidebar .toc-sidebar-editor {
+		display: none;
+	}
+}
+
 .state-dot {
 	display: inline-block;
 	width: 8px;
