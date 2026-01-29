@@ -13,7 +13,7 @@ import se.lu.nateko.cp.doi.gui.views.Constants
 
 class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: UnifiedToolbar) {
 	private var _json = Json.prettyPrint(Json.toJson(meta))
-	private var lineCount = _json.linesIterator.length
+	private var lineCount = _json.linesIterator.length + 1
 	private val editor = new TextAreaWidget(_json, v => {
 		_json = v
 		errorMessages.innerHTML = ""
