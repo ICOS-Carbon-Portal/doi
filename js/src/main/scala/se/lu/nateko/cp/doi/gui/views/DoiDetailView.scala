@@ -123,6 +123,14 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		}
 
 		toolbar.updateTocButtonPosition()
+
+		setupStickyHeaderHeight()
+	}
+
+	private def setupStickyHeaderHeight(): Unit = {
+		val height = stickyHeader.offsetHeight
+		val root = org.scalajs.dom.document.documentElement.asInstanceOf[org.scalajs.dom.HTMLElement]
+		root.style.setProperty("--sticky-header-height", s"${height}px")
 	}
 
 	private var metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)

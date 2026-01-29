@@ -52,8 +52,10 @@ span.label{
 }
 
 #detail-title {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 	overflow-y: hidden;
-	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
@@ -144,7 +146,7 @@ span.label{
 	font-weight: 600;
 }
 .toc-section {
-	scroll-margin-top: 130px;
+	scroll-margin-top: var(--sticky-header-height, 130px);
 	margin-top: 1rem;
 }
 @media (max-width: 768px) {
@@ -175,12 +177,12 @@ span.label{
 
 .doi-editor-with-sidebar .toc-sidebar-editor {
 	position: sticky;
-	top: 150px;
+	top: calc(var(--sticky-header-height, 130px) + 20px);
 	width: 250px;
 	flex-shrink: 0;
 	background-color: #fff;
 	padding: 1rem;
-	max-height: calc(100vh - 160px);
+	max-height: calc(100vh - var(--sticky-header-height, 130px) - 30px);
 	overflow-y: auto;
 }
 
