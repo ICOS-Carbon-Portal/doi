@@ -85,8 +85,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val infoLink = a(
 		href := "https://support.datacite.org/docs/api-queries#using-the-query-parameter",
 		target := "_blank",
-		cls := "icon-link px-3 text-nowrap"
-	)("Search documentation")
+		cls := "btn-link btn-documentation px-3 text-secondary",
+		title := "Search documentation",
+		attr("aria-label") := "Search documentation",
+	)(
+		i(cls := "fa-solid fa-circle-question")
+	)
 
 	private val searchResultsStats = p.render
 
@@ -94,7 +98,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
-			cls := "d-flex",
+			cls := "d-flex align-items-center",
 			div(cls := "input-group me-2", style := "max-width: 120px")(
 				stateFilterSelect
 			),

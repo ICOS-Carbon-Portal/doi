@@ -57,6 +57,11 @@ span.label{
 	text-overflow: ellipsis;
 }
 
+.btn-documentation[target="_blank"]:after {
+	content: "";
+	margin: 0;
+}
+
 .unified-toolbar .state-dropdown-menu {
 	display: none;
 	position: absolute;
