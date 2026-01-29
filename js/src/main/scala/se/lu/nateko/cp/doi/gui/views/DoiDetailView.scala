@@ -125,7 +125,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		toolbar.updateTocButtonPosition()
 	}
 
-	private lazy val metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
+	private var metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
 
 	private var metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 		meta,
@@ -162,7 +162,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 				// Success - update UI
 				meta = updated
 
-				// Create new editor instances with updated metadata as the new baseline
+				// Create new view/editor instances with updated metadata as the new baseline
+				metaViewer = new DoiMetaViewer(updated, toolbar)
 				metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 					updated,
 					updateDoiMeta,
