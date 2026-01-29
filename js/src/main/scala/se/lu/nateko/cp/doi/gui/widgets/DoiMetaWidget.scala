@@ -50,7 +50,7 @@ class DoiMetaWidget(
 
 		div(cls := "toc-section", id := "toc-publication-year")(
 			Bootstrap.singlePropValueWidget("Publication year")(
-				new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
+				new YearInputWidget(init.publicationYear, cb(pub => _.copy(publicationYear = pub))).element
 			)
 		).render,
 
