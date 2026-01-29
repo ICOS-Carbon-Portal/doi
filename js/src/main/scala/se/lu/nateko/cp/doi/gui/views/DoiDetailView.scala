@@ -36,6 +36,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	// Admins start with edit tab, non-admins with view tab
 	private val initialTab = if (isAdmin) EditorTab.edit else EditorTab.view
+	private var currentTab: EditorTab = initialTab
 
 	private val backToList: Event => Unit = e => {
 		e.preventDefault()
@@ -132,20 +133,23 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		toolbar
 	)
 
-	private lazy val metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
+	private var metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
 
 	private lazy val tabsCb: Map[EditorTab, () => Unit] = Map(
 		EditorTab.view -> {() =>
+			currentTab = EditorTab.view
 			contentBody.replaceChildren(metaViewer.element)
 			toolbar.setTab(EditorTab.view)
 			toolbar.setUpdateButtonEnabled(false)
 		},
 		EditorTab.edit -> {() =>
+			currentTab = EditorTab.edit
 			contentBody.replaceChildren(metaEditorWithSidebar.element)
 			toolbar.setTab(EditorTab.edit)
 			metaEditorWithSidebar.wireToolbarCallbacks()
 		},
 		EditorTab.json -> {() =>
+			currentTab = EditorTab.json
 			contentBody.replaceChildren(metaJsonEditor.element)
 			toolbar.setTab(EditorTab.json)
 			metaJsonEditor.wireToolbarCallbacks()
@@ -158,18 +162,27 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 				// Success - update UI
 				meta = updated
 
-				// Create a new editor instance with updated metadata as the new baseline
+				// Create new editor instances with updated metadata as the new baseline
 				metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 					updated,
 					updateDoiMeta,
 					toolbar
 				)
+				metaJsonEditor = new DoiJsonEditor(updated, updateDoiMeta, toolbar)
 
+				// Restore the current tab view
 				contentBody.innerHTML = ""
-				contentBody.appendChild(metaEditorWithSidebar.element)
-
-				// Wire toolbar callbacks for the new editor
-				metaEditorWithSidebar.wireToolbarCallbacks()
+				currentTab match {
+					case EditorTab.edit =>
+						contentBody.appendChild(metaEditorWithSidebar.element)
+						metaEditorWithSidebar.wireToolbarCallbacks()
+					case EditorTab.json =>
+						contentBody.appendChild(metaJsonEditor.element)
+						metaJsonEditor.wireToolbarCallbacks()
+					case EditorTab.view =>
+						contentBody.appendChild(metaViewer.element)
+						toolbar.setUpdateButtonEnabled(false)
+				}
 
 				// Update header with new title and DOI if they changed
 				val newTitle = DoiMetaHelpers.extractTitle(updated)

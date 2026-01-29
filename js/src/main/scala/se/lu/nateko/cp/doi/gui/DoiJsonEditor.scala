@@ -17,7 +17,7 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: U
 	private val editor = new TextAreaWidget(_json, v => {
 		_json = v
 		errorMessages.innerHTML = ""
-	})(rows := lineCount, whiteSpace := "pre")
+	})(rows := lineCount, whiteSpace := "pre", spellcheck := false)
 
 	private val errorMessages = p(color := Constants.formErrorsTextColor).render
 
