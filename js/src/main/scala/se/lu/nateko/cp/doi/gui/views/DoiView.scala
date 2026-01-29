@@ -46,7 +46,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		style := "cursor: pointer",
 		onclick := navigateToDetail
 	)(
-		div(cls := "d-flex align-items-center justify-content-between")(
+		div(cls := "d-flex align-items-center justify-content-between gap-2")(
 			div(cls := "d-flex flex-column flex-grow-1")(
 				doiSpan,
 				titleSpan

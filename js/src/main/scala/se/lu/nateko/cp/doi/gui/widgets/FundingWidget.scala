@@ -41,13 +41,17 @@ class FundingWidget(init: FundingReference, protected val updateCb: FundingRefer
 		}
 	)
 
-	val element = div(cls := "row")(
-		div(cls := "row spacyrow")(
-			div(cls := "col-md-1")(strong("Funder name")),
-			div(cls := "col-md-3")(funderNameInput.element)(paddingBottom := 15),
-			div(cls := "col-md-8")(funderIdsInput.element)(paddingBottom := 15)
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Funder name"),
+			div(funderNameInput.element),
 		),
-		awardInput.element
+		div(cls := "col-md-6")(
+			funderIdsInput.element
+		),
+		div(cls := "col-md-12")(
+			awardInput.element
+		)
 	).render
 
 }

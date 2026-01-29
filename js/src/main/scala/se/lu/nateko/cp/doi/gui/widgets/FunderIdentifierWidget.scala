@@ -34,10 +34,14 @@ class FunderIdentifierWidget(
 		}
 	)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-2")(strong("Funder identifier")),
-		div(cls := "col-md-4")(idInput.element),
-		div(cls := "col-md-2")(strong("Scheme")),
-		div(cls := "col-md-4")(schemeInput.element)
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Funder identifier"),
+			div(idInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Scheme"),
+			div(schemeInput.element),
+		),
 	).render
 }
