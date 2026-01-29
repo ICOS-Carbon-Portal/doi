@@ -8,15 +8,15 @@ import scala.collection.Seq
 
 abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	initValues: Seq[E], cb: Seq[E] => Unit
-)(protected val title: String, protected val minAmount: Int = 0, protected val maxAmount: Int = 0, showTitle: Boolean = true){
+)(protected val title: String, protected val required: Boolean = false, protected val maxAmount: Int = 0, showTitle: Boolean = true){
 
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
-	private def setRemovability(): Unit = 
-		widgets.foreach(_.setRemovability(widgets.length > minAmount))
+	private def setRemovability(): Unit =
+		widgets.foreach(_.setRemovability(!(required && widgets.length <= 1)))
 
 	private def setOrderability(): Unit = {
 		widgets.foreach(widget => {
@@ -98,7 +98,8 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			)
 		)
 
-	initValues.foreach(produceWidget)
+	val valuesToInit = if required && initValues.isEmpty then Seq(defaultValue) else initValues
+	valuesToInit.foreach(produceWidget)
 	setRemovability()
 	setOrderability()
 	setAppendability()

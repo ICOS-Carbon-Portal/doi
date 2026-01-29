@@ -187,7 +187,7 @@ class DoiMetaWidget(
 object DoiMetaWidget{
 
 	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends
-		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", 1){
+		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", required = true){
 
 		protected def makeWidget(value: Creator, updateCb: Creator => Unit) = new CreatorWidget(value, updateCb)
 
@@ -196,7 +196,7 @@ object DoiMetaWidget{
 
 
 	class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends
-		MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb)("Titles", 1){
+		MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb)("Titles", required = true){
 
 		protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
 
