@@ -141,7 +141,7 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 	if (initialLicenseValue != "custom") hideDetails()
 
 	val element = div(cls := "row spacyrow g-3")(
-		div(cls := "col-md-auto")(
+		div(cls := "col")(
 			licenseSelect
 		),
 		detailsContainer

@@ -2,10 +2,8 @@ package se.lu.nateko.cp.doi.gui.widgets
 
 import org.scalajs.dom.Event
 import scalatags.JsDom.all._
-import se.lu.nateko.cp.doi.gui.views.Bootstrap
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.meta.Date
-import se.lu.nateko.cp.doi.meta.DateType
 
 import scala.util.matching.Regex
 
@@ -27,7 +25,9 @@ class CompositeDateWidget(init: Date, protected val updateCb: Date => Unit) exte
 
 	private var dateElem = getDateElem
 
-	private def changeDateType(range: Boolean): Event => Unit = e =>
+	private def onSelectChange: Event => Unit = e =>
+		val selectElem = e.target.asInstanceOf[org.scalajs.dom.html.Select]
+		val range = selectElem.value == "range"
 		val split = _date.date.split("/")
 		val newDate = if (range && split.nonEmpty) split(0) + "/" else if(range) _date.date + "/" else if(split.nonEmpty) split(0) else ""
 
@@ -38,25 +38,17 @@ class CompositeDateWidget(init: Date, protected val updateCb: Date => Unit) exte
 		dateElem = newDateElem
 		updateCb(_date)
 
-	private def dateTypeOption(range: Boolean) =
-		val checkedModifier = if(range == isRange) Seq(checked := true) else Nil
-		input(cls := "form-check-input", tpe := "radio", name := "dateType", onchange := changeDateType(range))(checkedModifier)
+	private def dateTypeSelect =
+		select(cls := "form-select", onchange := onSelectChange)(
+			option(value := "single", if(!isRange) selected else ())("Single date"),
+			option(value := "range", if(isRange) selected else ())("Date range")
+		)
 
 	val element = div(cls := "row align-items-center")(
 		div(cls := "col-md-4 mt-1")(
-			div(cls := "form-check form-check-inline")(
-				div(label(cls := "form-label")(
-					dateTypeOption(false),
-					" Single date",
-				)),
-			),
-			div(cls := "form-check form-check-inline")(
-				div(label(cls := "form-label")(
-					dateTypeOption(true),
-					" Date range"
-				)),
-			)),
-			div(cls := "col-md")(
+			dateTypeSelect
+		),
+		div(cls := "col-md")(
 			dateElem
 		)
 	).render
