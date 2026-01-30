@@ -16,7 +16,8 @@ class UnifiedToolbar(
 	cloneCb: DoiMeta => Unit,
 	updater: DoiMeta => Future[Unit],
 	deleteCb: Doi => Unit,
-	initialTab: EditorTab = EditorTab.view
+	initialTab: EditorTab = EditorTab.view,
+	canEdit: Boolean = false
 ) {
 
 	private[this] var _meta = meta
@@ -178,8 +179,8 @@ class UnifiedToolbar(
 
 	private def updateTabButtons(): Unit = {
 		viewButton.className = s"btn btn-sm${if (currentTab == EditorTab.view) " btn-secondary" else " btn-outline-secondary"}"
-		editButton.className = s"btn btn-sm${if (currentTab == EditorTab.edit) " btn-secondary" else " btn-outline-secondary"} edit-control"
-		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"} edit-control"
+		editButton.className = s"btn btn-sm${if (currentTab == EditorTab.edit) " btn-secondary" else " btn-outline-secondary"}"
+		jsonButton.className = s"btn btn-sm${if (currentTab == EditorTab.json) " btn-secondary" else " btn-outline-secondary"}"
 
 		tocButton.style.display = if (currentTab == EditorTab.edit) "block" else "none"
 		tocPanel.classList.remove("show")
@@ -327,7 +328,7 @@ class UnifiedToolbar(
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
 			div(cls := "me-2")(backButton),
 
-			div(cls := "btn-group me-2 admin-control")(
+			div(cls := s"btn-group me-2${if (!canEdit) " edit-control" else ""}")(
 				viewButton,
 				editButton,
 				jsonButton

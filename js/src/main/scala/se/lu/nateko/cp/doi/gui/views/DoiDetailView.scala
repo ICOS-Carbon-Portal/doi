@@ -18,6 +18,7 @@ import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.Backend
 import se.lu.nateko.cp.doi.gui.ReportError
 import se.lu.nateko.cp.doi.gui.ClearLastClonedDoi
+import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
@@ -28,14 +29,16 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private[this] var meta = metaInit
 
-	// Check if user is admin by checking the main-wrapper class
-	private val isAdmin = {
-		val mainWrapper = org.scalajs.dom.document.getElementById("main-wrapper")
-		mainWrapper != null && mainWrapper.classList.contains("is-admin")
-	}
+	// Check user status by checking the main-wrapper class
+	private val mainWrapper = org.scalajs.dom.document.getElementById("main-wrapper")
+	private val isAdmin = mainWrapper != null && mainWrapper.classList.contains("is-admin")
+	private val isLoggedIn = mainWrapper != null && mainWrapper.classList.contains("is-logged-in")
 
-	// Admins start with edit tab, non-admins with view tab
-	private val initialTab = if (isAdmin) EditorTab.edit else EditorTab.view
+	// Logged-in non-admins can edit draft DOIs, admins can edit any DOI
+	private val canEdit: Boolean = isAdmin || (isLoggedIn && metaInit.state == DoiPublicationState.draft)
+
+	// Users who can edit start with edit tab, otherwise view tab
+	private val initialTab = if (canEdit) EditorTab.edit else EditorTab.view
 	private var currentTab: EditorTab = initialTab
 
 	private val backToList: Event => Unit = e => {
@@ -59,7 +62,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		meta => d.dispatch(ThunkActions.requestDoiClone(meta)),
 		updateDoiMeta,
 		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
-		initialTab
+		initialTab,
+		canEdit
 	)
 
 	private val cloneBanner = div(
@@ -95,9 +99,11 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		toolbar.element
 	).render
 
+	private val stateClass = if (metaInit.state == DoiPublicationState.draft) "draft-doi" else "published-doi"
+
 	val element = div(
 		id := "detail-view",
-		cls := "position-relative",
+		cls := s"position-relative $stateClass",
 		style := "transition: opacity 0.5s ease; opacity: 1;"
 	)(
 		stickyHeader,
@@ -115,7 +121,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			d.dispatch(ClearLastClonedDoi)
 		}
 
-		if (isAdmin) {
+		if (canEdit) {
 			contentBody.appendChild(metaEditorWithSidebar.element)
 			metaEditorWithSidebar.wireToolbarCallbacks()
 		} else {

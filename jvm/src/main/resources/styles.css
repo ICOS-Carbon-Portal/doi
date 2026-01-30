@@ -34,6 +34,7 @@ span.label{
 }
 .is-anonymous .edit-control,
 .is-not-admin .admin-control,
+.is-not-admin .published-doi .edit-control,
 .is-not-admin .published-doi .btn-update-doi,
 .is-logged-in.is-not-admin .published-doi .nav-edit,
 .is-admin .btn-submit {
