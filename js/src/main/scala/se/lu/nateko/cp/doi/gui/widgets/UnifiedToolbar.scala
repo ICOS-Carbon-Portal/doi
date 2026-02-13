@@ -17,7 +17,8 @@ class UnifiedToolbar(
 	updater: DoiMeta => Future[Unit],
 	deleteCb: Doi => Unit,
 	initialTab: EditorTab = EditorTab.view,
-	canEdit: Boolean = false
+	canEdit: Boolean = false,
+	isAdmin: Boolean = false
 ) {
 
 	private[this] var _meta = meta
@@ -255,6 +256,13 @@ class UnifiedToolbar(
 		stateDropdownMenu
 	).render
 
+	private val stateDisplay = span(
+		cls := "d-inline-flex align-items-center gap-1 px-2 py-1 text-secondary"
+	)(
+		createStateDot(),
+		_meta.state.toString.capitalize
+	).render
+
 	// Toggle state dropdown manually
 	stateDropdownButton.onclick = (_: Event) => {
 		stateDropdownMenu.classList.toggle("show")
@@ -336,7 +344,7 @@ class UnifiedToolbar(
 
 			div(cls := "flex-grow-1"),
 
-			stateDropdown,
+			if (isAdmin) stateDropdown else stateDisplay,
 			cloneButton,
 			actionButtons
 		),
