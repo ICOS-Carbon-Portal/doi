@@ -18,7 +18,8 @@ class UnifiedToolbar(
 	deleteCb: Doi => Unit,
 	initialTab: EditorTab = EditorTab.view,
 	canEdit: Boolean = false,
-	isAdmin: Boolean = false
+	isAdmin: Boolean = false,
+	isLoggedIn: Boolean = false
 ) {
 
 	private[this] var _meta = meta
@@ -271,7 +272,7 @@ class UnifiedToolbar(
 	// Clone button
 	private val cloneButton = button(
 		tpe := "button",
-		cls := "btn btn-sm btn-outline-secondary edit-control"
+		cls := "btn btn-sm btn-outline-secondary"
 	)(
 		i(cls := "fa-solid fa-copy me-1"),
 		"Clone"
@@ -345,7 +346,7 @@ class UnifiedToolbar(
 			div(cls := "flex-grow-1"),
 
 			if (isAdmin) stateDropdown else stateDisplay,
-			cloneButton,
+			if (isLoggedIn) cloneButton else span().render,
 			actionButtons
 		),
 		tocButtonContainer

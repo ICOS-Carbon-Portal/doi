@@ -64,7 +64,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
 		initialTab,
 		canEdit,
-		isAdmin
+		isAdmin,
+		isLoggedIn
 	)
 
 	private val cloneBanner = div(
