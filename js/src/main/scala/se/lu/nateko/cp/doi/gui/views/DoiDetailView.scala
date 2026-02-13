@@ -14,6 +14,7 @@ import se.lu.nateko.cp.doi.gui.widgets.DoiMetaWidget
 import se.lu.nateko.cp.doi.gui.widgets.DoiMetaEditorWithSidebar
 import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 import se.lu.nateko.cp.doi.gui.widgets.UnifiedToolbar
+import se.lu.nateko.cp.doi.gui.UserInfo
 import se.lu.nateko.cp.doi.gui.ThunkActions
 import se.lu.nateko.cp.doi.gui.Backend
 import se.lu.nateko.cp.doi.gui.ReportError
@@ -36,6 +37,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	// Logged-in non-admins can edit draft DOIs, admins can edit any DOI
 	private val canEdit: Boolean = isAdmin || (isLoggedIn && metaInit.state == DoiPublicationState.draft)
+
+	private val userInfo = UserInfo(isLoggedIn = isLoggedIn, isAdmin = isAdmin, canEdit = canEdit)
 
 	// Users who can edit start with edit tab, otherwise view tab
 	private val initialTab = if (canEdit) EditorTab.edit else EditorTab.view
@@ -63,9 +66,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		updateDoiMeta,
 		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
 		initialTab,
-		canEdit,
-		isAdmin,
-		isLoggedIn
+		userInfo
 	)
 
 	private val cloneBanner = div(

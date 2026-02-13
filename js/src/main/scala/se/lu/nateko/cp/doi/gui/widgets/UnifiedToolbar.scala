@@ -5,6 +5,7 @@ import org.scalajs.dom.Event
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
+import se.lu.nateko.cp.doi.gui.UserInfo
 import org.scalajs.dom.html.{Button, Div}
 import scala.concurrent.Future
 import scala.scalajs.js.timers.{setTimeout, clearTimeout}
@@ -17,9 +18,7 @@ class UnifiedToolbar(
 	updater: DoiMeta => Future[Unit],
 	deleteCb: Doi => Unit,
 	initialTab: EditorTab = EditorTab.view,
-	canEdit: Boolean = false,
-	isAdmin: Boolean = false,
-	isLoggedIn: Boolean = false
+	userInfo: UserInfo = UserInfo(isLoggedIn = false, isAdmin = false, canEdit = false)
 ) {
 
 	private[this] var _meta = meta
@@ -337,7 +336,7 @@ class UnifiedToolbar(
 		div(cls := "d-flex flex-wrap align-items-center gap-2")(
 			div(cls := "me-2")(backButton),
 
-			div(cls := s"btn-group me-2${if (!canEdit) " edit-control" else ""}")(
+			div(cls := s"btn-group me-2${if (!userInfo.canEdit) " edit-control" else ""}")(
 				viewButton,
 				editButton,
 				jsonButton
@@ -345,8 +344,8 @@ class UnifiedToolbar(
 
 			div(cls := "flex-grow-1"),
 
-			if (isAdmin) stateDropdown else stateDisplay,
-			if (isLoggedIn) cloneButton else span().render,
+			if (userInfo.isAdmin) stateDropdown else stateDisplay,
+			if (userInfo.isLoggedIn) cloneButton else span().render,
 			actionButtons
 		),
 		tocButtonContainer
