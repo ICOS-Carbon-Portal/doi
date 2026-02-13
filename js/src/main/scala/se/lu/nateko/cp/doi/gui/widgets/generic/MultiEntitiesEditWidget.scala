@@ -78,6 +78,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	}
 
 	private val buttonType = if (showTitle) "btn-outline-primary mt-2" else "btn-link"
+	private val widgetWidth = if (showTitle) "col-md-10" else "col-md-12"
 	private val addWidgetButton = button(
 			tpe := "button", cls := "btn btn-sm " + buttonType,
 			htmlTitle := "Add another item to the list",
@@ -92,7 +93,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			if (showTitle) div(cls := "col-md-2")(
 				div(cls := "fw-bold pt-2")(title)
 			) else div(),
-			div(cls := "col-md-10")(
+			div(cls := widgetWidth)(
 				widgetsParent,
 				addWidgetButton
 			)
