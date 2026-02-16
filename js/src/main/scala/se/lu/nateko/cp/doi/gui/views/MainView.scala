@@ -44,17 +44,18 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private def getPrefix = d.getState.prefix
 
 	private val makeSuffixButton = button(
-		cls := "btn btn-secondary",
+		cls := "btn btn-outline-secondary",
 		tpe := "button",
+		title := "New suffix",
 		onclick := (genSuffix _)
-	)("Generate suffix").render
+	)(i(cls := "fa-solid fa-arrows-rotate")).render
 
 	private val addDoiButton = button(
 		cls := "btn btn-secondary",
 		tpe := "button",
 		disabled := true,
 		onclick := (addDoi _)
-	)("Add new DOI").render
+	)("Create DOI").render
 
 	private val stateFilterSelect = select(
 		cls := "form-select",
@@ -78,9 +79,9 @@ class MainView(d: DoiRedux.Dispatcher) {
 	}
 
 	private val searchSubmitButton = button(
-		cls := "btn btn-secondary",
+		cls := "btn btn-outline-secondary",
 		onclick := (searchDoi _)
-	)("Search")
+	)(i(cls := "fa-solid fa-magnifying-glass"))
 
 	private val infoLink = a(
 		href := "https://support.datacite.org/docs/api-queries#using-the-query-parameter",
