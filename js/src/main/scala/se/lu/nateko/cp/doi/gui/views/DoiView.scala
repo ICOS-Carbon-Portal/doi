@@ -28,17 +28,13 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private val doiSpan = span(cls := "text-muted small").render
 	private val titleSpan = span(cls := "fw-semibold").render
-	private val badgeSpan = span().render
+	private val stateDot = span(cls := "flex-shrink-0").render
+
+
 	private val navigateToDetail: Event => Unit = e => {
 		e.preventDefault()
 		d.dispatch(NavigateToRoute(DetailRoute(meta.doi)))
 	}
-
-	def badgeClasses = "badge " + (meta.state match {
-		case DoiPublicationState.draft => "bg-warning text-dark"
-		case DoiPublicationState.registered => "bg-primary"
-		case DoiPublicationState.findable => "bg-success"
-	})
 
 	val element = a(
 		href := s"/doi/${meta.doi}",
@@ -51,7 +47,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 				doiSpan,
 				titleSpan
 			),
-			badgeSpan
+			stateDot
 		)
 	).render
 
@@ -60,8 +56,7 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 		doiSpan.textContent = meta.doi.toString
 		titleSpan.textContent = title
-		badgeSpan.className = badgeClasses
-		badgeSpan.textContent = meta.state.toString.capitalize
+		stateDot.className = s"flex-shrink-0 ${DoiMetaHelpers.stateDotClass(meta.state)}"
 	}
 
 	def setSelected(selected: Boolean): Unit = {

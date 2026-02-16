@@ -6,6 +6,7 @@ import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import se.lu.nateko.cp.doi.gui.UserInfo
+import se.lu.nateko.cp.doi.gui.views.DoiMetaHelpers
 import org.scalajs.dom.html.{Button, Div}
 import scala.concurrent.Future
 import scala.scalajs.js.timers.{setTimeout, clearTimeout}
@@ -187,14 +188,8 @@ class UnifiedToolbar(
 		tocPanel.classList.remove("show")
 	}
 
-	private def stateDotClass = _meta.state match {
-		case DoiPublicationState.draft => "state-dot state-dot-draft"
-		case DoiPublicationState.registered => "state-dot state-dot-registered"
-		case DoiPublicationState.findable => "state-dot state-dot-findable"
-	}
-
 	private def createStateDot() = span(
-		cls := stateDotClass
+		cls := DoiMetaHelpers.stateDotClass(_meta.state)
 	).render
 
 	private val stateDropdownButton = button(
