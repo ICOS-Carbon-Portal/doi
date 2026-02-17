@@ -93,7 +93,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 		i(cls := "fa-solid fa-circle-question")
 	)
 
-	private val searchResultsStats = p.render
+	private val searchResultsStats = p(style := "min-height: 1.5em").render
 
 	private val paginationElem = div(cls := "mt-3").render
 
@@ -129,15 +129,18 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 		if(dois.isEmpty) {
 			if(!isLoading) listElem.appendChild(p("No DOIs found").render)
-			else{
-				listElem.appendChild(h3("Fetching DOI list from DataCite...").render)
-				listElem.appendChild(
-					div(cls := "progress")(
-						div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
-							attr("aria-valuenow") := 100, style := "width: 100%"
+			else {
+				def skeletonItem = div(cls := "list-group-item d-block")(
+					div(cls := "d-flex align-items-center justify-content-between gap-2")(
+						div(cls := "d-flex flex-column flex-grow-1 gap-1 placeholder-glow")(
+							span(cls := "placeholder col-1"),
+							span(cls := s"placeholder placeholder-lg col-${5 + scala.util.Random.nextInt(5)}")
 						)
-					).render
-				)
+					)
+				).render
+				val skeleton = div(cls := "list-group").render
+				for (_ <- 1 to 25) skeleton.appendChild(skeletonItem)
+				listElem.appendChild(skeleton)
 			}
 		} else for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
