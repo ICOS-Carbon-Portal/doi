@@ -28,7 +28,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
-		placeholder := "New DOI suffix"
+		placeholder := "suffix"
 	).render
 
 	private def addDoi(): Unit = {

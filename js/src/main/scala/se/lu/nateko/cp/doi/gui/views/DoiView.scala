@@ -43,11 +43,11 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		onclick := navigateToDetail
 	)(
 		div(cls := "d-flex align-items-center justify-content-between gap-2")(
+			stateDot,
 			div(cls := "d-flex flex-column flex-grow-1")(
 				doiSpan,
 				titleSpan
-			),
-			stateDot
+			)
 		)
 	).render
 

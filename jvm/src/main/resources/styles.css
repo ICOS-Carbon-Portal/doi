@@ -237,11 +237,11 @@ span.label{
 	margin-right: 6px;
 }
 .state-dot-draft {
-	background-color: #ffc107;
+	background-color: var(--bs-yellow);
 }
 .state-dot-registered {
-	background-color: #0d6efd;
+	background-color: var(--bs-blue);
 }
 .state-dot-findable {
-	background-color: #198754;
+	background-color: var(--bs-green);
 }
