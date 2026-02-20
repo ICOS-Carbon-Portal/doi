@@ -291,6 +291,13 @@ class UnifiedToolbar(
 		cls := "btn btn-sm btn-secondary btn-submit edit-control"
 	)("Submit for publication").render
 
+	private val submitButtonWrapper = span(
+		cls := "d-inline-block",
+		title := "Fix validation errors to enable submission",
+		data("bs-toggle") := "tooltip",
+		data("bs-placement") := "top"
+	)(submitButton).render
+
 	// Delete button
 	private val deleteButton = button(
 		tpe := "button",
@@ -305,10 +312,7 @@ class UnifiedToolbar(
 	private val actionButtons: Div = _meta.state match {
 		case DoiPublicationState.draft =>
 			div(cls := "d-flex gap-2")(
-				button(
-					tpe := "button",
-					cls := "btn btn-sm btn-secondary btn-submit edit-control"
-				)("Submit for publication").render,
+				submitButtonWrapper,
 				deleteButton,
 				updateButton
 			).render
@@ -421,6 +425,14 @@ class UnifiedToolbar(
 
 	def setSubmitButtonEnabled(enabled: Boolean): Unit = {
 		submitButton.disabled = !enabled
+		// Only show tooltip when button is disabled
+		if (enabled) {
+			submitButtonWrapper.removeAttribute("title")
+			submitButtonWrapper.removeAttribute("data-bs-toggle")
+		} else {
+			submitButtonWrapper.setAttribute("title", "Fix validation errors to enable submission")
+			submitButtonWrapper.setAttribute("data-bs-toggle", "tooltip")
+		}
 	}
 
 	def setUpdateButtonCallback(cb: Event => Unit): Unit = {
