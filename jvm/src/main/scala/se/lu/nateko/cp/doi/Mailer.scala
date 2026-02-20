@@ -29,7 +29,6 @@ class Mailer(config: EmailConfig) {
 			}
 
 			message.setFrom(new InternetAddress(config.fromAddress))
-			message.setReplyTo(Array(new InternetAddress("do_not_reply@icos-cp.eu")))
 			to.foreach(r => message.addRecipient(Message.RecipientType.TO, new InternetAddress(r.email)))
 
 			message.setSentDate(new Date())
