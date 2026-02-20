@@ -4,6 +4,7 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import scala.concurrent.Future
 import org.scalajs.dom.Event
+import scala.collection.Seq
 
 class DoiMetaEditorWithSidebar(
 	init: DoiMeta,
@@ -11,7 +12,27 @@ class DoiMetaEditorWithSidebar(
 	toolbar: UnifiedToolbar
 ) {
 
-	private val metaWidget = new DoiMetaWidget(init, updater, toolbar)
+	private var currentSidebarTab: String = "toc"
+	private var currentErrors: Seq[DoiMetaWidget.ValidationError] = Seq.empty
+
+	private val errorCountBadge = span(cls := "error-count-badge").render
+
+	private val tocTab = button(
+		cls := "sidebar-tab sidebar-tab-active",
+		onclick := {(_: Event) => switchToTab("toc")}
+	)("Contents").render
+
+	private val errorsTab = button(
+		cls := "sidebar-tab",
+		onclick := {(_: Event) => switchToTab("errors")}
+	)(
+		"Errors ",
+		errorCountBadge
+	).render
+
+	private val tabBar = div(cls := "sidebar-tabs")(tocTab, errorsTab).render
+
+	private val errorListContent = ul(cls := "error-list list-unstyled mb-0").render
 
 	// TODO: Base the TOC on the form content
 	private val tocContent = ul(cls := "list-unstyled mb-0")(
@@ -74,11 +95,81 @@ class DoiMetaEditorWithSidebar(
 		)
 	).render
 
+	private val tocBody = div(cls := "toc-body", style := "display: block;")(tocContent).render
+	private val errorBody = div(cls := "toc-body", style := "display: none;")(errorListContent).render
+
 	private val sidebar = div(
 		cls := "toc-sidebar-editor"
 	)(
-		div(cls := "toc-body")(tocContent)
+		tabBar,
+		tocBody,
+		errorBody
 	).render
+
+	private def switchToTab(tab: String): Unit = {
+		currentSidebarTab = tab
+
+		if (tab == "toc") {
+			tocTab.classList.add("sidebar-tab-active")
+			errorsTab.classList.remove("sidebar-tab-active")
+			tocBody.style.display = "block"
+			errorBody.style.display = "none"
+		} else {
+			tocTab.classList.remove("sidebar-tab-active")
+			errorsTab.classList.add("sidebar-tab-active")
+			tocBody.style.display = "none"
+			errorBody.style.display = "block"
+		}
+	}
+
+	private def updateErrorCountBadge(count: Int): Unit = {
+		if (count > 0) {
+			errorCountBadge.textContent = count.toString
+		} else {
+			errorCountBadge.textContent = ""
+		}
+	}
+
+	private def navigateToSection(sectionId: String)(e: Event): Unit = {
+		e.preventDefault()
+		val targetElement = org.scalajs.dom.document.getElementById(sectionId)
+		if (targetElement != null) {
+			targetElement.asInstanceOf[scala.scalajs.js.Dynamic].scrollIntoView(
+				scala.scalajs.js.Dynamic.literal(
+					behavior = "smooth",
+					block = "start"
+				)
+			)
+		}
+	}
+
+	private def renderErrors(): Unit = {
+		errorListContent.innerHTML = ""
+
+		if (currentErrors.isEmpty) {
+			val emptyState = li(cls := "error-empty-state")("No validation errors").render
+			errorListContent.appendChild(emptyState)
+		} else {
+			currentErrors.foreach { err =>
+				val errorItem = li(cls := "error-item")(
+					a(
+						href := s"#${err.sectionId}",
+						cls := "error-link",
+						onclick := navigateToSection(err.sectionId)
+					)(
+						i(cls := "fa-solid fa-triangle-exclamation error-icon"),
+						div(cls := "error-content")(
+							div(cls := "error-section-name")(err.sectionName),
+							div(cls := "error-message")(err.message)
+						)
+					)
+				).render
+				errorListContent.appendChild(errorItem)
+			}
+		}
+
+		updateErrorCountBadge(currentErrors.length)
+	}
 
 	private def setupTOCLinks(): Unit = {
 		val links = sidebar.querySelectorAll(".toc-link")
@@ -103,7 +194,23 @@ class DoiMetaEditorWithSidebar(
 		}
 	}
 
+	private def updateErrors(errors: Seq[DoiMetaWidget.ValidationError]): Unit = {
+		currentErrors = errors
+		renderErrors()
+
+		// Auto-switch to errors tab if there are errors
+		if (errors.nonEmpty && currentSidebarTab == "toc") {
+			switchToTab("errors")
+		} else if (errors.isEmpty && currentSidebarTab == "errors") {
+			// Switch back to TOC if all errors are resolved
+			switchToTab("toc")
+		}
+	}
+
+	private val metaWidget = new DoiMetaWidget(init, updater, toolbar, updateErrors)
+
 	setupTOCLinks()
+	renderErrors() // Initialize with empty state
 
 	val element = div(
 		cls := "doi-editor-with-sidebar"

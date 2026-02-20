@@ -21,7 +21,8 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	toolbar: UnifiedToolbar
+	toolbar: UnifiedToolbar,
+	errorCallback: Seq[DoiMetaWidget.ValidationError] => Unit = _ => ()
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
@@ -31,6 +32,65 @@ class DoiMetaWidget(
 
 	private def withUrlError(err: Option[String]): Option[String] =
 		joinErrors(err, _meta.url.flatMap(DoiTargetWidget.targetUrlError))
+
+	private def detectSection(errorMsg: String): Option[(String, String)] = {
+		val lower = errorMsg.toLowerCase
+		// Match keywords to section IDs
+		if (lower.contains("target") || lower.contains("domain") || lower.contains("doi prefix") || lower.contains("doi suffix"))
+			Some(("toc-doi-target", "DOI target"))
+		else if (lower.contains("creator") || lower.contains("given name") || lower.contains("family name"))
+			Some(("toc-creators", "Creators"))
+		else if (lower.contains("title"))
+			Some(("toc-titles", "Titles"))
+		else if (lower.contains("publisher"))
+			Some(("toc-publisher", "Publisher"))
+		else if (lower.contains("publication year"))
+			Some(("toc-publication-year", "Publication year"))
+		else if (lower.contains("resource type"))
+			Some(("toc-resource-type", "Resource type"))
+		else if (lower.contains("subject"))
+			Some(("toc-subjects", "Subjects"))
+		else if (lower.contains("contributor") || lower.contains("affiliation"))
+			Some(("toc-contributors", "Contributors"))
+		else if (lower.contains("date"))
+			Some(("toc-dates", "Dates"))
+		else if (lower.contains("related identifier") || lower.contains("relation type"))
+			Some(("toc-related-identifiers", "Related identifiers"))
+		else if (lower.contains("rights") || lower.contains("license"))
+			Some(("toc-rights", "Rights"))
+		else if (lower.contains("description"))
+			Some(("toc-descriptions", "Descriptions"))
+		else if (lower.contains("geolocation") || lower.contains("longitude") || lower.contains("latitude"))
+			Some(("toc-geolocations", "Geolocations"))
+		else if (lower.contains("format"))
+			Some(("toc-formats", "Formats"))
+		else if (lower.contains("version"))
+			Some(("toc-version", "Version"))
+		else if (lower.contains("funder") || lower.contains("funding") || lower.contains("award"))
+			Some(("toc-funding", "Funding references"))
+		else if (lower.contains("name identifier"))
+			// Name identifiers can be in creators or contributors, default to creators
+			Some(("toc-creators", "Creators"))
+		else
+			None // General errors without specific section
+	}
+
+	private def parseErrors(errorStr: Option[String]): Seq[DoiMetaWidget.ValidationError] = {
+		errorStr.toSeq.flatMap(_.split("\n")).flatMap { errMsg =>
+			val trimmed = errMsg.trim
+			if (trimmed.nonEmpty) {
+				detectSection(trimmed) match {
+					case Some((sectionId, sectionName)) =>
+						Some(DoiMetaWidget.ValidationError(sectionId, sectionName, trimmed))
+					case None =>
+						// For general errors, use a special "general" section
+						Some(DoiMetaWidget.ValidationError("toc-general", "General", trimmed))
+				}
+			} else {
+				None
+			}
+		}
+	}
 
 	private def formElements: Seq[Div] = Seq(
 		
@@ -97,13 +157,12 @@ class DoiMetaWidget(
 
 	private var toolbarInitialized = false
 
-	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
-
 	private def validateMeta(): Unit = {
 		val errors = error.toSeq.flatMap(_.split("\n"))
 
-		errorMessages.innerHTML = ""
-		errors.foreach(err => errorMessages.appendChild(p(err).render))
+		// Parse and send errors to sidebar via callback
+		val parsedErrors = parseErrors(error)
+		errorCallback(parsedErrors)
 
 		val canUpdate = _meta != init && {
 			if(_meta.state == DoiPublicationState.draft) withUrlError(_meta.draftError).isEmpty
@@ -146,7 +205,7 @@ class DoiMetaWidget(
 			}.andThen{
 				case Failure(exc) =>
 					toolbar.setSubmitButtonEnabled(true)
-					errorMessages.appendChild(p(exc.getMessage()).render)
+					// Error will be handled by validateMeta() or shown in a banner
 				case Success(_) =>
 					// Keep button disabled after successful submission
 			}
@@ -171,8 +230,7 @@ class DoiMetaWidget(
 	private[this] val formElems = div.render
 
 	val element = div(
-		formElems,
-		errorMessages
+		formElems
 	).render
 
 	// Initialize forms (deferred to avoid calling toolbar during construction)
@@ -185,6 +243,12 @@ class DoiMetaWidget(
 }
 
 object DoiMetaWidget{
+
+	case class ValidationError(
+		sectionId: String,
+		sectionName: String,
+		message: String
+	)
 
 	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends
 		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", required = true){
