@@ -10,7 +10,7 @@ class DescriptionWidget(init: Description, protected val updateCb: Description =
 
 	private[this] var _descr = init
 
-	private def validate(element: HTMLElement) = highlightError(element, _descr.error)
+	private def validate(element: HTMLElement) = highlightError(element, _descr.errorMessage)
 
 	private[this] val descrInput: TextAreaWidget = new TextAreaWidget(init.description, v => {
 		_descr = _descr.copy(description = v)

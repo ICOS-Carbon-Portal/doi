@@ -15,7 +15,7 @@ class FunderIdentifierWidget(
 
 	private var _funderId = init
 
-	private def validate(): Unit = highlightError(idInput.element, _funderId.error)
+	private def validate(): Unit = highlightError(idInput.element, _funderId.errorMessage)
 
 	private val idInput = new TextInputWidget(init.funderIdentifier.getOrElse(""), newId => {
 		val funderIdOpt = if(newId.isEmpty) None else Some(newId)		

@@ -8,41 +8,160 @@ import scala.util.Failure
 import java.net.URI
 import scala.util.matching.Regex
 
+enum ValidationSection(val id: String, val label: String) {
+	case DoiTarget extends ValidationSection("toc-doi-target", "DOI target")
+	case Creators extends ValidationSection("toc-creators", "Creators")
+	case Titles extends ValidationSection("toc-titles", "Titles")
+	case Publisher extends ValidationSection("toc-publisher", "Publisher")
+	case PublicationYear extends ValidationSection("toc-publication-year", "Publication year")
+	case ResourceType extends ValidationSection("toc-resource-type", "Resource type")
+	case Subjects extends ValidationSection("toc-subjects", "Subjects")
+	case Contributors extends ValidationSection("toc-contributors", "Contributors")
+	case Dates extends ValidationSection("toc-dates", "Dates")
+	case RelatedIdentifiers extends ValidationSection("toc-related-identifiers", "Related identifiers")
+	case Rights extends ValidationSection("toc-rights", "Rights")
+	case Descriptions extends ValidationSection("toc-descriptions", "Descriptions")
+	case Geolocations extends ValidationSection("toc-geolocations", "Geolocations")
+	case Formats extends ValidationSection("toc-formats", "Formats")
+	case Version extends ValidationSection("toc-version", "Version")
+	case Funding extends ValidationSection("toc-funding", "Funding references")
+}
+
+case class ValidationError(
+	section: ValidationSection,
+	message: String,
+	path: List[String] = Nil
+)
+
 trait SelfValidating{
-	def error: Option[String]
+	def errors: Seq[ValidationError]
 
-	protected def joinErrors(errors: Iterable[Option[String]]): Option[String] = {
-		val list = errors.flatten
-		if(list.isEmpty) None else Some(list.mkString("\n"))
-	}
-	protected def joinErrors(errors: Option[String]*): Option[String] = joinErrors(errors)
+	// Convenience methods
+	def isValid: Boolean = errors.isEmpty
 
-	protected def allGood(items: Iterable[SelfValidating]): Option[String] = joinErrors(items.map(_.error))
+	def errorMessage: Option[String] =
+		if (errors.isEmpty) None
+		else Some(errors.map(_.message).mkString("\n"))
 
-	protected def nonNull(obj: AnyRef)(msg: String): Option[String] =
-		if(obj == null) Some(msg) else None
+	// Helper: Create a single error
+	protected def mkError(
+		section: ValidationSection,
+		message: String,
+		path: List[String] = Nil
+	): ValidationError =
+		ValidationError(section, message, path)
 
-	protected def nonEmpty[T](seq: Iterable[T])(msg: String): Option[String] =
-		if(seq == null || seq.isEmpty) Some(msg) else None
+	// Helper: Combine multiple error sequences
+	protected def combineErrors(errorSeqs: Seq[ValidationError]*): Seq[ValidationError] =
+		errorSeqs.flatten
 
-	protected def eachNonEmpty(ss: Seq[String])(msg: String): Option[String] =
-		joinErrors(ss.map(s => nonEmpty(s)(msg)))
+	// Helper: Collect errors from nested SelfValidating items with path tracking
+	protected def collectErrors(
+		items: Iterable[SelfValidating],
+		section: ValidationSection,
+		pathPrefix: List[String] = Nil
+	): Seq[ValidationError] =
+		items.zipWithIndex.flatMap { case (item, idx) =>
+			item.errors.map(e => e.copy(
+				section = section,
+				path = (pathPrefix :+ idx.toString) ::: e.path
+			))
+		}.toSeq
 
-	protected def nonEmptyAllGood(items: Iterable[SelfValidating])(msg: String): Option[String] =
-		if(items.isEmpty) Some(msg) else allGood(items)
-
-	//TODO Improve this naive URI syntax validation
-	protected def validUri(uri: String): Option[String] =
-		if(SelfValidating.uriRegex.findFirstIn(uri).isDefined) None else Some("Invalid URI: " + uri)
-
-	protected def validDoi(doi: String): Option[String] =
-		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined) None else Some("Invalid DOI: " + doi + ", valid format: 00.00000/ABC0-ABC0")
-
-	protected def validPid(pid: String): Option[String] =
-		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined)
-			None
+	// Validation: require non-empty collection
+	protected def requireNonEmpty[T](
+		seq: Iterable[T],
+		section: ValidationSection,
+		message: String,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (seq == null || seq.isEmpty)
+			Seq(mkError(section, message, path))
 		else
-			Some("Invalid PID: " + pid + ", only letters, numbers, - and _ are allowed. Must be separated by a '/'")
+			Seq.empty
+
+	// Validation: require non-null object
+	protected def requireNonNull(
+		obj: AnyRef,
+		section: ValidationSection,
+		message: String,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (obj == null)
+			Seq(mkError(section, message, path))
+		else
+			Seq.empty
+
+	// Validation: require non-empty string
+	protected def requireNonEmptyString(
+		str: String,
+		section: ValidationSection,
+		message: String,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (str == null || str.isEmpty)
+			Seq(mkError(section, message, path))
+		else
+			Seq.empty
+
+	// Validation: require Option to be defined (Some)
+	protected def requireDefined[T](
+		opt: Option[T],
+		section: ValidationSection,
+		message: String,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (opt == null || opt.isEmpty)
+			Seq(mkError(section, message, path))
+		else
+			Seq.empty
+
+	// Validation: require each string in collection to be non-empty
+	protected def requireEachNonEmpty(
+		strings: Seq[String],
+		section: ValidationSection,
+		message: String,
+		pathPrefix: List[String] = Nil
+	): Seq[ValidationError] =
+		strings.zipWithIndex.flatMap { case (s, idx) =>
+			if (s == null || s.isEmpty)
+				Seq(mkError(section, message, pathPrefix :+ idx.toString))
+			else
+				Seq.empty
+		}
+
+	// URI validation
+	protected def validateUri(
+		uri: String,
+		section: ValidationSection,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (SelfValidating.uriRegex.findFirstIn(uri).isDefined)
+			Seq.empty
+		else
+			Seq(mkError(section, s"Invalid URI: $uri", path))
+
+	// DOI validation
+	protected def validateDoi(
+		doi: String,
+		section: ValidationSection,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (SelfValidating.doiRegex.findFirstIn(doi).isDefined)
+			Seq.empty
+		else
+			Seq(mkError(section, s"Invalid DOI: $doi, valid format: 00.00000/ABC0-ABC0", path))
+
+	// PID validation
+	protected def validatePid(
+		pid: String,
+		section: ValidationSection,
+		path: List[String] = Nil
+	): Seq[ValidationError] =
+		if (SelfValidating.pidRegex.findFirstIn(pid).isDefined)
+			Seq.empty
+		else
+			Seq(mkError(section, s"Invalid PID: $pid, only letters, numbers, - and _ are allowed. Must be separated by a '/'", path))
 }
 
 object SelfValidating{
@@ -54,35 +173,44 @@ object SelfValidating{
 sealed trait Name extends SelfValidating
 
 case class PersonalName(givenName: String, familyName: String) extends Name{
-	def error = joinErrors(
-		nonEmpty(givenName)("Given name is required"),
-		nonEmpty(familyName)("Family name is required")
+	def errors: Seq[ValidationError] = combineErrors(
+		requireNonEmptyString(givenName, ValidationSection.Creators, "Given name is required", List("givenName")),
+		requireNonEmptyString(familyName, ValidationSection.Creators, "Family name is required", List("familyName"))
 	)
 	override def toString = givenName + " " + familyName
 }
 
 case class GenericName(name: String) extends Name{
-	def error = nonEmpty(name)("Name is required")
+	def errors: Seq[ValidationError] =
+		requireNonEmptyString(name, ValidationSection.Creators, "Name is required", List("name"))
 	override def toString = name
 }
 
 case class NameIdentifier(nameIdentifier: String, scheme: NameIdentifierScheme) extends SelfValidating{
 	import NameIdentifierScheme.*
 
-	def error = joinErrors(
-		nonEmpty(nameIdentifier)("Name identifier must not be empty"),
-		nonNull(scheme)("Name Identifier scheme must be provided"),
-		scheme.error,
-		lookupRegex(scheme) match{
-			case Some(rex) =>
-				if(rex.matches(nameIdentifier)) None
-				else Some(s"Wrong $scheme ID format")
-			case None if(values.contains(scheme)) => None
-			case None =>
-				val supportedNames = values.mkString(", ")
-				Some("Only the following name identifier schemes are supported: " + supportedNames)
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
+
+		errs ++= requireNonEmptyString(nameIdentifier, ValidationSection.Creators, "Name identifier must not be empty", List("nameIdentifier"))
+		errs ++= requireNonNull(scheme, ValidationSection.Creators, "Name Identifier scheme must be provided", List("scheme"))
+
+		if (scheme != null) {
+			errs ++= scheme.errors.map(e => e.copy(path = "scheme" :: e.path))
+
+			lookupRegex(scheme) match {
+				case Some(rex) =>
+					if (!rex.matches(nameIdentifier))
+						errs += mkError(ValidationSection.Creators, s"Wrong $scheme ID format", List("nameIdentifier"))
+				case None if (!values.contains(scheme)) =>
+					val supportedNames = values.mkString(", ")
+					errs += mkError(ValidationSection.Creators, "Only the following name identifier schemes are supported: " + supportedNames, List("scheme"))
+				case _ => // valid
+			}
 		}
-	)
+
+		errs.result()
+	}
 }
 
 object NameIdentifier{
@@ -91,7 +219,8 @@ object NameIdentifier{
 }
 
 case class NameIdentifierScheme(nameIdentifierScheme: String, schemeUri: Option[String]) extends SelfValidating{
-	def error = schemeUri.flatMap(validUri)
+	def errors: Seq[ValidationError] =
+		schemeUri.toSeq.flatMap(uri => validateUri(uri, ValidationSection.Creators, List("schemeUri")))
 
 	override def toString = nameIdentifierScheme
 }
@@ -121,17 +250,30 @@ object NameIdentifierScheme{
 case class FunderIdentifier(funderIdentifier: Option[String], scheme: Option[FunderIdentifierScheme]) extends SelfValidating {
 	import FunderIdentifierScheme._
 
-	def error = joinErrors(
-		funderIdentifier.collect{
-			case fi if !fi.isEmpty && scheme.isEmpty => "Funder Identifier scheme must be provided"
-		},
-		scheme.flatMap{scheme =>
-			val validator = lookupValidator(scheme.funderIdentifierType)
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
 
-			validator.fold{Some("Only the following funder identifier schemes are supported: " + supported.mkString(", "))}{fIdVal =>
-				fIdVal.produceErrorMessage(funderIdentifier)
+		funderIdentifier match {
+			case Some(fi) if !fi.isEmpty && scheme.isEmpty =>
+				errs += mkError(ValidationSection.Funding, "Funder Identifier scheme must be provided", List("scheme"))
+			case _ => // OK
+		}
+
+		scheme.foreach { sch =>
+			val validator = lookupValidator(sch.funderIdentifierType)
+
+			validator match {
+				case None =>
+					errs += mkError(ValidationSection.Funding, "Only the following funder identifier schemes are supported: " + supported.mkString(", "), List("scheme"))
+				case Some(fIdVal) =>
+					fIdVal.produceErrorMessage(funderIdentifier).foreach { msg =>
+						errs += mkError(ValidationSection.Funding, msg, List("funderIdentifier"))
+					}
 			}
-	})
+		}
+
+		errs.result()
+	}
 }
 
 object FunderIdentifier{
@@ -206,19 +348,40 @@ sealed trait Person extends SelfValidating{
 	val nameIdentifiers: Seq[NameIdentifier]
 	val affiliation: Seq[Affiliation]
 
-	def error = joinErrors(
-		name.error,
-		allGood(nameIdentifiers),
-		eachNonEmpty(affiliation.map(_.name))("Affiliation is not required but must not be empty if provided")
-	)
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
+
+		errs ++= name.errors.map(e => e.copy(path = "name" :: e.path))
+
+		errs ++= collectErrors(nameIdentifiers, ValidationSection.Creators, List("nameIdentifiers"))
+
+		errs ++= requireEachNonEmpty(
+			affiliation.map(_.name),
+			ValidationSection.Creators,
+			"Affiliation is not required but must not be empty if provided",
+			List("affiliation")
+		)
+
+		errs.result()
+	}
 }
 
 case class Creator(name: Name, nameIdentifiers: Seq[NameIdentifier], affiliation: Seq[Affiliation]) extends Person
 
 case class Award(awardNumber: Option[String], awardTitle: Option[String], awardUri: Option[String]) extends SelfValidating{
-	def error = awardUri.flatMap(aUri =>
-					Try(new URI(aUri)).failed.toOption.map(_ => s"Invalid funder award URI: $aUri")
-				)
+	def errors: Seq[ValidationError] = {
+		awardUri match {
+			case Some(aUri) =>
+				Try(new URI(aUri)) match {
+					case Failure(_) =>
+						Seq(mkError(ValidationSection.Funding, s"Invalid funder award URI: $aUri", List("awardUri")))
+					case Success(_) =>
+						Seq.empty
+				}
+			case None =>
+				Seq.empty
+		}
+	}
 }
 
 object Award{
@@ -229,11 +392,25 @@ case class FundingReference(
 	funderName: Option[String], funderIdentifier: Option[FunderIdentifier], award: Option[Award]
 ) extends SelfValidating {
 
-		def error = joinErrors(
-				nonEmpty(funderName)("Funder must have a name"),
-				allGood(award),
-				allGood(funderIdentifier),
-			)
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
+
+		funderName match {
+			case None | Some("") =>
+				errs += mkError(ValidationSection.Funding, "Funder must have a name", List("funderName"))
+			case _ => // OK
+		}
+
+		award.foreach { a =>
+			errs ++= a.errors.map(e => e.copy(path = "award" :: e.path))
+		}
+
+		funderIdentifier.foreach { fi =>
+			errs ++= fi.errors.map(e => e.copy(path = "funderIdentifier" :: e.path))
+		}
+
+		errs.result()
+	}
 }
 case class Contributor(
 	name: Name,
@@ -242,24 +419,27 @@ case class Contributor(
 	contributorType: Option[ContributorType]
 ) extends Person{
 
-	override def error = joinErrors(
-		super.error,
-		nonEmpty(contributorType)("Contributor type must be specified")
+	override def errors: Seq[ValidationError] = combineErrors(
+		super.errors,
+		requireDefined(contributorType, ValidationSection.Contributors, "Contributor type must be specified", List("contributorType"))
 	)
 }
 
 
 case class Title(title: String, lang: Option[String], titleType: Option[TitleType]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(title)("Title must not be empty"),
-		lang.flatMap(l => nonEmpty(l)("Title language is not required but must not be empty if provided"))
+	def errors: Seq[ValidationError] = combineErrors(
+		requireNonEmptyString(title, ValidationSection.Titles, "Title must not be empty", List("title")),
+		lang.toSeq.flatMap(l => requireNonEmptyString(l, ValidationSection.Titles, "Title language is not required but must not be empty if provided", List("lang")))
 	)
 }
 
 case class ResourceType(resourceType: Option[String], resourceTypeGeneral: Option[ResourceTypeGeneral]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(resourceType.getOrElse(""))("Specific resource type must not be empty"),
-		nonEmpty(resourceTypeGeneral)("The general resource type must be specified")
+	def errors: Seq[ValidationError] = combineErrors(
+		resourceType match {
+			case None | Some("") => Seq(mkError(ValidationSection.ResourceType, "Specific resource type must not be empty", List("resourceType")))
+			case _ => Seq.empty
+		},
+		requireDefined(resourceTypeGeneral, ValidationSection.ResourceType, "The general resource type must be specified", List("resourceTypeGeneral"))
 	)
 }
 
@@ -268,21 +448,32 @@ case class Subject(
 	val lang: Option[String] = None,
 	val valueUri: Option[String] = None
 ) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(subject)("Subject must not be empty"),
-		lang.flatMap(l => nonEmpty(l)("Subject language is not required but must not be empty if provided")),
-		valueUri.flatMap(validUri)
+	def errors: Seq[ValidationError] = combineErrors(
+		requireNonEmptyString(subject, ValidationSection.Subjects, "Subject must not be empty", List("subject")),
+		lang.toSeq.flatMap(l => requireNonEmptyString(l, ValidationSection.Subjects, "Subject language is not required but must not be empty if provided", List("lang"))),
+		valueUri.toSeq.flatMap(uri => validateUri(uri, ValidationSection.Subjects, List("valueUri")))
 	)
 }
 
 case class Date(date: String, dateType: Option[DateType]) extends SelfValidating{
 	import Date._
-	def error = joinErrors(
-		nonEmpty(date)("Date must not be empty if specified"),
-		nonEmpty(dateType)("Date type must be specified for every date"),
-		if(date == null || date.isEmpty || !dateIsWrong(date)) rangeAllowedCheck
-		else Some(s"Wrong date '$date', use format YYYY[-MM-DD] or YYYY-MM-DD/YYYY-MM-DD")
-	)
+
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
+
+		errs ++= requireNonEmptyString(date, ValidationSection.Dates, "Date must not be empty if specified", List("date"))
+
+		errs ++= requireNonNull(dateType, ValidationSection.Dates, "Date type must be specified for every date", List("dateType"))
+
+		if (date != null && !date.isEmpty && dateIsWrong(date))
+			errs += mkError(ValidationSection.Dates, s"Wrong date '$date', use format YYYY[-MM-DD] or YYYY-MM-DD/YYYY-MM-DD", List("date"))
+		else if (date != null && !date.isEmpty && !dateIsWrong(date))
+			rangeAllowedCheck.foreach { msg =>
+				errs += mkError(ValidationSection.Dates, msg, List("date"))
+			}
+
+		errs.result()
+	}
 
 	private def rangeAllowedCheck: Option[String] = date match
 		case dateRangeRegex(_, _) => dateType.collect{
@@ -319,13 +510,17 @@ object Date{
 
 case class Version(major: Int, minor: Int) extends SelfValidating{
 
-	private def versionCorrect(v: Int, msg: String): Option[String] =
-		if(v >= 0 && v < 100) None else Some(msg + " version must be between 0 and 99")
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
 
-	def error = joinErrors(
-		versionCorrect(major, "Major"),
-		versionCorrect(minor, "Minor")
-	)
+		if (major < 0 || major >= 100)
+			errs += mkError(ValidationSection.Version, "Major version must be between 0 and 99", List("major"))
+
+		if (minor < 0 || minor >= 100)
+			errs += mkError(ValidationSection.Version, "Minor version must be between 0 and 99", List("minor"))
+
+		errs.result()
+	}
 
 	override def toString = s"$major.$minor"
 }
@@ -346,10 +541,13 @@ case class Rights(
 	rightsIdentifierScheme: Option[String] = Some("SPDX"),
 	lang: Option[String] = Some("en")
 ) extends SelfValidating {
-	def error = joinErrors(
-		nonEmpty(rightsIdentifier)("Rights identifier must be provided"),
-		nonEmpty(rights)("License name must be provided"),
-		rightsUri.flatMap(validUri)
+	def errors: Seq[ValidationError] = combineErrors(
+		rightsIdentifier match {
+			case None | Some("") => Seq(mkError(ValidationSection.Rights, "Rights identifier must be provided", List("rightsIdentifier")))
+			case _ => Seq.empty
+		},
+		requireNonEmptyString(rights, ValidationSection.Rights, "License name must be provided", List("rights")),
+		rightsUri.toSeq.flatMap(uri => validateUri(uri, ValidationSection.Rights, List("rightsUri")))
 	)
 }
 
@@ -376,26 +574,26 @@ final case class RelatedIdentifier (
 	schemeUri: Option[String],
 	schemeType: Option[String]
 ) extends SelfValidating {
-	def error = joinErrors(
-		nonEmpty(relatedIdentifier)("Related identifier must not be empty"),
-		nonEmpty(relatedIdentifierType)("Please select a related identifier type"),
-		validateIdentifier(relatedIdentifier, relatedIdentifierType.get),
-		nonNull(relationType)("Please provide a relation type")
+	def errors: Seq[ValidationError] = combineErrors(
+		requireNonEmptyString(relatedIdentifier, ValidationSection.RelatedIdentifiers, "Related identifier must not be empty", List("relatedIdentifier")),
+		requireNonNull(relatedIdentifierType, ValidationSection.RelatedIdentifiers, "Please select a related identifier type", List("relatedIdentifierType")),
+		relatedIdentifierType.toSeq.flatMap(idType => validateIdentifierWithType(relatedIdentifier, idType)),
+		requireNonNull(relationType, ValidationSection.RelatedIdentifiers, "Please provide a relation type", List("relationType"))
 	)
 
-	def validateIdentifier(id: String, idType: RelatedIdentifierType): Option[String] = idType match {
-		case RelatedIdentifierType.DOI => validDoi(id)
-		case RelatedIdentifierType.Handle => validPid(id)
-		case RelatedIdentifierType.URL => validUri(id)
-		case null => None
+	private def validateIdentifierWithType(id: String, idType: RelatedIdentifierType): Seq[ValidationError] = idType match {
+		case RelatedIdentifierType.DOI => validateDoi(id, ValidationSection.RelatedIdentifiers, List("relatedIdentifier"))
+		case RelatedIdentifierType.Handle => validatePid(id, ValidationSection.RelatedIdentifiers, List("relatedIdentifier"))
+		case RelatedIdentifierType.URL => validateUri(id, ValidationSection.RelatedIdentifiers, List("relatedIdentifier"))
+		case null => Seq.empty
 	}
 }
 
 case class Description(description: String, descriptionType: DescriptionType, lang: Option[String]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(description)("Description must not be empty (if supplied)"),
-		lang.flatMap(l => nonEmpty(l)("Description language is not required but must not be empty if provided")),
-		nonNull(descriptionType)("Description type must be specified")
+	def errors: Seq[ValidationError] = combineErrors(
+		requireNonEmptyString(description, ValidationSection.Descriptions, "Description must not be empty (if supplied)", List("description")),
+		lang.toSeq.flatMap(l => requireNonEmptyString(l, ValidationSection.Descriptions, "Description language is not required but must not be empty if provided", List("lang"))),
+		requireNonNull(descriptionType, ValidationSection.Descriptions, "Description type must be specified", List("descriptionType"))
 	)
 }
 
@@ -414,30 +612,39 @@ extension (l: Latitude)
 	def latError: Option[String] = if(l < -90 || l > 90) Some(s"Latitude must be between -90 and 90") else None
 
 case class GeoLocationPoint(pointLongitude: Option[Longitude], pointLatitude: Option[Latitude]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(pointLongitude)("Point longitude must be specified for every geolocation point"),
-		pointLongitude.flatMap(lonError),
-		nonEmpty(pointLatitude)("Point latitude must be specified for every geolocation point"),
-		pointLatitude.flatMap(latError)
+	def errors: Seq[ValidationError] = combineErrors(
+		requireDefined(pointLongitude, ValidationSection.Geolocations, "Point longitude must be specified for every geolocation point", List("pointLongitude")),
+		pointLongitude.toSeq.flatMap(lon => lon.lonError.map(msg => mkError(ValidationSection.Geolocations, msg, List("pointLongitude")))),
+		requireDefined(pointLatitude, ValidationSection.Geolocations, "Point latitude must be specified for every geolocation point", List("pointLatitude")),
+		pointLatitude.toSeq.flatMap(lat => lat.latError.map(msg => mkError(ValidationSection.Geolocations, msg, List("pointLatitude"))))
 	)
 }
 
 case class GeoLocationBox(westBoundLongitude: Option[Longitude], eastBoundLongitude: Option[Longitude], southBoundLatitude: Option[Latitude], northBoundLatitude: Option[Latitude]) extends SelfValidating{
-	def error = joinErrors(
-		nonEmpty(westBoundLongitude)("West bound longitude must be specified for every geolocation box"),
-		westBoundLongitude.flatMap(lonError),
-		nonEmpty(eastBoundLongitude)("East bound latitude must be specified for every geolocation box"),
-		eastBoundLongitude.flatMap(lonError),
-		nonEmpty(southBoundLatitude)("South bound latitude must be specified for every geolocation box"),
-		southBoundLatitude.flatMap(latError),
-		nonEmpty(northBoundLatitude)("North bound latitude must be specified for every geolocation box"),
-		northBoundLatitude.flatMap(latError)
+	def errors: Seq[ValidationError] = combineErrors(
+		requireDefined(westBoundLongitude, ValidationSection.Geolocations, "West bound longitude must be specified for every geolocation box", List("westBoundLongitude")),
+		westBoundLongitude.toSeq.flatMap(lon => lon.lonError.map(msg => mkError(ValidationSection.Geolocations, msg, List("westBoundLongitude")))),
+		requireDefined(eastBoundLongitude, ValidationSection.Geolocations, "East bound latitude must be specified for every geolocation box", List("eastBoundLongitude")),
+		eastBoundLongitude.toSeq.flatMap(lon => lon.lonError.map(msg => mkError(ValidationSection.Geolocations, msg, List("eastBoundLongitude")))),
+		requireDefined(southBoundLatitude, ValidationSection.Geolocations, "South bound latitude must be specified for every geolocation box", List("southBoundLatitude")),
+		southBoundLatitude.toSeq.flatMap(lat => lat.latError.map(msg => mkError(ValidationSection.Geolocations, msg, List("southBoundLatitude")))),
+		requireDefined(northBoundLatitude, ValidationSection.Geolocations, "North bound latitude must be specified for every geolocation box", List("northBoundLatitude")),
+		northBoundLatitude.toSeq.flatMap(lat => lat.latError.map(msg => mkError(ValidationSection.Geolocations, msg, List("northBoundLatitude"))))
 	)
 }
 
 case class GeoLocation(geoLocationPoint: Option[GeoLocationPoint], geoLocationBox: Option[GeoLocationBox], geoLocationPlace: Option[String]) extends SelfValidating{
-	def error = joinErrors(
-		geoLocationPoint.flatMap(_.error),
-		geoLocationBox.flatMap(_.error)
-	)
+	def errors: Seq[ValidationError] = {
+		val errs = Seq.newBuilder[ValidationError]
+
+		geoLocationPoint.foreach { point =>
+			errs ++= point.errors.map(e => e.copy(path = "geoLocationPoint" :: e.path))
+		}
+
+		geoLocationBox.foreach { box =>
+			errs ++= box.errors.map(e => e.copy(path = "geoLocationBox" :: e.path))
+		}
+
+		errs.result()
+	}
 }

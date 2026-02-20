@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi.meta
 import org.scalatest.funspec.AnyFunSpec
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.Doi
+import scala.collection.Seq
 
 
 class DoiMetaTests extends AnyFunSpec{
@@ -11,41 +12,43 @@ class DoiMetaTests extends AnyFunSpec{
 
 		it("is valid if has proper ORCID scheme"){
 			val id = NameIdentifier("0000-0001-1234-123X", NameIdentifierScheme.ORCID)
-			assert(id.error === None)
+			assert(id.errors.isEmpty)
 		}
 
 		it("is invalid if has ORCID scheme but wrong format"){
 			val id = NameIdentifier("0000-0001-1234-123A", NameIdentifierScheme.ORCID)
-			assert(id.error.isDefined)
-			assert(id.error.get.contains("format"))
+			assert(id.errors.nonEmpty)
+			assert(id.errors.exists(_.message.contains("format")))
 		}
 
 		it("is invalid if the scheme is neither ORCID nor ISNI"){
-			val error = NameIdentifier("any", NameIdentifierScheme("other", None)).error
-			assert(error.isDefined)
-			assert(error.get.contains("Only the following name identifier schemes are supported"))
+			val errors = NameIdentifier("any", NameIdentifierScheme("other", None)).errors
+			assert(errors.nonEmpty)
+			assert(errors.exists(_.message.contains("Only the following name identifier schemes are supported")))
 		}
 	}
 
 	describe("URI validation support"){
 
-		def error(uri: String): Option[String] = new SelfValidating{
-			def error = validUri(uri)
-		}.error
+		def errors(uri: String): Seq[ValidationError] = new SelfValidating{
+			def errors = validateUri(uri, ValidationSection.DoiTarget, Nil)
+		}.errors
 
 		it("accepts plain HTTP[S] URLS"){
-			assertResult(None)(error("http://bebe.com"))
-			assertResult(None)(error("https://bebe.com"))
+			assert(errors("http://bebe.com").isEmpty)
+			assert(errors("https://bebe.com").isEmpty)
 		}
 
 		it("rejects a dummy string"){
-			assert(error("dummy").isDefined)
+			assert(errors("dummy").nonEmpty)
 		}
 	}
 
 	describe("Title validation support"){
 		it("rejects an empty title"){
-			assertResult(Some("Title must not be empty"))(Title("", None, None).error)
+			val titleErrors = Title("", None, None).errors
+			assert(titleErrors.nonEmpty)
+			assert(titleErrors.exists(_.message == "Title must not be empty"))
 		}
 	}
 
@@ -71,12 +74,13 @@ class DoiMetaTests extends AnyFunSpec{
 		)
 
 		it("accepts valid DoiMeta"){
-			assertResult(None)(example.error)
+			assert(example.errors.isEmpty)
 		}
 
 		it("gives correct error if only title is wrong (empty)"){
 			val wrongExample = example.copy(titles = Some(Seq(Title("", None, None))))
-			assertResult(Some("Title must not be empty"))(wrongExample.error)
+			assert(wrongExample.errors.nonEmpty)
+			assert(wrongExample.errors.exists(_.message == "Title must not be empty"))
 		}
 	}
 }

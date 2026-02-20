@@ -4,6 +4,8 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.Doi
+import se.lu.nateko.cp.doi.meta.ValidationError
+import se.lu.nateko.cp.doi.meta.ValidationSection
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic._
@@ -22,74 +24,21 @@ class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
 	toolbar: UnifiedToolbar,
-	errorCallback: Seq[DoiMetaWidget.ValidationError] => Unit = _ => ()
+	errorCallback: Seq[ValidationError] => Unit = _ => ()
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
-	def error = withUrlError(_meta.error)
+	def errors = withUrlErrors(_meta.errors)
 
 	protected val updateCb: DoiMeta => Unit = _ => ???//dummy, not used here
 
-	private def withUrlError(err: Option[String]): Option[String] =
-		joinErrors(err, _meta.url.flatMap(DoiTargetWidget.targetUrlError))
-
-	private def detectSection(errorMsg: String): Option[(String, String)] = {
-		val lower = errorMsg.toLowerCase
-		// Match keywords to section IDs
-		if (lower.contains("target") || lower.contains("domain") || lower.contains("doi prefix") || lower.contains("doi suffix"))
-			Some(("toc-doi-target", "DOI target"))
-		else if (lower.contains("creator") || lower.contains("given name") || lower.contains("family name"))
-			Some(("toc-creators", "Creators"))
-		else if (lower.contains("title"))
-			Some(("toc-titles", "Titles"))
-		else if (lower.contains("publisher"))
-			Some(("toc-publisher", "Publisher"))
-		else if (lower.contains("publication year"))
-			Some(("toc-publication-year", "Publication year"))
-		else if (lower.contains("resource type"))
-			Some(("toc-resource-type", "Resource type"))
-		else if (lower.contains("subject"))
-			Some(("toc-subjects", "Subjects"))
-		else if (lower.contains("contributor") || lower.contains("affiliation"))
-			Some(("toc-contributors", "Contributors"))
-		else if (lower.contains("date"))
-			Some(("toc-dates", "Dates"))
-		else if (lower.contains("related identifier") || lower.contains("relation type"))
-			Some(("toc-related-identifiers", "Related identifiers"))
-		else if (lower.contains("rights") || lower.contains("license"))
-			Some(("toc-rights", "Rights"))
-		else if (lower.contains("description"))
-			Some(("toc-descriptions", "Descriptions"))
-		else if (lower.contains("geolocation") || lower.contains("longitude") || lower.contains("latitude"))
-			Some(("toc-geolocations", "Geolocations"))
-		else if (lower.contains("format"))
-			Some(("toc-formats", "Formats"))
-		else if (lower.contains("version"))
-			Some(("toc-version", "Version"))
-		else if (lower.contains("funder") || lower.contains("funding") || lower.contains("award"))
-			Some(("toc-funding", "Funding references"))
-		else if (lower.contains("name identifier"))
-			// Name identifiers can be in creators or contributors, default to creators
-			Some(("toc-creators", "Creators"))
-		else
-			None // General errors without specific section
-	}
-
-	private def parseErrors(errorStr: Option[String]): Seq[DoiMetaWidget.ValidationError] = {
-		errorStr.toSeq.flatMap(_.split("\n")).flatMap { errMsg =>
-			val trimmed = errMsg.trim
-			if (trimmed.nonEmpty) {
-				detectSection(trimmed) match {
-					case Some((sectionId, sectionName)) =>
-						Some(DoiMetaWidget.ValidationError(sectionId, sectionName, trimmed))
-					case None =>
-						// For general errors, use a special "general" section
-						Some(DoiMetaWidget.ValidationError("toc-general", "General", trimmed))
-				}
-			} else {
-				None
+	private def withUrlErrors(errs: Seq[ValidationError]): Seq[ValidationError] = {
+		val urlErrs = _meta.url.toSeq.flatMap { url =>
+			DoiTargetWidget.targetUrlError(url).map { msg =>
+				ValidationError(ValidationSection.DoiTarget, msg, List("url"))
 			}
 		}
+		errs ++ urlErrs
 	}
 
 	private def formElements: Seq[Div] = Seq(
@@ -158,20 +107,24 @@ class DoiMetaWidget(
 	private var toolbarInitialized = false
 
 	private def validateMeta(): Unit = {
-		val errors = error.toSeq.flatMap(_.split("\n"))
-
-		// Parse and send errors to sidebar via callback
-		val parsedErrors = parseErrors(error)
-		errorCallback(parsedErrors)
+		val allErrors = withUrlErrors(_meta.errors)
+		errorCallback(allErrors)
 
 		val canUpdate = _meta != init && {
-			if(_meta.state == DoiPublicationState.draft) withUrlError(_meta.draftError).isEmpty
-			else errors.isEmpty
+			if(_meta.state == DoiPublicationState.draft) {
+				val draftUrlErrors = _meta.url.toSeq.flatMap { url =>
+					DoiTargetWidget.targetUrlError(url).map { msg =>
+						ValidationError(ValidationSection.DoiTarget, msg, List("url"))
+					}
+				}
+				(_meta.draftErrors ++ draftUrlErrors).isEmpty
+			}
+			else allErrors.isEmpty
 		}
 
 		if (toolbarInitialized) {
 			toolbar.setUpdateButtonEnabled(canUpdate)
-			toolbar.setSubmitButtonEnabled(errors.isEmpty)
+			toolbar.setSubmitButtonEnabled(allErrors.isEmpty)
 		}
 	}
 
@@ -182,10 +135,8 @@ class DoiMetaWidget(
 		validateMeta()
 	}
 
-	// Expose methods to wire toolbar callbacks
 	def wireToolbarCallbacks(): Unit = {
 		toolbarInitialized = true
-		// Run validation now that toolbar is initialized
 		validateMeta()
 		toolbar.setUpdateButtonCallback { (_: Event) =>
 			toolbar.setUpdateButtonEnabled(false)
@@ -243,12 +194,6 @@ class DoiMetaWidget(
 }
 
 object DoiMetaWidget{
-
-	case class ValidationError(
-		sectionId: String,
-		sectionName: String,
-		message: String
-	)
 
 	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends
 		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", required = true){

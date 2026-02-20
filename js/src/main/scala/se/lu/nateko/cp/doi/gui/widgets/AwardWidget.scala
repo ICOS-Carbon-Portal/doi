@@ -14,7 +14,7 @@ class AwardWidget(
 
 	private[this] var _award = init
 
-	private[this] def validate(): Unit = highlightError(awardUriInput.element, _award.error)
+	private[this] def validate(): Unit = highlightError(awardUriInput.element, _award.errorMessage)
 
 	private val awardTitleInput  = awardTextWidget(_award.awardTitle,  textOpt => _award.copy(awardTitle  = textOpt), "Award title")
 	private val awardNumberInput = awardTextWidget(_award.awardNumber, textOpt => _award.copy(awardNumber = textOpt), "Award number")

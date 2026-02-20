@@ -17,7 +17,7 @@ class VersionWidget(init: Option[Version], protected val updateCb: Option[Versio
 		case versionRegex(majorStr, minorStr) =>
 			val version = Version(majorStr.toInt, minorStr.toInt)
 			updateCb(Some(version))
-			highlightError(element, version.error)
+			highlightError(element, version.errorMessage)
 
 		case _ =>
 			updateCb(Some(Version(-1, -1)))

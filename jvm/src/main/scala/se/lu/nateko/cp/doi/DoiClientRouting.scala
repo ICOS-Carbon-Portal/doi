@@ -101,9 +101,7 @@ object DoiClientRouting{
 	val DoiPath = (Segment / Segment).tflatMap{
 		case (prefix, suffix) =>
 			val doi = Doi(prefix, suffix)
-			doi.error match{
-				case None => Some(Tuple1(doi))
-				case Some(_) => None
-			}
+			if (doi.isValid) Some(Tuple1(doi))
+			else None
 	}
 }

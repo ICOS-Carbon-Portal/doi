@@ -5,6 +5,8 @@ import se.lu.nateko.cp.doi.DoiMeta
 import scala.concurrent.Future
 import org.scalajs.dom.Event
 import scala.collection.Seq
+import se.lu.nateko.cp.doi.meta.ValidationError
+import se.lu.nateko.cp.doi.meta.ValidationSection
 
 class DoiMetaEditorWithSidebar(
 	init: DoiMeta,
@@ -13,7 +15,7 @@ class DoiMetaEditorWithSidebar(
 ) {
 
 	private var currentSidebarTab: String = "toc"
-	private var currentErrors: Seq[DoiMetaWidget.ValidationError] = Seq.empty
+	private var currentErrors: Seq[ValidationError] = Seq.empty
 
 	private val errorCountBadge = span(cls := "error-count-badge").render
 
@@ -153,13 +155,13 @@ class DoiMetaEditorWithSidebar(
 			currentErrors.foreach { err =>
 				val errorItem = li(cls := "error-item")(
 					a(
-						href := s"#${err.sectionId}",
+						href := s"#${err.section.id}",
 						cls := "error-link",
-						onclick := navigateToSection(err.sectionId)
+						onclick := navigateToSection(err.section.id)
 					)(
 						i(cls := "fa-solid fa-triangle-exclamation error-icon"),
 						div(cls := "error-content")(
-							div(cls := "error-section-name")(err.sectionName),
+							div(cls := "error-section-name")(err.section.label),
 							div(cls := "error-message")(err.message)
 						)
 					)
@@ -194,7 +196,7 @@ class DoiMetaEditorWithSidebar(
 		}
 	}
 
-	private def updateErrors(errors: Seq[DoiMetaWidget.ValidationError]): Unit = {
+	private def updateErrors(errors: Seq[ValidationError]): Unit = {
 		currentErrors = errors
 		renderErrors()
 
