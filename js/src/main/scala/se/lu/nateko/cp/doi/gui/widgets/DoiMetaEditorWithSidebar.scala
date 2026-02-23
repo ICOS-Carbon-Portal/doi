@@ -11,7 +11,8 @@ import se.lu.nateko.cp.doi.meta.ValidationSection
 class DoiMetaEditorWithSidebar(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	toolbar: UnifiedToolbar
+	toolbar: UnifiedToolbar,
+	envProvider: () => Option[String] = () => None
 ) {
 
 	private var currentSidebarTab: String = "toc"
@@ -209,7 +210,7 @@ class DoiMetaEditorWithSidebar(
 		}
 	}
 
-	private val metaWidget = new DoiMetaWidget(init, updater, toolbar, updateErrors)
+	private val metaWidget = new DoiMetaWidget(init, updater, toolbar, updateErrors, envProvider)
 
 	setupTOCLinks()
 	renderErrors() // Initialize with empty state

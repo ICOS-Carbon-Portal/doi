@@ -11,7 +11,10 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 object DoiApp {
 
 	val initState = DoiState(
-		prefix = "10.18160", //default init value; the actual one is fetched from backend
+		prefix = "", //default init value; the actual one is fetched from backend
+		envs = Nil,
+		activeEnv = None,
+		prefixes = Map.empty,
 		dois = Nil,
 		listMeta = None,
 		selected = None,
@@ -32,7 +35,7 @@ object DoiApp {
 			store.dispatch(NavigateToRoute(route))
 		}
 		
-		store.dispatch(ThunkActions.FetchPrefixInfo)
+		store.dispatch(ThunkActions.FetchEnvConfigs)
 		
 		val url = new URL(window.location.href)
 		val searchQuery = Option(url.searchParams.get("q")).filter(_.nonEmpty)

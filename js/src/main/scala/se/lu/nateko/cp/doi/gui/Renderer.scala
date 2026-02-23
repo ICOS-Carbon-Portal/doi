@@ -12,7 +12,8 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 	private var currentDetailView: Option[DoiDetailView] = None
 
 	def notify(state: State, oldState: State): Unit = {
-		if(state.prefix != oldState.prefix) mainView.updateDefaultPrefix()
+		if(state.prefix != oldState.prefix || state.envs != oldState.envs || state.activeEnv != oldState.activeEnv)
+			mainView.updateEnvSelector(state)
 
 		if(oldState.error != state.error){
 			if(state.error.isDefined)
@@ -116,7 +117,7 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				val isCloned = state.lastClonedDoi.contains(doi)
 				state.dois.find(_.doi == doi).orElse {
 					// DOI not in cache, fetch it
-					Backend.getDoi(doi).foreach {
+					Backend.getDoi(doi, state.activeEnv).foreach {
 						case Some(meta) =>
 							val detailView = new DoiDetailView(meta, dispatcher, isCloned)
 							currentDetailView = Some(detailView)

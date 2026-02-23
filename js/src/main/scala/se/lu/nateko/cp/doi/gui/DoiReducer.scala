@@ -14,7 +14,19 @@ object DoiReducer {
 
 	val reducer: Reducer = (action, state) => action match{
 
-		case GotPrefixInfo(info) => state.copy(prefix = info)
+		case GotEnvConfigs(envs, defaultEnv, prefixes) =>
+			state.copy(
+				envs = envs,
+				activeEnv = Some(defaultEnv),
+				prefixes = prefixes,
+				prefix = prefixes.getOrElse(defaultEnv, state.prefix)
+			)
+
+		case SwitchEnv(env) =>
+			state.copy(
+				activeEnv = Some(env),
+				prefix = state.prefixes.getOrElse(env, state.prefix)
+			)
 
 		case StartLoading => state.copy(isLoading = true)
 		case StopLoading => state.copy(isLoading = false)

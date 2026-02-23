@@ -15,21 +15,27 @@ import se.lu.nateko.cp.doi.DoiMeta
 
 object ThunkActions {
 
-	val FetchPrefixInfo: ThunkAction = implicit d => {
-		dispatchFut(Backend.getPrefixInfo.map(GotPrefixInfo(_)))
+	val FetchEnvConfigs: ThunkAction = implicit d => {
+		dispatchFut(Backend.getEnvConfigs.map(identity))
 	}
 
 	def DoiListRefreshRequest(query: Option[String] = None, page: Option[Int] = None, state: Option[String] = None): ThunkAction = implicit d => {
 		d.dispatch(StartLoading)
+		val env = d.getState.activeEnv
 		import scalajs.js.timers.{setTimeout, clearTimeout}
 		val handle = setTimeout(800){
 			d.dispatch(FreshDoiList(Nil, None))
 		}
-		dispatchFut(Backend.getFreshDoiList(query, page, state).andThen{
+		dispatchFut(Backend.getFreshDoiList(query, page, state, env).andThen{
 			case _ =>
 				clearTimeout(handle)
 				d.dispatch(StopLoading)
 		})
+	}
+
+	def SwitchEnvAndRefresh(env: String): ThunkAction = implicit d => {
+		d.dispatch(SwitchEnv(env))
+		d.dispatch(DoiListRefreshRequest())
 	}
 
 	private def dispatchFut(result: Future[Action])(implicit d: Dispatcher): Unit = {
@@ -42,7 +48,8 @@ object ThunkActions {
 	def requestDoiDeletion(doi: Doi): ThunkAction = implicit d => {
 		val confirmed = org.scalajs.dom.window.confirm(s"Are you sure you want to delete DOI $doi? This action cannot be undone.")
 		if (confirmed) {
-			dispatchFut(Backend.delete(doi).map(_ => DoiDeleted(doi)))
+			val env = d.getState.activeEnv
+			dispatchFut(Backend.delete(doi, env).map(_ => DoiDeleted(doi)))
 		}
 	}
 
@@ -50,6 +57,7 @@ object ThunkActions {
 		import se.lu.nateko.cp.doi.CoolDoi
 		import se.lu.nateko.cp.doi.meta.DoiPublicationState
 
+		val env = d.getState.activeEnv
 		val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
 		val newMeta = meta.copy(doi = newDoi, state = DoiPublicationState.draft)
 
@@ -57,7 +65,7 @@ object ThunkActions {
 		d.dispatch(DoiCloneRequest(meta, newMeta))
 
 		// Then save the cloned DOI to the backend
-		Backend.updateMeta(newMeta).onComplete {
+		Backend.updateMeta(newMeta, env).onComplete {
 			case Success(result) =>
 				if (!result.isEmpty) {
 					d.dispatch(ReportError(s"Failed to save clone: $result"))

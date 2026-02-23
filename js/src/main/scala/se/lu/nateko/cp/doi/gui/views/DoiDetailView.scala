@@ -144,10 +144,13 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private var metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, toolbar)
 
+	private def envProvider(): Option[String] = d.getState.activeEnv
+
 	private var metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 		meta,
 		updateDoiMeta,
-		toolbar
+		toolbar,
+		envProvider
 	)
 
 	private var metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
@@ -174,7 +177,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	)
 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
-		Backend.updateMeta(updated).flatMap { errorMsg =>
+		Backend.updateMeta(updated, d.getState.activeEnv).flatMap { errorMsg =>
 			if (errorMsg.isEmpty) {
 				// Success - update UI
 				meta = updated
@@ -184,7 +187,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 				metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 					updated,
 					updateDoiMeta,
-					toolbar
+					toolbar,
+					envProvider
 				)
 				metaJsonEditor = new DoiJsonEditor(updated, updateDoiMeta, toolbar)
 

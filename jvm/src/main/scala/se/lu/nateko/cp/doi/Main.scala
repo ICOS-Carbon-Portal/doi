@@ -34,11 +34,22 @@ object Main{
 
 		val authRouting = new AuthRouting(conf.auth)
 
-		val client = {
-			val http = new AkkaDoiHttp(conf.client.member.symbol, conf.client.member.password)
-			new DoiClient(conf.client, http)
+		val clients: Map[String, DoiClient] = conf.envConfigs.map{ (envName, envConf) =>
+			val http = new AkkaDoiHttp(envConf.client.member.symbol, envConf.client.member.password)
+			envName -> new DoiClient(envConf.client, http)
 		}
-		val doiRouting = new DoiClientRouting(client, conf)
+
+		val defaultEnv =
+			if clients.contains("test") then "test"
+			else clients.keys.head
+
+		val doiRouting = new DoiClientRouting(clients, defaultEnv, conf)
+
+		val envConfigsJson = {
+			val envs = conf.envConfigs.keys.toSeq.sorted
+			val prefixes = conf.envConfigs.map((name, ec) => s""""$name":"${ec.prefixInfo}"""").mkString("{", ",", "}")
+			s"""{"envs":[${envs.map(e => s""""$e"""").mkString(",")}],"default":"$defaultEnv","prefixes":$prefixes}"""
+		}
 
 		val emailSender = new Mailer(conf.mailing)
 
@@ -67,7 +78,7 @@ object Main{
 				doiRouting.publicRoute ~
 				post{
 					authRouting.user{uid =>
-						doiRouting.writingRoute{doiMeta =>
+						doiRouting.writingRoute{(doiMeta, client) =>
 							if(isAdmin(uid)) Future.successful(true)
 							else if(doiMeta.event.isDefined || doiMeta.state != DoiPublicationState.draft) Future.successful(false)
 							else client.getMetadata(doiMeta.doi).map{
@@ -91,18 +102,15 @@ object Main{
 				delete{
 					authRouting.user{uid =>
 						if(isAdmin(uid)) {
-							pathPrefix(DoiClientRouting.DoiPath){doi =>
-								onSuccess(client.delete(doi)){
-									complete(StatusCodes.OK)
-								}
-							} ~
-							complete(StatusCodes.BadRequest -> "Expected URL path ending in a DOI")
+							doiRouting.deleteRoute
 						} else complete(StatusCodes.Forbidden -> "Must be admin to delete DOIs")
 					} ~
 					complete(StatusCodes.Unauthorized -> "Must be logged in")
 				} ~
-				path("doiprefix"){
-					get{complete(conf.prefixInfo)}
+				path("envconfigs"){
+					get{
+						complete(HttpEntity(ContentTypes.`application/json`, envConfigsJson))
+					}
 				}
 			} ~
 			get{

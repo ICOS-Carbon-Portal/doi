@@ -17,7 +17,11 @@ object Playground {
 	given Envri = Envri.ICOS
 	import system.dispatcher
 
-	val config = DoiConfig.getConfig.client
+	private val envConfig = {
+		val conf = DoiConfig.getConfig
+		conf.envConfigs.getOrElse("test", conf.envConfigs.values.head)
+	}
+	val config = envConfig.client
 	val http = new AkkaDoiHttp(config.member.symbol, config.member.password)
 	val client = new DoiClient(config, http)
 

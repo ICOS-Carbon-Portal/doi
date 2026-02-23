@@ -24,7 +24,8 @@ class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
 	toolbar: UnifiedToolbar,
-	errorCallback: Seq[ValidationError] => Unit = _ => ()
+	errorCallback: Seq[ValidationError] => Unit = _ => (),
+	envProvider: () => Option[String] = () => None
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
@@ -152,7 +153,7 @@ class DoiMetaWidget(
 		toolbar.setSubmitButtonCallback { (_: Event) =>
 			toolbar.setSubmitButtonEnabled(false)
 			updater(_meta).map{ _ =>
-				Backend.submitForPublication(_meta.doi)
+				Backend.submitForPublication(_meta.doi, envProvider())
 			}.andThen{
 				case Failure(exc) =>
 					toolbar.setSubmitButtonEnabled(true)

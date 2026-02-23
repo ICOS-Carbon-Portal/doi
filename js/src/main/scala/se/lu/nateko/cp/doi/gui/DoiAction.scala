@@ -8,7 +8,8 @@ import se.lu.nateko.cp.doi.DoiListMeta
 
 sealed trait DoiAction
 
-case class GotPrefixInfo(info: String) extends DoiAction
+case class GotEnvConfigs(envs: Seq[String], defaultEnv: String, prefixes: Map[String, String]) extends DoiAction
+case class SwitchEnv(env: String) extends DoiAction
 
 case object StartLoading extends DoiAction
 case object StopLoading extends DoiAction

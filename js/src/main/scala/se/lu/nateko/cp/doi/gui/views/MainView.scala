@@ -13,6 +13,7 @@ import se.lu.nateko.cp.doi.gui.ResetErrors
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.DoiState
 import se.lu.nateko.cp.doi.DoiListMeta
 import org.scalajs.dom.document
 import scala.scalajs.js.timers.setTimeout
@@ -25,6 +26,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val listElem = ul(cls := "list-group").render
 
 	private val prefixSpan = span(cls := "input-group-text").render
+	private val envSelect = select(cls := "form-select").render
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
@@ -119,8 +121,25 @@ class MainView(d: DoiRedux.Dispatcher) {
 	),
 	)
 
-	def updateDefaultPrefix(): Unit = {
-		prefixSpan.textContent = getPrefix
+	def updateEnvSelector(state: DoiState): Unit = {
+		val current = if (envSelect.parentNode != null) envSelect else prefixSpan
+		val parent = current.parentNode
+		if (state.envs.size > 1) {
+			envSelect.innerHTML = ""
+			state.envs.foreach { envName =>
+				val pfx = state.prefixes.getOrElse(envName, "")
+				val opt = option(value := envName)(s"$pfx ($envName)").render
+				if (state.activeEnv.contains(envName)) opt.selected = true
+				envSelect.appendChild(opt)
+			}
+			envSelect.onchange = { (_: Event) =>
+				d.dispatch(ThunkActions.SwitchEnvAndRefresh(envSelect.value))
+			}
+			if (current ne envSelect) parent.replaceChild(envSelect, current)
+		} else {
+			prefixSpan.textContent = getPrefix
+			if (current ne prefixSpan) parent.replaceChild(prefixSpan, current)
+		}
 	}
 
 	def supplyDoiList(dois: Seq[DoiMeta], isLoading: Boolean): Unit = {
@@ -315,5 +334,5 @@ class MainView(d: DoiRedux.Dispatcher) {
 		suffixInput.value = ""
 	}
 
-	updateDefaultPrefix()
+	updateEnvSelector(d.getState)
 }

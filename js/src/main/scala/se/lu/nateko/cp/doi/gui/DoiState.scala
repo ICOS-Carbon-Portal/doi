@@ -8,6 +8,9 @@ import scala.collection.Seq
 
 case class DoiState(
 	prefix: String,
+	envs: Seq[String],
+	activeEnv: Option[String],
+	prefixes: Map[String, String],
 	dois: Seq[DoiMeta],
 	listMeta: Option[DoiListMeta],
 	selected: Option[Doi],
