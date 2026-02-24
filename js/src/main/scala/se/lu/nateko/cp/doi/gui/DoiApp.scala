@@ -20,8 +20,7 @@ object DoiApp {
 		selected = None,
 		error = None,
 		success = None,
-		isLoading = true,
-		currentRoute = InitialRoute
+		isLoading = true
 	)
 	val store = new DoiRedux.Store(DoiReducer.reducer, initState)
 

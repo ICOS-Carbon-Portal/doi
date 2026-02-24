@@ -40,19 +40,15 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 
 		// Handle route changes
 		if(state.currentRoute != oldState.currentRoute) {
-			renderRoute(state.currentRoute, state)
+			state.currentRoute.foreach(renderRoute(_, state))
 		}
 	}
 
 	private def renderRoute(route: Route, state: State): Unit = {
 		route match {
-			case InitialRoute =>
-				// Should never render this, just a placeholder
-				
 			case ListRoute =>
-				// Show list view in list-wrapper
 				currentDetailView = None
-				// Restore default page title
+
 				document.title = DoiMetaHelpers.pageTitle("DOI minting")
 				
 				val mainWrapper = document.getElementById("main-wrapper")
@@ -60,7 +56,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				
 				// Check if we're showing detail view (need to restore list structure)
 				if (listWrapper == null) {
-					// Recreate the list view structure with header
 					import scalatags.JsDom.all._
 					val permissions = mainWrapper.getAttribute("data-permissions")
 					mainWrapper.innerHTML = ""
@@ -93,26 +88,24 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 					listWrapper.innerHTML = ""
 					listWrapper.appendChild(mainView.element)
 					mainWrapper.classList.add("loaded")
-					// Update with current data from state (no refetch needed)
+
 					mainView.supplyDoiList(state.dois, state.isLoading)
 					mainView.setPagination(state.listMeta)
-					// Show error or success message if present
+
 					if (state.error.isDefined) {
 						mainView.appendError(state.error.get)
 					} else if (state.success.isDefined) {
 						mainView.appendSuccess(state.success.get)
 					}
-					// Restore scroll position from history state
+
 					if (showingDetail) {
 						Router.getScrollPosition.foreach { scrollY =>
 							org.scalajs.dom.window.scrollTo(0, scrollY.toInt)
 						}
 					}
-				} else {
 				}
 				
 			case DetailRoute(doi) =>
-				// Show detail view, replacing entire main-wrapper content
 				val mainWrapper = document.getElementById("main-wrapper")
 				val isCloned = state.lastClonedDoi.contains(doi)
 				state.dois.find(_.doi == doi).orElse {

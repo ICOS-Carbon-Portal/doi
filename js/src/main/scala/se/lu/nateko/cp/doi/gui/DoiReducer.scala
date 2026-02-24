@@ -35,21 +35,20 @@ object DoiReducer {
 
 		case NavigateToRoute(route) =>
 			Router.navigateTo(route) // This saves scroll position in history.state
-			val newState = state.copy(currentRoute = route)
+			val newState = state.copy(currentRoute = Some(route))
 			newState
 
-	case DoiCloneRequest(originalMeta, clonedMeta) => {
-		// Navigate to the new cloned DOI
-		Router.navigateTo(DetailRoute(clonedMeta.doi))
+		case DoiCloneRequest(originalMeta, clonedMeta) => {
+			Router.navigateTo(DetailRoute(clonedMeta.doi))
 
-		val newState = state.copy(
-			dois = clonedMeta +: state.dois,
-			lastClonedDoi = Some(clonedMeta.doi),
-			currentRoute = DetailRoute(clonedMeta.doi)
-		).withSelected(clonedMeta.doi)
-			.incrementTotal
-		newState
-	}
+			val newState = state.copy(
+				dois = clonedMeta +: state.dois,
+				lastClonedDoi = Some(clonedMeta.doi),
+				currentRoute = Some(DetailRoute(clonedMeta.doi))
+			).withSelected(clonedMeta.doi)
+				.incrementTotal
+			newState
+		}
 
 		case EmptyDoiCreation(doi) => state.copy(dois = DoiMeta(doi) +: state.dois)
 			.incrementTotal
@@ -61,20 +60,20 @@ object DoiReducer {
 
 		case ResetErrors => state.copy(error = None, success = None)
 
-	case DoiDeleted(doi) =>
-		Router.navigateTo(ListRoute)
-		state.copy(
-			dois = state.dois.filter(_.doi != doi),
-			selected = None,
-			currentRoute = ListRoute,
-			success = Some(s"DOI $doi was deleted successfully")
-		).decrementTotal
+		case DoiDeleted(doi) =>
+			Router.navigateTo(ListRoute)
+			state.copy(
+				dois = state.dois.filter(_.doi != doi),
+				selected = None,
+				currentRoute = Some(ListRoute),
+				success = Some(s"DOI $doi was deleted successfully")
+			).decrementTotal
 
-	case DoiUpdated(updatedMeta) => state.copy(
-		dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)
-	)
+		case DoiUpdated(updatedMeta) => state.copy(
+			dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)
+		)
 
-	case ClearLastClonedDoi => state.copy(lastClonedDoi = None)
+		case ClearLastClonedDoi => state.copy(lastClonedDoi = None)
 
 	}
 

@@ -17,7 +17,7 @@ case class DoiState(
 	error: Option[String],
 	success: Option[String],
 	isLoading: Boolean,
-	currentRoute: Route,
+	currentRoute: Option[Route] = None,
 	lastClonedDoi: Option[Doi] = None
 )
 

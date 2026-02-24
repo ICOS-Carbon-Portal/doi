@@ -5,7 +5,6 @@ import org.scalajs.dom.PopStateEvent
 import se.lu.nateko.cp.doi.Doi
 
 sealed trait Route
-case object InitialRoute extends Route // Placeholder before first navigation
 case object ListRoute extends Route
 case class DetailRoute(doi: Doi) extends Route
 
@@ -54,7 +53,6 @@ object Router {
 	}
 	
 	def routeToUrl(route: Route): String = route match {
-		case InitialRoute => "/" // Should never be called
 		case ListRoute => "/"
 		case DetailRoute(doi) => s"/doi/$doi"
 	}

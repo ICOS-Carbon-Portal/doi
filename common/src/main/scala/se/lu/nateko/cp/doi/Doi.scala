@@ -58,7 +58,6 @@ case class DoiMeta(
 	def draftErrors: Seq[ValidationError] = {
 		val errs = Seq.newBuilder[ValidationError]
 
-		// Collect nested validation errors
 		errs ++= doi.errors
 		errs ++= collectErrors(creators, ValidationSection.Creators, List("creators"))
 		
