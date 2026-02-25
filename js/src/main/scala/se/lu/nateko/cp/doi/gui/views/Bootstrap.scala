@@ -8,19 +8,6 @@ import org.scalajs.dom.html
 
 object Bootstrap {
 
-	def defaultCard(title: String)(body: Modifier*): TypedTag[html.Div] =
-		div(cls := "card")(
-			div(cls := "card-header")(
-				span(cls := "card-title")(title)
-			),
-			div(cls := "card-body")(body)
-		)
-
-	def basicCard(body: Modifier*): TypedTag[html.Div] =
-		div(cls := "card")(
-			div(cls := "card-body")(body)
-		)
-
 	def propValueRow(propHtml: Modifier*)(valHtml: Modifier*) =
 		div(cls := "row gy-2")(
 			div(cls := "col-md-2")(propHtml),

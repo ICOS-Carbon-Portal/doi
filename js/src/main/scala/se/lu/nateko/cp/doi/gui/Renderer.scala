@@ -38,7 +38,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 			mainView.setPagination(state.listMeta)
 		}
 
-		// Handle route changes
 		if(state.currentRoute != oldState.currentRoute) {
 			state.currentRoute.foreach(renderRoute(_, state))
 		}
@@ -54,7 +53,7 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 				val mainWrapper = document.getElementById("main-wrapper")
 				var listWrapper = document.getElementById("list-wrapper")
 				
-				// Check if we're showing detail view (need to restore list structure)
+				// Check if we're showing detail view and need to restore the DOI list
 				if (listWrapper == null) {
 					import scalatags.JsDom.all._
 					val permissions = mainWrapper.getAttribute("data-permissions")

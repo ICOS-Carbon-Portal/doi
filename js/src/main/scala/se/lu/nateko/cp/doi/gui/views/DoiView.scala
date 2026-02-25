@@ -59,8 +59,4 @@ class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 		stateDot.className = s"flex-shrink-0 ${DoiMetaHelpers.stateDotClass(meta.state)}"
 	}
 
-	def setSelected(selected: Boolean): Unit = {
-		// This method is kept for compatibility but no longer expands cards
-		// Cards now navigate to detail view instead
-	}
 }

@@ -130,7 +130,7 @@ object Main{
 					}
 				} ~
 				getFromResourceDirectory("") ~
-				// SPA catch-all - serve index for any /doi/* path (after trying static resources)
+				// SPA catch-all - serve index for any /doi/* path
 				pathPrefix("doi"){
 					path(DoiClientRouting.DoiPath){doi =>
 						mainPage(conf.development, Some(doi.suffix))

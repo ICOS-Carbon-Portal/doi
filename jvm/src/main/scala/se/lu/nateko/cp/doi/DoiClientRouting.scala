@@ -67,10 +67,8 @@ class DoiClientRouting(
 								import meta.doi.{prefix, suffix}
 
 								if (conf.skipCacheInvalidation) {
-									// Skip cache invalidation (typically for dev environments)
 									complete("")
 								} else {
-									// Production: perform cache invalidation
 									val metaHost = meta.url.fold(conf.metaHost)(url => {
 										val targetHost = new URI(url).getHost()
 										if (targetHost == "citymeta.icos-cp.eu")

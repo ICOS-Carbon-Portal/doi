@@ -38,7 +38,7 @@ object Router {
 				"scrollY" -> scrollPosition.getOrElse(window.pageYOffset)
 			)
 			window.history.replaceState(currentState, "") // Update current entry with scroll pos
-			window.history.pushState(null, "", url) // Push new entry
+			window.history.pushState(null, "", url)
 		}
 	}
 	

@@ -26,7 +26,6 @@ class UnifiedToolbar(
 	private[this] var currentTab: EditorTab = initialTab
 	private[this] var successTimeoutHandle: Option[scala.scalajs.js.timers.SetTimeoutHandle] = None
 
-	// Back to list button
 	private val backButton = a(
 		href := "/",
 		cls := "btn btn-sm btn-outline-secondary",
@@ -36,7 +35,6 @@ class UnifiedToolbar(
 		"Back to list"
 	).render
 
-	// Tab buttons
 	private def makeTabButton(tab: EditorTab, label: String): Button = {
 		val btn = button(
 			tpe := "button",
@@ -258,12 +256,10 @@ class UnifiedToolbar(
 		_meta.state.toString.capitalize
 	).render
 
-	// Toggle state dropdown manually
 	stateDropdownButton.onclick = (_: Event) => {
 		stateDropdownMenu.classList.toggle("show")
 	}
 
-	// Clone button
 	private val cloneButton = button(
 		tpe := "button",
 		cls := "btn btn-sm btn-outline-secondary"
@@ -273,7 +269,6 @@ class UnifiedToolbar(
 	).render
 	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
-	// Action buttons (edit mode)
 	private val updateButtonIcon = i(cls := "fa-solid fa-floppy-disk me-1").render
 	private val updateButtonText = span("Save").render
 	private val updateButton = button(
@@ -298,7 +293,6 @@ class UnifiedToolbar(
 		data("bs-placement") := "top"
 	)(submitButton).render
 
-	// Delete button
 	private val deleteButton = button(
 		tpe := "button",
 		cls := "btn btn-sm btn-outline-secondary admin-control edit-control"
@@ -308,7 +302,6 @@ class UnifiedToolbar(
 	).render
 	deleteButton.onclick = (_: Event) => deleteCb(_meta.doi)
 
-	// Action button groups based on state
 	private val actionButtons: Div = _meta.state match {
 		case DoiPublicationState.draft =>
 			div(cls := "d-flex gap-2")(
@@ -317,11 +310,11 @@ class UnifiedToolbar(
 				updateButton
 			).render
 
-	case DoiPublicationState.registered =>
+		case DoiPublicationState.registered =>
 			div(cls := "d-flex gap-2")(
 				updateButton
 			).render
-	case _ =>
+		case _ =>
 			div(cls := "d-flex gap-2")(
 				updateButton
 			).render
@@ -350,10 +343,8 @@ class UnifiedToolbar(
 		tocButtonContainer
 	).render
 
-	// Close state dropdown when clicking outside
 	org.scalajs.dom.document.addEventListener("click", (e: Event) => {
 		val target = e.target.asInstanceOf[org.scalajs.dom.Node]
-		// Check if click is outside state dropdown by traversing parents
 		var node = target
 		var isInside = false
 		while (node != null && !isInside) {
@@ -390,11 +381,9 @@ class UnifiedToolbar(
 
 	def setUpdateButtonEnabled(enabled: Boolean): Unit = {
 		if (enabled) {
-			// Clear any pending success animation timeout since we have new changes
 			successTimeoutHandle.foreach(clearTimeout)
 			successTimeoutHandle = None
 
-			// Reset button icon and text from success state to normal save state
 			updateButtonIcon.className = "fa-solid fa-floppy-disk me-1"
 			updateButtonText.textContent = "Save"
 		}
@@ -404,10 +393,8 @@ class UnifiedToolbar(
 	}
 
 	def showSaveSuccess(): Unit = {
-		// Clear any existing timeout
 		successTimeoutHandle.foreach(clearTimeout)
 
-		// Change button to success state
 		updateButton.disabled = true
 		updateButton.className = "btn btn-sm btn-update-doi edit-control btn-success"
 		updateButtonIcon.className = "fa-solid fa-check me-1"

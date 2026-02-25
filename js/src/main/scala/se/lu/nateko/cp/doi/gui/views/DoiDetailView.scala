@@ -51,7 +51,6 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private val title = DoiMetaHelpers.extractTitle(meta)
 
-	// External links for DOI and DataCite
 	private val doiUrl = "https://doi.org/" + meta.doi
 	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
 	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
@@ -179,10 +178,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
 		Backend.updateMeta(updated, d.getState.activeEnv).flatMap { errorMsg =>
 			if (errorMsg.isEmpty) {
-				// Success - update UI
 				meta = updated
 
-				// Create new view/editor instances with updated metadata as the new baseline
 				metaViewer = new DoiMetaViewer(updated, toolbar)
 				metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
 					updated,
@@ -192,7 +189,6 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 				)
 				metaJsonEditor = new DoiJsonEditor(updated, updateDoiMeta, toolbar)
 
-				// Restore the current tab view
 				contentBody.innerHTML = ""
 				currentTab match {
 					case EditorTab.edit =>
@@ -206,20 +202,16 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 						toolbar.setUpdateButtonEnabled(false)
 				}
 
-				// Update header with new title and DOI if they changed
 				val newTitle = DoiMetaHelpers.extractTitle(updated)
 				headerSection.querySelector("h1").textContent = newTitle
 				headerSection.querySelector("p").textContent = s"${updated.doi}"
 
-				// Update toolbar badge
 				toolbar.updateBadge(updated.state)
 
-				// Update the list view with the new state
 				d.dispatch(DoiUpdated(updated))
 
 				Future.successful(())
 			} else {
-				// Backend returned error message
 				d.dispatch(ReportError(errorMsg))
 				Future.failed(new Exception(errorMsg))
 			}
@@ -231,17 +223,12 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	}
 
 	private def showCloneBanner(): Unit = {
-		// Delay slightly to ensure DOM is fully rendered
 		org.scalajs.dom.window.setTimeout(() => {
-			// Show the clone banner with animation
 			cloneBanner.style.display = "block"
-			// Force a reflow to ensure the transition works
 			val _ = cloneBanner.offsetHeight
-			// Trigger the animation
 			cloneBanner.style.opacity = "1"
 			cloneBanner.style.transform = "translateY(0)"
 
-			// Auto-dismiss after 8 seconds
 			org.scalajs.dom.window.setTimeout(() => {
 				hideCloneBanner()
 			}, 8000)
@@ -251,7 +238,6 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 	private def hideCloneBanner(): Unit = {
 		cloneBanner.style.opacity = "0"
 		cloneBanner.style.transform = "translateY(-10px)"
-		// Wait for transition to complete before hiding
 		org.scalajs.dom.window.setTimeout(() => {
 			cloneBanner.style.display = "none"
 		}, 300)

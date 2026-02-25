@@ -19,7 +19,6 @@ object DoiMetaHelpers {
 			.getOrElse("No title")
 	}
 
-	// Page title utilities
 	private lazy val mainWrapper = document.getElementById("main-wrapper")
 
 	private lazy val devIcon: String =
