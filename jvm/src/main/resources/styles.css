@@ -106,63 +106,9 @@ span.label{
 .unified-toolbar .state-dropdown-menu .dropdown-item-text {
 	display: block;
 }
-.toc-panel {
-	position: absolute;
-	top: calc(100% + 0.5rem);
-	right: 0;
-	width: 300px;
-	max-height: calc(100vh - 200px);
-	background-color: #fff;
-	border: 1px solid rgba(0,0,0,.15);
-	border-radius: 0.25rem;
-	box-shadow: 0 4px 8px rgba(0,0,0,.1);
-	z-index: 900;
-	display: none;
-	flex-direction: column;
-}
-.toc-panel.show {
-	display: flex;
-}
-.toc-panel .toc-header {
-	padding: 1rem;
-	border-bottom: 1px solid rgba(0,0,0,.1);
-}
-.toc-panel .toc-body {
-	padding: 1rem;
-	overflow-y: auto;
-	flex: 1;
-}
-.toc-panel .toc-link {
-	display: block;
-	padding: 0.4rem 0.5rem;
-	color: #212529;
-	text-decoration: none;
-	border-radius: 0.25rem;
-	transition: background-color 0.15s ease;
-}
-.toc-panel .toc-link:hover {
-	background-color: #f8f9fa;
-}
-.toc-panel .toc-section-link {
-	font-weight: 600;
-}
 .toc-section {
 	scroll-margin-top: var(--sticky-header-height, 130px);
 	margin-top: 1rem;
-}
-@media (max-width: 768px) {
-	.unified-toolbar .toc-panel {
-		width: 250px;
-	}
-}
-.unified-toolbar .toc-button-container {
-	position: absolute;
-	right: 0;
-	z-index: 950;
-}
-.unified-toolbar .toc-toggle-button {
-	position: relative;
-	background-color: white !important;
 }
 
 .doi-editor-with-sidebar {
@@ -213,19 +159,15 @@ span.label{
 	font-weight: 600;
 }
 
-@media (min-width: 992px) {
-	.unified-toolbar .toc-button-container {
-		display: none;
-	}
-}
-
 @media (max-width: 991px) {
 	.doi-editor-with-sidebar {
 		flex-direction: column;
 	}
 
 	.doi-editor-with-sidebar .toc-sidebar-editor {
-		display: none;
+		position: static;
+		width: 100%;
+		max-height: none;
 	}
 }
 

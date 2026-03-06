@@ -130,8 +130,6 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			contentBody.appendChild(metaViewer.element)
 		}
 
-		toolbar.updateTocButtonPosition()
-
 		setupStickyHeaderHeight()
 	}
 

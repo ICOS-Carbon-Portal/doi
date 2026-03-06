@@ -37,65 +37,44 @@ class DoiMetaEditorWithSidebar(
 
 	private val errorListContent = ul(cls := "error-list list-unstyled mb-0").render
 
-	// TODO: Base the TOC on the form content
+	private val tocSections: Seq[(String, String, Seq[ValidationSection])] = Seq(
+		("toc-required", "Required properties", Seq(
+			ValidationSection.DoiTarget,
+			ValidationSection.Creators,
+			ValidationSection.Titles,
+			ValidationSection.Publisher,
+			ValidationSection.PublicationYear,
+			ValidationSection.ResourceType
+		)),
+		("toc-recommended", "Recommended properties", Seq(
+			ValidationSection.Subjects,
+			ValidationSection.Contributors,
+			ValidationSection.Dates,
+			ValidationSection.RelatedIdentifiers,
+			ValidationSection.Rights,
+			ValidationSection.Descriptions,
+			ValidationSection.Geolocations
+		)),
+		("toc-optional", "Optional properties", Seq(
+			ValidationSection.Formats,
+			ValidationSection.Version,
+			ValidationSection.Funding
+		))
+	)
+
 	private val tocContent = ul(cls := "list-unstyled mb-0")(
-		li(cls := "toc-section")(
-			a(href := "#toc-required", cls := "toc-link toc-section-link")("Required properties")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-doi-target", cls := "toc-link")("DOI target")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-creators", cls := "toc-link")("Creators")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-titles", cls := "toc-link")("Titles")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-publisher", cls := "toc-link")("Publisher")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-publication-year", cls := "toc-link")("Publication year")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-resource-type", cls := "toc-link")("Resource type")
-		),
-		li(cls := "toc-section mt-3")(
-			a(href := "#toc-recommended", cls := "toc-link toc-section-link")("Recommended properties")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-subjects", cls := "toc-link")("Subjects")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-contributors", cls := "toc-link")("Contributors")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-dates", cls := "toc-link")("Dates")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-related-identifiers", cls := "toc-link")("Related identifiers")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-rights", cls := "toc-link")("Rights")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-descriptions", cls := "toc-link")("Descriptions")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-geolocations", cls := "toc-link")("Geolocations")
-		),
-		li(cls := "toc-section mt-3")(
-			a(href := "#toc-optional", cls := "toc-link toc-section-link")("Optional properties")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-formats", cls := "toc-link")("Formats")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-version", cls := "toc-link")("Version")
-		),
-		li(cls := "toc-item")(
-			a(href := "#toc-funding", cls := "toc-link")("Funding references")
-		)
+		tocSections.zipWithIndex.flatMap { case ((sectionId, sectionLabel, items), idx) =>
+			val sectionCls = if idx == 0 then "toc-section" else "toc-section mt-3"
+			val header = li(cls := sectionCls)(
+				a(href := s"#$sectionId", cls := "toc-link toc-section-link")(sectionLabel)
+			)
+			val entries = items.map { vs =>
+				li(cls := "toc-item")(
+					a(href := s"#${vs.id}", cls := "toc-link")(vs.label)
+				)
+			}
+			header +: entries
+		}.toList: _*
 	).render
 
 	private val tocBody = div(cls := "toc-body", style := "display: block;")(tocContent).render
