@@ -16,7 +16,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 	private[this] def validateTargetUrl(): Unit = {
 		_target = Option(urlInput.value).map(_.trim).filterNot(_.isEmpty)
 
-		val targetError = _target.flatMap(targetUrlError)
+		val targetError = _target.fold[Option[String]](Some("Target URL is required"))(targetUrlError)
 
 		highlightError(urlInput, targetError)
 

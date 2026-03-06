@@ -34,12 +34,13 @@ class DoiMetaWidget(
 	protected val updateCb: DoiMeta => Unit = _ => ???//dummy, not used here
 
 	private def withUrlErrors(errs: Seq[ValidationError]): Seq[ValidationError] = {
-		val urlErrs = _meta.url.toSeq.flatMap { url =>
-			DoiTargetWidget.targetUrlError(url).map { msg =>
+		val urlErrs = _meta.url match {
+			case None => Seq(ValidationError(ValidationSection.DoiTarget, "Target URL is required", List("url")))
+			case Some(url) => DoiTargetWidget.targetUrlError(url).toSeq.map { msg =>
 				ValidationError(ValidationSection.DoiTarget, msg, List("url"))
 			}
 		}
-		errs ++ urlErrs
+		urlErrs ++ errs
 	}
 
 	private def formElements: Seq[Div] = Seq(
@@ -112,14 +113,8 @@ class DoiMetaWidget(
 		errorCallback(allErrors)
 
 		val canUpdate = _meta != init && {
-			if(_meta.state == DoiPublicationState.draft) {
-				val draftUrlErrors = _meta.url.toSeq.flatMap { url =>
-					DoiTargetWidget.targetUrlError(url).map { msg =>
-						ValidationError(ValidationSection.DoiTarget, msg, List("url"))
-					}
-				}
-				(_meta.draftErrors ++ draftUrlErrors).isEmpty
-			}
+			if(_meta.state == DoiPublicationState.draft)
+				withUrlErrors(_meta.draftErrors).isEmpty
 			else allErrors.isEmpty
 		}
 
