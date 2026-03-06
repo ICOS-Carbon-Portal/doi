@@ -9,7 +9,7 @@ import java.net.URI
 import scala.util.matching.Regex
 
 enum ValidationSection(val id: String, val label: String) {
-	case DoiTarget extends ValidationSection("toc-doi-target", "DOI target")
+	case DoiTarget extends ValidationSection("toc-doi-target", "Target URL")
 	case Creators extends ValidationSection("toc-creators", "Creators")
 	case Titles extends ValidationSection("toc-titles", "Titles")
 	case Publisher extends ValidationSection("toc-publisher", "Publisher")
