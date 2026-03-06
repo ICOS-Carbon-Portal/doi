@@ -72,8 +72,9 @@ case class DoiMeta(
 
 		// Publication year range check
 		publicationYear.foreach { year =>
-			if (year < 1000 || year > 3000)
-				errs += mkError(ValidationSection.PublicationYear, "Invalid publication year", List("publicationYear"))
+			PublicationYear.error(year).foreach { msg =>
+				errs += mkError(ValidationSection.PublicationYear, msg, List("publicationYear"))
+			}
 		}
 
 		errs ++= collectErrors(subjects, ValidationSection.Subjects, List("subjects"))

@@ -170,6 +170,15 @@ object SelfValidating{
 	private val pidRegex = """^[A-Za-z0-9-_]+/[A-Za-z0-9-_]+$""".r
 }
 
+object PublicationYear{
+	val MinYear = 1900
+	val MaxYear = 2050
+	val ErrorMessage = s"Publication year must be between $MinYear and $MaxYear"
+
+	def error(year: Int): Option[String] =
+		if year < MinYear || year > MaxYear then Some(ErrorMessage) else None
+}
+
 sealed trait Name extends SelfValidating
 
 case class PersonalName(givenName: String, familyName: String) extends Name{
