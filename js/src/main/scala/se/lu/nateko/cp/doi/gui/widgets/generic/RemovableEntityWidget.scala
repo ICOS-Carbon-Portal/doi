@@ -29,7 +29,9 @@ class RemovableEntityWidget[E](
 
 	def setRemovability(removable: Boolean): Unit = {
 		removeButton.disabled = !removable
-		removeButton.classList.add(if(removable) "text-warning" else "text-secondary")
+		val (toAdd, toRemove) = if(removable) ("text-warning", "text-secondary") else ("text-secondary", "text-warning")
+		removeButton.classList.remove(toRemove)
+		removeButton.classList.add(toAdd)
 	}
 
 	private[this] val moveUpButton =
