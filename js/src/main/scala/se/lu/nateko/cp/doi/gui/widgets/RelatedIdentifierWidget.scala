@@ -26,6 +26,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		rtOpt => {
 			_relatedIdentifier = _relatedIdentifier.copy(relationType = rtOpt)
 			updateRelatedMetadataVisibility(rtOpt)
+			validate()
 			updateCb(_relatedIdentifier)
 		}
 	)
@@ -35,6 +36,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		init.relatedIdentifierType,
 		rit => {
 			_relatedIdentifier = _relatedIdentifier.copy(relatedIdentifierType = rit)
+			validate()
 			updateCb(_relatedIdentifier)
 		}
 	)
@@ -98,6 +100,18 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		}
 	}
 
+	private def validate(): Unit = {
+		val relationTypeErr =
+			if _relatedIdentifier.relationType.isDefined then None
+			else Some("Please provide a relation type")
+		highlightError(relationTypeInput.element, relationTypeErr)
+
+		val identifierTypeErr =
+			if _relatedIdentifier.relatedIdentifierType.isDefined then None
+			else Some("Please select a related identifier type")
+		highlightError(relatedIdentifierTypeInput.element, identifierTypeErr)
+	}
+
 	val element = div(cls := "row spacyrow g-3")(
 		div(cls := "col-md-6")(
 			label(cls := "form-label")("Related identifier"),
@@ -119,4 +133,6 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 		schemeUriCol,
 		schemeTypeCol,
 	).render
+
+	validate()
 }

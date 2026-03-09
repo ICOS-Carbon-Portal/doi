@@ -472,7 +472,7 @@ case class Date(date: String, dateType: Option[DateType]) extends SelfValidating
 
 		errs ++= requireNonEmptyString(date, ValidationSection.Dates, "Date must not be empty if specified", List("date"))
 
-		errs ++= requireNonNull(dateType, ValidationSection.Dates, "Date type must be specified for every date", List("dateType"))
+		errs ++= requireDefined(dateType, ValidationSection.Dates, "Date type must be specified for every date", List("dateType"))
 
 		if (date != null && !date.isEmpty && dateIsWrong(date))
 			errs += mkError(ValidationSection.Dates, s"Wrong date '$date', use format YYYY[-MM-DD] or YYYY-MM-DD/YYYY-MM-DD", List("date"))
@@ -585,9 +585,9 @@ final case class RelatedIdentifier (
 ) extends SelfValidating {
 	def errors: Seq[ValidationError] = combineErrors(
 		requireNonEmptyString(relatedIdentifier, ValidationSection.RelatedIdentifiers, "Related identifier must not be empty", List("relatedIdentifier")),
-		requireNonNull(relatedIdentifierType, ValidationSection.RelatedIdentifiers, "Please select a related identifier type", List("relatedIdentifierType")),
+		requireDefined(relatedIdentifierType, ValidationSection.RelatedIdentifiers, "Please select a related identifier type", List("relatedIdentifierType")),
 		relatedIdentifierType.toSeq.flatMap(idType => validateIdentifierWithType(relatedIdentifier, idType)),
-		requireNonNull(relationType, ValidationSection.RelatedIdentifiers, "Please provide a relation type", List("relationType"))
+		requireDefined(relationType, ValidationSection.RelatedIdentifiers, "Please provide a relation type", List("relationType"))
 	)
 
 	private def validateIdentifierWithType(id: String, idType: RelatedIdentifierType): Seq[ValidationError] = idType match {
