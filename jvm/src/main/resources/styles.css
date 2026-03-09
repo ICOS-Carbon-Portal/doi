@@ -182,7 +182,7 @@ span.label{
 	background-color: var(--bs-yellow);
 }
 .state-dot-registered {
-	background-color: var(--bs-blue);
+	background-color: var(--bs-red);
 }
 .state-dot-findable {
 	background-color: var(--bs-green);
