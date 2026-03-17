@@ -37,7 +37,7 @@ span.label{
 .is-not-admin .published-doi .edit-control,
 .is-not-admin .published-doi .btn-update-doi,
 .is-logged-in.is-not-admin .published-doi .nav-edit,
-.is-admin .btn-submit {
+.is-admin .submit-btn-wrapper {
 	display: none;
 }
 .is-not-admin .published-doi .card input,

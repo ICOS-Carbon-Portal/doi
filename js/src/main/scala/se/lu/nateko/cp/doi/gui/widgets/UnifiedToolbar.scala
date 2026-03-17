@@ -159,7 +159,7 @@ class UnifiedToolbar(
 	)("Submit for publication").render
 
 	private val submitButtonWrapper = span(
-		cls := "d-inline-block",
+		cls := "submit-btn-wrapper",
 		title := "Fix validation errors to enable submission",
 		data("bs-toggle") := "tooltip",
 		data("bs-placement") := "top"
