@@ -29,6 +29,7 @@ class DoiMetaWidget(
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
 	private[this] var _meta = init
+	def currentMeta: DoiMeta = _meta
 	def errors = withUrlErrors(_meta.errors)
 
 	protected val updateCb: DoiMeta => Unit = _ => ???//dummy, not used here

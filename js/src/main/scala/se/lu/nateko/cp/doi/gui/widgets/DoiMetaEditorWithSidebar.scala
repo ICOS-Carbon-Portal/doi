@@ -201,5 +201,7 @@ class DoiMetaEditorWithSidebar(
 		sidebar
 	).render
 
+	def currentMeta: DoiMeta = metaWidget.currentMeta
+
 	def wireToolbarCallbacks(): Unit = metaWidget.wireToolbarCallbacks()
 }

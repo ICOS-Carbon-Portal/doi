@@ -19,6 +19,10 @@ class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: U
 		errorMessages.innerHTML = ""
 	})(rows := lineCount, whiteSpace := "pre", spellcheck := false)
 
+	def currentMeta: Option[DoiMeta] =
+		try Some(Json.parse(_json).as[DoiMeta])
+		catch case _: Throwable => None
+
 	private val errorMessages = p(color := Constants.formErrorsTextColor).render
 
 	// Expose method to wire toolbar callbacks

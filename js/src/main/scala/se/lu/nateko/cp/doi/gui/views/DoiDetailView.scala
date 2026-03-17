@@ -152,24 +152,64 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private var metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, toolbar)
 
+	/** Get the working (unsaved) metadata from the currently active editor tab.
+	  * Returns None only when the JSON tab has unparseable content. */
+	private def workingMeta: Option[DoiMeta] = currentTab match {
+		case EditorTab.edit => Some(metaEditorWithSidebar.currentMeta)
+		case EditorTab.json => metaJsonEditor.currentMeta
+		case EditorTab.view => Some(meta)
+	}
+
+	private def resolveWorkingMeta: Option[DoiMeta] = workingMeta.orElse {
+		val stay = !org.scalajs.dom.window.confirm(
+			"The JSON content is invalid and cannot be transferred to the editor.\n\n" +
+			"Switch anyway? Your unsaved JSON changes will be lost."
+		)
+		if stay then None else Some(meta)
+	}
+
 	private lazy val tabsCb: Map[EditorTab, () => Unit] = Map(
 		EditorTab.view -> {() =>
-			currentTab = EditorTab.view
-			contentBody.replaceChildren(metaViewer.element)
-			toolbar.setTab(EditorTab.view)
-			toolbar.setUpdateButtonEnabled(false)
+			resolveWorkingMeta match {
+				case Some(working) =>
+					currentTab = EditorTab.view
+					metaViewer = new DoiMetaViewer(working, toolbar)
+					contentBody.replaceChildren(metaViewer.element)
+					toolbar.setTab(EditorTab.view)
+					toolbar.setUpdateButtonEnabled(false)
+				case None =>
+					toolbar.setTab(currentTab)
+			}
 		},
 		EditorTab.edit -> {() =>
-			currentTab = EditorTab.edit
-			contentBody.replaceChildren(metaEditorWithSidebar.element)
-			toolbar.setTab(EditorTab.edit)
-			metaEditorWithSidebar.wireToolbarCallbacks()
+			resolveWorkingMeta match {
+				case Some(working) =>
+					currentTab = EditorTab.edit
+					metaEditorWithSidebar = new DoiMetaEditorWithSidebar(
+						working,
+						updateDoiMeta,
+						toolbar,
+						envProvider
+					)
+					contentBody.replaceChildren(metaEditorWithSidebar.element)
+					toolbar.setTab(EditorTab.edit)
+					metaEditorWithSidebar.wireToolbarCallbacks()
+				case None =>
+					toolbar.setTab(currentTab)
+			}
 		},
 		EditorTab.json -> {() =>
-			currentTab = EditorTab.json
-			contentBody.replaceChildren(metaJsonEditor.element)
-			toolbar.setTab(EditorTab.json)
-			metaJsonEditor.wireToolbarCallbacks()
+			val working = currentTab match {
+				case EditorTab.edit => Some(metaEditorWithSidebar.currentMeta)
+				case _ => Some(meta)
+			}
+			working.foreach { w =>
+				currentTab = EditorTab.json
+				metaJsonEditor = new DoiJsonEditor(w, updateDoiMeta, toolbar)
+				contentBody.replaceChildren(metaJsonEditor.element)
+				toolbar.setTab(EditorTab.json)
+				metaJsonEditor.wireToolbarCallbacks()
+			}
 		},
 	)
 
