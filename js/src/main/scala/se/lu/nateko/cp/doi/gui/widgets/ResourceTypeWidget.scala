@@ -25,7 +25,8 @@ class ResourceTypeWidget(
 			val rtGen = rtGenOpt.getOrElse(null)
 			_resType = _resType.copy(resourceTypeGeneral = Some(rtGen))
 			updateCb(_resType)
-		}
+		},
+		required = true
 	)
 
 	val element = div(cls := "row")(
