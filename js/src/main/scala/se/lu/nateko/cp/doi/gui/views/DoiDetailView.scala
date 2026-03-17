@@ -189,7 +189,8 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 						working,
 						updateDoiMeta,
 						toolbar,
-						envProvider
+						envProvider,
+						savedMeta = Some(meta)
 					)
 					contentBody.replaceChildren(metaEditorWithSidebar.element)
 					toolbar.setTab(EditorTab.edit)

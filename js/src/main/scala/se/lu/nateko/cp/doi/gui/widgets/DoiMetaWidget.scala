@@ -25,8 +25,11 @@ class DoiMetaWidget(
 	updater: DoiMeta => Future[Unit],
 	toolbar: UnifiedToolbar,
 	errorCallback: Seq[ValidationError] => Unit = _ => (),
-	envProvider: () => Option[String] = () => None
+	envProvider: () => Option[String] = () => None,
+	savedMeta: Option[DoiMeta] = None
 ) extends EntityWidget[DoiMeta] with SelfValidating{
+
+	private val saved = savedMeta.getOrElse(init)
 
 	private[this] var _meta = init
 	def currentMeta: DoiMeta = _meta
@@ -113,7 +116,7 @@ class DoiMetaWidget(
 		val allErrors = withUrlErrors(_meta.errors)
 		errorCallback(allErrors)
 
-		val canUpdate = _meta != init && {
+		val canUpdate = _meta != saved && {
 			if(_meta.state == DoiPublicationState.draft)
 				withUrlErrors(_meta.draftErrors).isEmpty
 			else allErrors.isEmpty

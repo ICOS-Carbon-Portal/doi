@@ -12,7 +12,8 @@ class DoiMetaEditorWithSidebar(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
 	toolbar: UnifiedToolbar,
-	envProvider: () => Option[String] = () => None
+	envProvider: () => Option[String] = () => None,
+	savedMeta: Option[DoiMeta] = None
 ) {
 
 	private var currentSidebarTab: String = "toc"
@@ -189,7 +190,7 @@ class DoiMetaEditorWithSidebar(
 		}
 	}
 
-	private val metaWidget = new DoiMetaWidget(init, updater, toolbar, updateErrors, envProvider)
+	private val metaWidget = new DoiMetaWidget(init, updater, toolbar, updateErrors, envProvider, savedMeta)
 
 	setupTOCLinks()
 	renderErrors() // Initialize with empty state
