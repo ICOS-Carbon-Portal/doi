@@ -24,7 +24,7 @@ class SelectWidget[T](
 object SelectWidget{
 
 	def optionElem[T](optInfo: SelectOption[T]) = {
-		option(value := optInfo.id)(optInfo.label)
+		option(value := optInfo.id, if optInfo.value.isEmpty then Seq(disabled, hidden) else Seq.empty[Modifier])(optInfo.label)
 	}
 
 	def selectOptions[T](noValueLabelOpt: Option[String], values: Array[T]): IndexedSeq[SelectOption[T]] =
