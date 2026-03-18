@@ -60,7 +60,7 @@ class DoiMetaViewer(meta: DoiMeta, toolbar: UnifiedToolbar) {
 		)
 	}.getOrElse(Seq())
 	
-	private val contributors = listPeople(meta.contributors.toSeq, "Contributors").map { contributorText =>
+	private val contributors = listPeople(meta.contributors.toSeq.distinctBy(_.name), "Contributors").map { contributorText =>
 		Seq(
 			h5(cls := "mt-4 mb-3")("Contributors"),
 			div(cls := "mb-3")(
