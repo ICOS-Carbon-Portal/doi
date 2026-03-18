@@ -15,7 +15,8 @@ case class EmailConfig(
 	smtpServer: String,
 	username: String,
 	password: String,
-	fromAddress: String
+	fromAddress: String,
+	toAddresses: Seq[UserId]
 )
 
 case class ClientEnvConfig(
@@ -90,7 +91,8 @@ object DoiConfig {
 			smtpServer = mailing.getString("smtpServer"),
 			username = mailing.getString("username"),
 			password = mailing.getString("password"),
-			fromAddress = mailing.getString("fromAddress")
+			fromAddress = mailing.getString("fromAddress"),
+			toAddresses = mailing.getStringList("toAddresses").asScala.map(UserId(_)).toIndexedSeq
 		)
 	}
 }

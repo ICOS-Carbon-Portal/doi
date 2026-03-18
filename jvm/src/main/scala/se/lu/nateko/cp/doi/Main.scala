@@ -67,7 +67,7 @@ object Main{
 
 		def sendEmail(uid: UserId, doi: Doi) = Future(
 			emailSender.send(
-				conf.admins,
+				conf.mailing.toAddresses,
 				"DOI submitted for publication",
 				views.html.doi.DoiSubmissionEmail(uid, doi).body
 			)
