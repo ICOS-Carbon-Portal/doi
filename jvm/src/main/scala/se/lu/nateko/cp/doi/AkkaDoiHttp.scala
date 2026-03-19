@@ -40,6 +40,12 @@ class AkkaDoiHttp(
 	}
 
 	def putPayload(url: URI, payload: String, contentType: String): Future[DoiResponse] = {
+		val logRequest = if(payload.contains("event")) true else false
+
+		if(logRequest)
+			system.log.info(url.toString)
+			system.log.info(payload)
+
 		val cType = ContentType.parse(contentType).getOrElse(
 			throw new Exception("Invalid content type: " + contentType)
 		)
@@ -47,7 +53,11 @@ class AkkaDoiHttp(
 		val entity = HttpEntity(cType, content)
 
 		val request = basicRequest(url).withMethod(HttpMethods.PUT).withEntity(entity)
-		http.singleRequest(request).flatMap(responseToDoi)
+		http.singleRequest(request).flatMap(responseToDoi).andThen(_.map { resp =>
+			if (logRequest)
+				system.log.info(resp.message)
+				system.log.info(resp.body)
+		})
 	}
 
 	def delete(url: URI): Future[DoiResponse] = {
