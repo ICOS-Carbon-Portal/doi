@@ -7,41 +7,52 @@ import se.lu.nateko.cp.doi.JsonSupport.given
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextAreaWidget
 import org.scalajs.dom.Event
 import scala.concurrent.Future
-import se.lu.nateko.cp.doi.gui.widgets.EditorTab
-import se.lu.nateko.cp.doi.gui.widgets.TabWidget
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import se.lu.nateko.cp.doi.gui.widgets.UnifiedToolbar
 import se.lu.nateko.cp.doi.gui.views.Constants
 
-class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], tabsCb: Map[EditorTab, () => Unit]) {
-
-	private val tabs = new TabWidget(EditorTab.json, tabsCb)
+class DoiJsonEditor(meta: DoiMeta, updateCb: DoiMeta => Future[Unit], toolbar: UnifiedToolbar) {
 	private var _json = Json.prettyPrint(Json.toJson(meta))
-	private var lineCount = _json.linesIterator.length
+	private var lineCount = _json.linesIterator.length + 1
 	private val editor = new TextAreaWidget(_json, v => {
 		_json = v
 		errorMessages.innerHTML = ""
-	})(rows := lineCount, whiteSpace := "pre")
+	})(rows := lineCount, whiteSpace := "pre", spellcheck := false)
+
+	def currentMeta: Option[DoiMeta] =
+		try Some(Json.parse(_json).as[DoiMeta])
+		catch case _: Throwable => None
 
 	private val errorMessages = p(color := Constants.formErrorsTextColor).render
 
-	private val updateButton = button(tpe := "button", cls := "btn btn-primary")("Update").render
-	updateButton.onclick = (_: Event) => {
-		try {
-			val meta = Json.parse(_json).as[DoiMeta]
-			updateCb(meta)
-		} catch {
-			case e: Throwable => {
-				errorMessages.innerText = e.getMessage
+	// Expose method to wire toolbar callbacks
+	def wireToolbarCallbacks(): Unit = {
+		toolbar.setUpdateButtonEnabled(true)
+		toolbar.setUpdateButtonCallback { (_: Event) =>
+			try {
+				toolbar.setUpdateButtonEnabled(false)
+				val meta = Json.parse(_json).as[DoiMeta]
+				val updateFuture = updateCb(meta)
+				updateFuture.foreach { _ =>
+					toolbar.showSaveSuccess()
+				}
+				updateFuture.failed.foreach { _ => toolbar.setUpdateButtonEnabled(true) }
+			} catch {
+				case e: Throwable => {
+					errorMessages.innerText = e.getMessage
+					toolbar.setUpdateButtonEnabled(true)
+				}
 			}
 		}
+		// Other callbacks don't apply for JSON editor
+		toolbar.setSubmitButtonCallback { (_: Event) => () }
 	}
 
 	val element = div(
-		tabs.element,
 		p(strong("Note:\u00a0"), "the structure of this JSON does not always match the JSON produced by Datacite"),
 		p(
 			editor.element
 		),
-		errorMessages,
-		updateButton
+		errorMessages
 	).render
 }

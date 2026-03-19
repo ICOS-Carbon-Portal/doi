@@ -4,61 +4,75 @@ import se.lu.nateko.cp.doi.meta.Rights
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.gui.widgets.generic.EntityWidget
 import se.lu.nateko.cp.doi.gui.widgets.generic.TextInputWidget
+import se.lu.nateko.cp.doi.gui.views.Constants
 
 class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends EntityWidget[Rights] {
 	private[this] var _rights = init
 
-	private[this] val ccBy4Button = button(
-		cls := "btn btn-secondary",
-		tpe := "button",
-		onclick := (autofillCcBy4 _)
-	)("CC-BY-4.0").render
+	private val initialLicenseValue: String = {
+		init.rightsIdentifier.map(_.toUpperCase) match {
+			case Some("CC-BY-4.0") => "CC-BY-4.0"
+			case Some("CC0-1.0") => "CC0-1.0"
+			case _ => "custom"
+		}
+	}
 
-	private def autofillCcBy4(): Unit = {
-		statementInput.element.value = "Creative Commons Attribution 4.0 International"
-		urlInput.element.value = "https://creativecommons.org/licenses/by/4.0/"
-		schemeUri.element.value = "https://spdx.org/licenses/"
-		rightsIdentifier.element.value = "CC-BY-4.0"
-		rightsIdentifierScheme.element.value = "SPDX"
-		lang.element.value = "eng"
-		statementInput.validate()
-		urlInput.validate()
-		rightsIdentifier.validate()
+	private[this] val licenseSelect = select(
+		cls := "form-select",
+		onchange := handleLicenseChange _
+	)(
+		option(value := "CC-BY-4.0")("CC-BY-4.0"),
+		option(value := "CC0-1.0")("CC0-1.0"),
+		option(value := "custom")("Custom")
+	).render
+
+	licenseSelect.value = initialLicenseValue
+
+	private def handleLicenseChange(): Unit = {
+		licenseSelect.value match {
+			case "CC-BY-4.0" =>
+				fillForm(Constants.ccBy4Rights)
+				hideDetails()
+			case "CC0-1.0" =>
+				fillForm(Constants.cc0Rights)
+				hideDetails()
+			case _ => // Custom
+				clearForm()
+				showDetails()
+		}
+	}
+
+	private def clearForm(): Unit = {
+		statementInput.element.value = ""
+		urlInput.element.value = ""
+		rightsIdentifier.element.value = ""
 		_rights = _rights.copy(
-			statementInput.element.value,
-			Some(urlInput.element.value),
-			Some(schemeUri.element.value),
-			Some(rightsIdentifier.element.value),
-			Some(rightsIdentifierScheme.element.value),
-			Some(lang.element.value)
+			rights = "",
+			rightsUri = None,
+			rightsIdentifier = None
 		)
 		updateCb(_rights)
 	}
 
-	private[this] val ccZeroButton = button(
-		cls := "btn btn-secondary",
-		tpe := "button",
-		onclick := (autofillCcZero _)
-	)("CC0-1.0").render
+	private def showDetails(): Unit = {
+		detailsContainer.style.display = "contents"
+	}
 
-	private def autofillCcZero(): Unit = {
-		statementInput.element.value = "Creative Commons Zero v1.0 Universal"
-		urlInput.element.value = "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
-		schemeUri.element.value = "https://spdx.org/licenses/"
-		rightsIdentifier.element.value = "CC0-1.0"
-		rightsIdentifierScheme.element.value = "SPDX"
-		lang.element.value = "eng"
+	private def hideDetails(): Unit = {
+		detailsContainer.style.display = "none"
+	}
+
+	private def fillForm(rights: Rights): Unit = {
+		statementInput.element.value = rights.rights
+		urlInput.element.value = rights.rightsUri.getOrElse("")
+		schemeUri.element.value = rights.schemeUri.getOrElse("")
+		rightsIdentifier.element.value = rights.rightsIdentifier.getOrElse("")
+		rightsIdentifierScheme.element.value = rights.rightsIdentifierScheme.getOrElse("")
+		lang.element.value = rights.lang.getOrElse("")
 		statementInput.validate()
 		urlInput.validate()
 		rightsIdentifier.validate()
-		_rights = _rights.copy(
-			statementInput.element.value,
-			Some(urlInput.element.value),
-			Some(schemeUri.element.value),
-			Some(rightsIdentifier.element.value),
-			Some(rightsIdentifierScheme.element.value),
-			Some(lang.element.value)
-		)
+		_rights = rights
 		updateCb(_rights)
 	}
 
@@ -97,21 +111,39 @@ class RightsWidget(init: Rights, protected val updateCb: Rights => Unit) extends
 		updateCb(_rights)
 	}, "Language", required = false)
 
-	val element = div(cls := "row spacyrow")(
-		div(cls := "col-md-2")(strong("Autofill")),
-		div(cls := "col-md-2")(ccBy4Button)(paddingBottom := 15),
-		div(cls := "col-md-8")(ccZeroButton)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License name")),
-		div(cls := "col-md-10")(statementInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License URI")),
-		div(cls := "col-md-4")(urlInput.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License id")),
-		div(cls := "col-md-4")(rightsIdentifier.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("License id scheme")),
-		div(cls := "col-md-4")(rightsIdentifierScheme.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Scheme uri")),
-		div(cls := "col-md-4")(schemeUri.element)(paddingBottom := 15),
-		div(cls := "col-md-2")(strong("Language")),
-		div(cls := "col-md-4")(lang.element)(paddingBottom := 15)
+	private[this] val detailsContainer = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-12")(
+			label(cls := "form-label")("License name"),
+			div(statementInput.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("License URI"),
+			div(urlInput.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("License id"),
+			div(rightsIdentifier.element)
+		),
+		div(cls := "col-md-3")(
+			label(cls := "form-label")("License id scheme"),
+			div(rightsIdentifierScheme.element)
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Scheme URI"),
+			div(schemeUri.element)
+		),
+		div(cls := "col-md-3")(
+			label(cls := "form-label")("Language"),
+			div(lang.element)
+		)
+	).render
+
+	if (initialLicenseValue != "custom") hideDetails()
+
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col")(
+			licenseSelect
+		),
+		detailsContainer
 	).render
 }

@@ -8,17 +8,15 @@ import scala.collection.Seq
 
 abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	initValues: Seq[E], cb: Seq[E] => Unit
-)(protected val title: String, protected val minAmount: Int = 0, protected val maxAmount: Int = 0){
+)(protected val title: String, protected val required: Boolean = false, protected val maxAmount: Int = 0, showTitle: Boolean = true){
 
 	protected def makeWidget(value: E, updateCb: E => Unit): W
 	protected def defaultValue: E
-	private var isCollapsed = false
 
 	private val widgets = Buffer.empty[RemovableEntityWidget[E]]
 
-	private def setRemovability(): Unit = if(minAmount > 0) {
-		widgets.foreach(_.setRemovability(widgets.length > minAmount))
-	}
+	private def setRemovability(): Unit =
+		widgets.foreach(_.setRemovability(!(required && widgets.length <= 1)))
 
 	private def setOrderability(): Unit = {
 		widgets.foreach(widget => {
@@ -39,7 +37,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 
 	private def notifyUpstream(): Unit = cb(widgets.map(_.entityValue))
 
-	private val widgetsParent = div(cls := "col-md-11").render
+	private val widgetsParent = div().render
 
 	private def produceWidget(value: E): Unit = {
 		val widgetFactory: (E => Unit) => W = makeWidget(value, _)
@@ -50,7 +48,6 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 			setRemovability()
 			setOrderability()
 			setAppendability()
-			setCollapsedness()
 			notifyUpstream()
 		}, (initiatingWidget, moveWidgetUp) => {
 			val initiatingWidgetIndex = widgets.indexOf(initiatingWidget)
@@ -77,54 +74,36 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 		setAppendability()
 		setRemovability()
 		setOrderability()
-		setCollapsedness()
 		notifyUpstream()
 	}
 
-	private val collapseWidget: Event => Unit = (_: Event) => {
-		isCollapsed = !isCollapsed
-		setCollapsedness()
-	}
-
-	private val collapseIcon = span().render
-	private val collapseButton = button(
-			tpe := "button",
-			cls := "btn btn-secondary",
-			onclick := collapseWidget,
-			marginBottom := 5
-		)(collapseIcon).render
-
+	private val buttonType = if (showTitle) "btn-outline-primary mt-2" else "btn-link ms-2"
+	private val addIcon = if (showTitle) "fas fa-plus" else "far fa-square-plus"
+	private val widgetWidth = if (showTitle) "col-md-10" else "col-md-12"
 	private val addWidgetButton = button(
-			tpe := "button", cls := "btn btn-success",
+			tpe := "button", cls := "btn btn-sm " + buttonType,
 			htmlTitle := "Add another item to the list",
 			onclick := addWidget, marginBottom := 5
 		)(
-			span(cls := "fas fa-plus")
+			span(cls := addIcon + " me-1"),
+			"Add " + title.dropRight(1).toLowerCase
 		).render
 
-	private def setCollapsedness(): Unit = {
-		val canCollapse: Boolean = widgetsParent.childNodes.length > 0
-		collapseButton.style.display = if(canCollapse) "inline-block" else "none"
-		collapseIcon.className = "fas fa-caret-" + (if(isCollapsed) "down" else "up")
-		collapseButton.title = if(isCollapsed) "Expand this list back down" else "Collapse this list up"
-		widgetsParent.style.display = if(isCollapsed) "none" else "block"
-		addWidgetButton.style.display = if(isCollapsed) "none" else "inline-block"
-	}
-
-	val element = Bootstrap.basicCard(
+	val element =
 		div(cls := "row")(
-			div(cls := "col-md-1")(
-				div(strong(title)),
-				div(addWidgetButton, collapseButton)
-			),
-			widgetsParent
+			if (showTitle) div(cls := "col-md-2")(
+				div(cls := "fw-bold pt-2")(title)
+			) else div(),
+			div(cls := widgetWidth)(
+				widgetsParent,
+				addWidgetButton
+			)
 		)
-	)
 
-	initValues.foreach(produceWidget)
+	val valuesToInit = if required && initValues.isEmpty then Seq(defaultValue) else initValues
+	valuesToInit.foreach(produceWidget)
 	setRemovability()
 	setOrderability()
 	setAppendability()
-	setCollapsedness()
 
 }

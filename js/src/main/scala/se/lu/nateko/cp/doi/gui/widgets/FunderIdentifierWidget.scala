@@ -15,7 +15,7 @@ class FunderIdentifierWidget(
 
 	private var _funderId = init
 
-	private def validate(): Unit = highlightError(idInput.element, _funderId.error)
+	private def validate(): Unit = highlightError(idInput.element, _funderId.errorMessage)
 
 	private val idInput = new TextInputWidget(init.funderIdentifier.getOrElse(""), newId => {
 		val funderIdOpt = if(newId.isEmpty) None else Some(newId)		
@@ -34,10 +34,14 @@ class FunderIdentifierWidget(
 		}
 	)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-2")(strong("Funder identifier")),
-		div(cls := "col-md-4")(idInput.element),
-		div(cls := "col-md-2")(strong("Scheme")),
-		div(cls := "col-md-4")(schemeInput.element)
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Funder identifier"),
+			div(idInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Scheme"),
+			div(schemeInput.element),
+		),
 	).render
 }

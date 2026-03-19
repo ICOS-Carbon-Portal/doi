@@ -14,40 +14,66 @@ object DoiReducer {
 
 	val reducer: Reducer = (action, state) => action match{
 
-		case GotPrefixInfo(info) => state.copy(prefix = info)
+		case GotEnvConfigs(envs, defaultEnv, prefixes) =>
+			state.copy(
+				envs = envs,
+				activeEnv = Some(defaultEnv),
+				prefixes = prefixes,
+				prefix = prefixes.getOrElse(defaultEnv, state.prefix)
+			)
+
+		case SwitchEnv(env) =>
+			state.copy(
+				activeEnv = Some(env),
+				prefix = state.prefixes.getOrElse(env, state.prefix)
+			)
 
 		case StartLoading => state.copy(isLoading = true)
 		case StopLoading => state.copy(isLoading = false)
 
 		case FreshDoiList(dois, listMeta) => state.copy(dois = dois, listMeta = listMeta)
 
-		case SelectDoi(doi) =>
-			if(state.isSelected(doi))
-				state.copy(selected = None)
-			else
-				state.withSelected(doi)
+		case NavigateToRoute(route) =>
+			Router.navigateTo(route) // This saves scroll position in history.state
+			val newState = state.copy(currentRoute = Some(route))
+			newState
 
-		case DoiCloneRequest(meta) => {
-			val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
-			val newMeta = meta.copy(doi = newDoi, titles = None, state = DoiPublicationState.draft)
+		case DoiCloneRequest(originalMeta, clonedMeta) => {
+			Router.navigateTo(DetailRoute(clonedMeta.doi))
 
-			state.copy(dois = newMeta +: state.dois)
-				.withSelected(newDoi)
+			val newState = state.copy(
+				dois = clonedMeta +: state.dois,
+				lastClonedDoi = Some(clonedMeta.doi),
+				currentRoute = Some(DetailRoute(clonedMeta.doi))
+			).withSelected(clonedMeta.doi)
 				.incrementTotal
+			newState
 		}
 
 		case EmptyDoiCreation(doi) => state.copy(dois = DoiMeta(doi) +: state.dois)
 			.incrementTotal
 			.withSelected(doi)
 
-		case ReportError(msg) => state.copy(error = Some(msg))
+		case ReportError(msg) => state.copy(error = Some(msg), success = None)
 
-		case ResetErrors => state.copy(error = None)
+		case ReportSuccess(msg) => state.copy(success = Some(msg), error = None)
 
-		case DoiDeleted(doi) => state.copy(
-			dois = state.dois.filter(_.doi != doi),
-			selected = None
-		).decrementTotal
+		case ResetErrors => state.copy(error = None, success = None)
+
+		case DoiDeleted(doi) =>
+			Router.navigateTo(ListRoute)
+			state.copy(
+				dois = state.dois.filter(_.doi != doi),
+				selected = None,
+				currentRoute = Some(ListRoute),
+				success = Some(s"DOI $doi was deleted successfully")
+			).decrementTotal
+
+		case DoiUpdated(updatedMeta) => state.copy(
+			dois = state.dois.map(meta => if (meta.doi == updatedMeta.doi) updatedMeta else meta)
+		)
+
+		case ClearLastClonedDoi => state.copy(lastClonedDoi = None)
 
 	}
 

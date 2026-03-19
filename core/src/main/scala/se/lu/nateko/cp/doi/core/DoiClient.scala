@@ -51,15 +51,17 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 
 	private val config = conf.member
 
-	def clientDois(query: String, page: Int): URI = new URI(
-		//TODO Move page size into the API, too
-		s"${metaBase}?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page"
-	)
+	def clientDois(query: String, page: Int, state: Option[String] = None): URI = {
+		val stateParam = state.map(s => s"&state=$s").getOrElse("")
+		new URI(
+			s"${metaBase}?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page$stateParam"
+		)
+	}
 
 	def doi(suffix: String): Doi = Doi(config.doiPrefix, suffix)
 
-	def listDoisMeta(query: Option[String] = None, page: Option[Int]): Future[DoiListPayload] = http
-		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1))).flatMap(
+	def listDoisMeta(query: Option[String] = None, page: Option[Int], state: Option[String] = None): Future[DoiListPayload] = http
+		.getJson(clientDois(query.getOrElse(""), page.getOrElse(1), state)).flatMap(
 			resp => analyzeResponse{
 				case 200 => Future.successful(resp.body.parseJson.convertTo[DoiListPayload])
 			}(resp)

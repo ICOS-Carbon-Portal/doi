@@ -20,7 +20,7 @@ class RemovableEntityWidget[E](
 	})
 
 	private[this] val removeButton =
-		button(tpe := "button", cls := "btn btn-warning m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-trash")
 		).render
 
@@ -29,15 +29,18 @@ class RemovableEntityWidget[E](
 
 	def setRemovability(removable: Boolean): Unit = {
 		removeButton.disabled = !removable
+		val (toAdd, toRemove) = if(removable) ("text-warning", "text-secondary") else ("text-secondary", "text-warning")
+		removeButton.classList.remove(toRemove)
+		removeButton.classList.add(toAdd)
 	}
 
 	private[this] val moveUpButton =
-		button(tpe := "button", cls := "btn btn-info m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-arrow-up")
 		).render
 
 	private[this] val moveDownButton =
-		button(tpe := "button", cls := "btn btn-info m-1")(
+		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
 			span(cls := "fas fa-arrow-down")
 		).render
 
@@ -51,10 +54,10 @@ class RemovableEntityWidget[E](
 		moveDownButton.disabled = !orderable(1)
 	}
 
-	val element = Bootstrap.basicCard(
-		div(cls := "row")(
-			div(cls := "col-md-11")(widget.element),
-			div(cls := "col-md-1 spacyrow")(div(moveUpButton, moveDownButton, removeButton))
+	val element =
+		div(cls := "row row-cols-auto")(
+			div(cls := "col-md")(widget.element),
+			div(cls := "col-xl-2 col-lg-3 text-end", style := "min-width: 120px;")(div(moveUpButton, moveDownButton, removeButton))
 		)
-	).render
+	.render
 }

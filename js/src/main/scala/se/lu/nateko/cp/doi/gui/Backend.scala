@@ -15,14 +15,24 @@ import scala.scalajs.js.Thenable.Implicits._
 
 object Backend {
 
-	def getPrefixInfo: Future[String] = dom
-		.fetch("/api/doiprefix")
-		.flatMap(checkResponseOk("fetch DOI prefix"))
+	def getEnvConfigs: Future[GotEnvConfigs] = dom
+		.fetch("/api/envconfigs")
+		.flatMap(checkResponseOk("fetch environment configs"))
 		.flatMap(_.text())
+		.map{ txt =>
+			val json = Json.parse(txt)
+			val envs = (json \ "envs").as[Seq[String]]
+			val defaultEnv = (json \ "default").as[String]
+			val prefixes = (json \ "prefixes").as[Map[String, String]]
+			GotEnvConfigs(envs, defaultEnv, prefixes)
+		}
 
-	def updateMeta(meta: DoiMeta): Future[String] = dom
+	private def envParam(env: Option[String]): String =
+		env.map(e => s"env=$e").getOrElse("")
+
+	def updateMeta(meta: DoiMeta, env: Option[String]): Future[String] = dom
 		.fetch(
-			"/api/metadata",
+			s"/api/metadata?${envParam(env)}",
 			new dom.RequestInit{
 				method = dom.HttpMethod.POST
 				body = Json.toJson(meta).toString
@@ -35,28 +45,36 @@ object Backend {
 		.flatMap(_.text())
 		.map(s => Json.parse(s).as[String])
 
-	def getFreshDoiList(query: Option[String], page: Option[Int]): Future[FreshDoiList] = {
-		//val startTime = System.currentTimeMillis()
+	def getFreshDoiList(query: Option[String], page: Option[Int], state: Option[String], env: Option[String]): Future[FreshDoiList] = {
+		val stateParam = state.map(s => s"&state=$s").getOrElse("")
+		val envP = env.map(e => s"&env=$e").getOrElse("")
 		dom
-			.fetch(s"/api/list/?query=${query.getOrElse("")}&page=${page.getOrElse(1)}")
-			//.andThen{case _ => println(s"Got list response in ${System.currentTimeMillis() - startTime} ms")}
+			.fetch(s"/api/list/?query=${query.getOrElse("")}&page=${page.getOrElse(1)}$stateParam$envP")
 			.flatMap(checkResponseOk("fetch DOI list from DataCite REST API"))
 			.flatMap(_.text())
 			.map(s => Json.parse(s).as[DoiListPayload])
 			.map{pl =>
 				val dois = pl.data.map(_.attributes)
-				//println(s"Got list response and parsed DOIs in ${System.currentTimeMillis() - startTime} ms")
 				FreshDoiList(dois, Some(pl.meta))
 			}
 	}
 
-	def delete(doi: Doi): Future[Unit] = dom
-		.fetch(s"/api/$doi/", new dom.RequestInit{method = dom.HttpMethod.DELETE})
+	def getDoi(doi: Doi, env: Option[String]): Future[Option[DoiMeta]] = dom
+		.fetch(s"/api/meta/$doi?${envParam(env)}")
+		.flatMap { resp =>
+			if (resp.status == 404) Future.successful(None)
+			else checkResponseOk(s"fetch DOI $doi")(resp).flatMap(_.text()).map { txt =>
+				Some(Json.parse(txt).as[DoiMeta])
+			}
+		}
+
+	def delete(doi: Doi, env: Option[String]): Future[Unit] = dom
+		.fetch(s"/api/$doi/?${envParam(env)}", new dom.RequestInit{method = dom.HttpMethod.DELETE})
 		.flatMap(checkResponseOk("delete DOI"))
 		.map(_ => ())
 
-	def submitForPublication(doi: Doi): Future[Unit] = dom
-		.fetch(s"/api/submit/$doi", new dom.RequestInit{method = dom.HttpMethod.POST})
+	def submitForPublication(doi: Doi, env: Option[String]): Future[Unit] = dom
+		.fetch(s"/api/submit/$doi?${envParam(env)}", new dom.RequestInit{method = dom.HttpMethod.POST})
 		.flatMap(checkResponseOk("submit DOI for publication"))
 		.map(_ => ())
 

@@ -19,6 +19,8 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 		case _: GenericName => false
 	}
 
+	private def isGeneric = !isPersonal
+
 	private def getNameElem: Element = _name match{
 		case pn: PersonalName => new PersonalNameWidget(pn, newPn => {
 				_name = newPn
@@ -32,23 +34,35 @@ class NameWidget(init: Name, protected val updateCb: Name => Unit) extends Entit
 
 	private var nameElem = getNameElem
 
-	private def checkedModifier(personal: Boolean) = if(personal == isPersonal) Seq(checked := true) else Nil
-
-	private def changeNameType(personal: Boolean): Event => Unit = e => if(isPersonal != personal){
-		_name = if(personal) PersonalName("", "") else GenericName("")
-		val newNameElem = getNameElem
-		nameElem.parentNode.replaceChild(newNameElem, nameElem)
-		nameElem = newNameElem
-		updateCb(_name)
+	private def changeNameType(): Event => Unit = e => {
+		val selectElem = e.target.asInstanceOf[org.scalajs.dom.html.Select]
+		val personal = selectElem.value == "personal"
+		if(isPersonal != personal){
+			_name = if(personal) PersonalName("", "") else GenericName("")
+			val newNameElem = getNameElem
+			nameElem.parentNode.replaceChild(newNameElem, nameElem)
+			nameElem = newNameElem
+			updateCb(_name)
+		}
 	}
 
-	private def nameTypeOption(personal: Boolean) =
-		input(tpe := "radio", name := "nameType", onchange := changeNameType(personal))(checkedModifier(personal))
-
-	val element = Bootstrap.basicCard(
-		Bootstrap.propValueRow(strong("Name type"))(
-			form(nameTypeOption(true), " Personal name", br, nameTypeOption(false), " Organizational name")
-		)(paddingBottom := 15),
-		Bootstrap.propValueRow(strong("Name"))(nameElem)
-	).render
+	val element =
+		div(
+			cls := "row",
+			div(
+				cls := "col-md-auto",
+				select(
+					cls := "form-select",
+					onchange := changeNameType()
+				)(
+					if(isPersonal) option(value := "personal", selected := true)("Person") else option(value := "personal")("Person"),
+					if(isGeneric) option(value := "organization", selected := true)("Organization") else option(value := "organization")("Organization")
+				)
+			),
+			div(
+				cls := "col",
+				nameElem
+			)
+		)
+	.render
 }

@@ -15,45 +15,64 @@ case class EmailConfig(
 	smtpServer: String,
 	username: String,
 	password: String,
-	fromAddress: String
+	fromAddress: String,
+	toAddresses: Seq[UserId]
+)
+
+case class ClientEnvConfig(
+	client: DoiClientConfig,
+	prefixInfo: String
 )
 
 case class DoiConfig(
 	httpBindInterface: String,
 	httpBindPort: Int,
-	client: DoiClientConfig,
-	prefixInfo: String,
+	envConfigs: Map[String, ClientEnvConfig],
 	auth: PublicAuthConfig,
 	admins: Seq[UserId],
 	mailing: EmailConfig,
-	metaHost: String
+	metaHost: String,
+	development: Boolean,
+	skipCacheInvalidation: Boolean
 )
 
 object DoiConfig {
+
+	private val envNames = Seq("test", "production")
 
 	def getConfig(using envri: Envri): DoiConfig = {
 		val allConf = ConfigLoader.appConfig
 
 		val doiConf = allConf.getConfig("cpdoi")
+
+		val envConfigs = envNames
+			.filter(doiConf.hasPath)
+			.map(name => name -> getClientEnvConfig(doiConf.getConfig(name)))
+			.toMap
+
 		DoiConfig(
 			httpBindInterface = doiConf.getString("httpBindInterface"),
 			httpBindPort = doiConf.getInt("httpBindPort"),
-			client = getClientConfig(doiConf),
-			prefixInfo = doiConf.getString("member.prefix"),
+			envConfigs = envConfigs,
 			auth = ConfigLoader.authPubConfig(envri),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
 			mailing = getMailingConfig(doiConf),
-			metaHost = doiConf.getString("metaHost")
+			metaHost = doiConf.getString("metaHost"),
+			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false,
+			skipCacheInvalidation = if doiConf.hasPath("skipCacheInvalidation") then doiConf.getBoolean("skipCacheInvalidation") else false
 		)
 	}
 
-	private def getClientConfig(doiConf: Config) = DoiClientConfig(
-		restEndpoint = new URI(doiConf.getString("restEndpoint")),
-		member = DoiMemberConfig(
-			symbol = doiConf.getString("member.symbol"),
-			password = doiConf.getString("member.password"),
-			doiPrefix = doiConf.getString("member.prefix")
-		)
+	private def getClientEnvConfig(envConf: Config) = ClientEnvConfig(
+		client = DoiClientConfig(
+			restEndpoint = new URI(envConf.getString("restEndpoint")),
+			member = DoiMemberConfig(
+				symbol = envConf.getString("member.symbol"),
+				password = envConf.getString("member.password"),
+				doiPrefix = envConf.getString("member.prefix")
+			)
+		),
+		prefixInfo = envConf.getString("member.prefix")
 	)
 
 	private def getAuthConfig(allConf: Config): PublicAuthConfig = {
@@ -72,7 +91,8 @@ object DoiConfig {
 			smtpServer = mailing.getString("smtpServer"),
 			username = mailing.getString("username"),
 			password = mailing.getString("password"),
-			fromAddress = mailing.getString("fromAddress")
+			fromAddress = mailing.getString("fromAddress"),
+			toAddresses = mailing.getStringList("toAddresses").asScala.map(UserId(_)).toIndexedSeq
 		)
 	}
 }

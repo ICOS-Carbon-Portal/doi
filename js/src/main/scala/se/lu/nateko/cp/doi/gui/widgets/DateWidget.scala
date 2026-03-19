@@ -33,7 +33,7 @@ trait DateWidget(init: Date) extends EntityWidget[Date]{
 		highlightError(input, dateErr)
 
 	def getDateTypeInput(init: Option[DateType], values: Array[DateType], validate: () => Unit) = new SelectWidget[DateType](
-		SelectWidget.selectOptions(Some("Date type"), values),
+		SelectWidget.selectOptions(Some("Select type"), values),
 		init,
 		dtOpt => {
 			_date = _date.copy(dateType = dtOpt)

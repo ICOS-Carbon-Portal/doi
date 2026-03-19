@@ -16,7 +16,7 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 	private[this] def validateTargetUrl(): Unit = {
 		_target = Option(urlInput.value).map(_.trim).filterNot(_.isEmpty)
 
-		val targetError = _target.flatMap(targetUrlError)
+		val targetError = _target.fold[Option[String]](Some("Target URL is required"))(targetUrlError)
 
 		highlightError(urlInput, targetError)
 
@@ -26,17 +26,12 @@ class DoiTargetWidget(init: Option[String], doi: Doi, protected val updateCb: Op
 
 	urlInput.onkeyup = (_: Event) => validateTargetUrl()
 
-	private val doiUrl = "https://doi.org/" + doi
-
-	val element: html.Div = Bootstrap.defaultCard("DOI Target")(
-		p(
-			span(strong("Test the DOI: ")),
-			a(href := doiUrl, target := "_blank")(doiUrl),
-			span(" (allow up to 24 hours synchronization time after Target URL update)")
-		),
-		div(cls := "input-group")(
-			span(cls := "input-group-text")("Target URL"),
-			urlInput
+	val element: html.Div = div(cls := "row gy-2")(
+		div(cls := "col-md-2")(div(cls := "fw-bold pt-2")("Target URL")),
+		div(cls := "col-md-10")(
+			div(cls := "row")(
+				div(cls := "col-xl-10 col-lg-9")(urlInput)
+			)
 		)
 	).render
 }

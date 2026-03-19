@@ -28,11 +28,11 @@ class TitleWidget(init: Title, protected val updateCb: Title => Unit) extends En
 		_title = _title.copy(lang = langOpt)
 		updateCb(_title)
 	})
+	
+	titleTypeInput.element.style.setProperty("flex-basis", "content")
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-8 spacyrow")(titleInput.element),
-		div(cls := "col-md-2 spacyrow")(titleTypeInput.element),
-		div(cls := "col-md-2 spacyrow")(languageInput.element)
+	val element = div(cls := "input-group")(
+		titleInput.element, titleTypeInput.element, languageInput.element
 	).render
 }
 

@@ -1,85 +1,34 @@
 @import views.html.CpCommonPage
 @import eu.icoscp.envri.Envri
 
-@(isLoggedIn: Boolean, isAdmin: Boolean, jsFastOpt: Boolean = false)(implicit env: Envri)
-@CpCommonPage("Carbon Portal's DOI minting service"){
-	<style type="text/css">
-		@@media all and (max-width: 991px) {
-			.spacyrow{
-				margin-top: 15px;
-				margin-bottom: 15px;
-			}
-		}
-		.page-header {
-			margin-top: 2rem;
-			margin-bottom: 1rem;
-		}
-		.card {
-			margin-bottom: 1rem;
-		}
-		span.label{
-			font-size: 100%;
-			color: #000;
-		}
-		.is-anonymous .edit-control,
-		.is-not-admin .admin-control,
-		.is-not-admin .published-doi .btn-update-doi,
-		.is-logged-in.is-not-admin .published-doi .nav-edit,
-		.is-admin .btn-submit {
-			display: none;
-		}
-		.is-not-admin .published-doi .card input,
-		.is-not-admin .published-doi .card button,
-		.is-not-admin .published-doi .card select,
-		.is-anonymous .draft-doi .card input,
-		.is-anonymous .draft-doi .card button,
-		.is-anonymous .draft-doi .card select{
-			pointer-events: none;
-		}
-		.is-not-admin .published-doi .card-body input{
-			background-color: lightgrey;
-		}
-		a[target="_blank"]::after {
-			font-family: "Font Awesome 5 Free";
-			content: "\f35d";
-			font-weight: 900;
-			margin: 0 0.3rem;
-		}
-	</style>
+@(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false, authHost: String, doiSuffix: Option[String] = None)(implicit env: Envri)
+@CpCommonPage(s"${devIcon}${pageTitle}"){
+	<link rel="stylesheet" type="text/css" href="/styles.css">
 }{
-	<div class="row">
-		<div class="col">
-			<div class="page-header">
-				<h1>Carbon Portal DOI minting service</h1>
+	<div id="main-wrapper" class="container-xxl @isAdminClass @isLoggedInClass" data-permissions="@permissions" data-development="@isDevelopment" data-envri="@env.shortName">
+		<div class="row">
+			<div class="col">
+				<div class="page-header">
+					<h1>DOI minting</h1>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<p>@permissions</p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<div id="list-wrapper"></div>
 			</div>
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col">
-			<p><b>@permissions</b></p>
-			<p>
-				<div>🔵 Published DOIs are in blue.</div>
-				<div>🟡 Drafts are in yellow.</div>
-			</p>
-			<p>
-				<a href="https://support.datacite.org/docs/datacite-search-user-documentation#1-search-the-for-a-specific-publisher" target="_blank">
-					Read about advanced search queries
-				</a>
-			</p>
-		</div>
-	</div>
 
-	<hr>
-
-	<div class="row">
-		<div class="col">
-			<div id="main-wrapper" class="@isAdminClass @isLoggedInClass"></div>
-		</div>
-	</div>
-
-
-	<script src="doi-js-@{if(jsFastOpt) "fast" else ""}opt.js"></script>
+	<script src="/doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
 
 }
 
@@ -89,7 +38,11 @@
 	else if(isLoggedIn)
 		"You can create draft DOIs and submit them for publication. We will review your submission before publishing the DOI. You can also clone an existing DOI to update it after it has been published."
 	else
-		"Please log in to create or update DOIs."
+		loginText
+}
+
+@loginText = {
+	Please <a href='https://@{authHost}'>log in</a> to create or update DOIs.
 }
 
 @isAdminClass = @{
@@ -99,3 +52,12 @@
 @isLoggedInClass = @{
 	if(isLoggedIn) "is-logged-in" else "is-anonymous"
 }
+
+@devIcon = @{
+	if(isDevelopment) "🚧 " else ""
+}
+
+@pageTitle = @{
+	doiSuffix.getOrElse("DOI minting")
+}
+

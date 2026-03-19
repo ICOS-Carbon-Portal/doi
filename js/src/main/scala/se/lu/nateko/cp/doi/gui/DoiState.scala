@@ -8,11 +8,17 @@ import scala.collection.Seq
 
 case class DoiState(
 	prefix: String,
+	envs: Seq[String],
+	activeEnv: Option[String],
+	prefixes: Map[String, String],
 	dois: Seq[DoiMeta],
 	listMeta: Option[DoiListMeta],
 	selected: Option[Doi],
 	error: Option[String],
-	isLoading: Boolean
+	success: Option[String],
+	isLoading: Boolean,
+	currentRoute: Option[Route] = None,
+	lastClonedDoi: Option[Doi] = None
 )
 
 object DoiStateUpgrades{

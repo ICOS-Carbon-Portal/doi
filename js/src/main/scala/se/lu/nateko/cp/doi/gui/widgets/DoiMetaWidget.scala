@@ -4,6 +4,8 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.meta._
 import se.lu.nateko.cp.doi.Doi
+import se.lu.nateko.cp.doi.meta.ValidationError
+import se.lu.nateko.cp.doi.meta.ValidationSection
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Div
 import se.lu.nateko.cp.doi.gui.widgets.generic._
@@ -21,85 +23,109 @@ import scala.util.Success
 class DoiMetaWidget(
 	init: DoiMeta,
 	updater: DoiMeta => Future[Unit],
-	tabsCb: Map[EditorTab, () => Unit],
-	deleteCb: Doi => Unit
+	toolbar: UnifiedToolbar,
+	errorCallback: Seq[ValidationError] => Unit = _ => (),
+	envProvider: () => Option[String] = () => None,
+	savedMeta: Option[DoiMeta] = None
 ) extends EntityWidget[DoiMeta] with SelfValidating{
 
+	private val saved = savedMeta.getOrElse(init)
+
 	private[this] var _meta = init
-	def error = withUrlError(_meta.error)
+	def currentMeta: DoiMeta = _meta
+	def errors = withUrlErrors(_meta.errors)
 
 	protected val updateCb: DoiMeta => Unit = _ => ???//dummy, not used here
 
-	private def withUrlError(err: Option[String]): Option[String] =
-		joinErrors(err, _meta.url.flatMap(DoiTargetWidget.targetUrlError))
+	private def withUrlErrors(errs: Seq[ValidationError]): Seq[ValidationError] = {
+		val urlErrs = _meta.url match {
+			case None => Seq(ValidationError(ValidationSection.DoiTarget, "Target URL is required", List("url")))
+			case Some(url) => DoiTargetWidget.targetUrlError(url).toSeq.map { msg =>
+				ValidationError(ValidationSection.DoiTarget, msg, List("url"))
+			}
+		}
+		urlErrs ++ errs
+	}
 
 	private def formElements: Seq[Div] = Seq(
+		
+		div(cls := "row mt-5 toc-section", id := "toc-required")(h4("Required properties")).render,
 
-		new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element.render,
+		div(cls := "toc-section", id := "toc-doi-target")(new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element).render,
 
-		new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element.render,
+		div(cls := "toc-section", id := "toc-creators")(new CreatorsEditWidget(init.creators, cb(cs => _.copy(creators = cs))).element).render,
 
-		Bootstrap.basicPropValueWidget("Publisher")(
-			new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
+		div(cls := "toc-section", id := "toc-titles")(new TitlesEditWidget(init.titles.getOrElse(Seq()), cb(ts => _.copy(titles = Some(ts)))).element).render,
+
+		div(cls := "toc-section", id := "toc-publisher")(
+			Bootstrap.singlePropValueWidget("Publisher")(
+				new TextInputWidget(init.publisher.getOrElse(""), cb(pub => _.copy(publisher = Some(pub))), required = true).element
+			)
 		).render,
 
-		Bootstrap.basicPropValueWidget("Publication year")(
-			new IntInputWidget(init.publicationYear.getOrElse(0), cb(pub => _.copy(publicationYear = Some(pub)))).element
+		div(cls := "toc-section", id := "toc-publication-year")(
+			Bootstrap.singlePropValueWidget("Publication year")(
+				new YearInputWidget(init.publicationYear, cb(pub => _.copy(publicationYear = pub)), required = true).element
+			)
 		).render,
 
-		Bootstrap.basicPropValueWidget("Resource type")(
-			new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
+		div(cls := "toc-section", id := "toc-resource-type")(
+			Bootstrap.basicPropValueWidget("Resource type")(
+				new ResourceTypeWidget(init.types.getOrElse(ResourceType(None, None)), cb(rt => _.copy(types = Some(rt)))).element
+			)
 		).render,
 
-		new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element.render,
+		div(cls := "row mt-5 toc-section", id := "toc-recommended")(h4("Recommended properties")).render,
 
-		new ContributorsEditWidget(init.contributors, cb(cs => _.copy(contributors = cs))).element.render,
+		div(cls := "toc-section", id := "toc-subjects")(new SubjectsEditWidget(init.subjects, cb(ss => _.copy(subjects = ss))).element).render,
 
-		new DatesEditWidget(init.dates, cb(ds => _.copy(dates = ds))).element.render,
+		div(cls := "toc-section", id := "toc-contributors")(new ContributorsEditWidget(init.contributors, cb(cs => _.copy(contributors = cs))).element).render,
 
-		new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element.render,
+		div(cls := "toc-section", id := "toc-dates")(new DatesEditWidget(init.dates, cb(ds => _.copy(dates = ds))).element).render,
 
-		Bootstrap.basicPropValueWidget("Version")(
-			new VersionWidget(init.version, cb(v => _.copy(version = v))).element
+		div(cls := "toc-section", id := "toc-related-identifiers")(new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element).render,
+
+		div(cls := "toc-section", id := "toc-rights")(new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element).render,
+
+		div(cls := "toc-section", id := "toc-descriptions")(new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element).render,
+
+		div(cls := "toc-section", id := "toc-geolocations")(new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element).render,
+
+		div(cls := "row mt-5 toc-section", id := "toc-optional")(h4("Optional properties")).render,
+
+		div(cls := "toc-section", id := "toc-formats")(new FormatsEditWidget(init.formats, cb(fs => _.copy(formats = fs))).element).render,
+
+		div(cls := "toc-section", id := "toc-version")(
+			Bootstrap.singlePropValueWidget("Version")(
+				new VersionWidget(init.version, cb(v => _.copy(version = v))).element
+			)
 		).render,
 
-		new RightsEditWidget(init.rightsList.getOrElse(Seq()), cb(rs => _.copy(rightsList = Some(rs)))).element.render,
-
-		new DescriptionsEditWidget(init.descriptions, cb(ds => _.copy(descriptions = ds))).element.render,
-
-		new RelatedIdentifierEditWidget(init.relatedIdentifiers.getOrElse(Seq()), cb(ri => _.copy(relatedIdentifiers = Some(ri)))).element.render,
-
-		new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element.render,
-
-		new GeoLocationEditWidget(init.geoLocations.getOrElse(Nil), cb(gl => _.copy(geoLocations = Some(gl)))).element.render,
-
-		new DoiTargetWidget(init.url, init.doi, cb(t => _.copy(url = t))).element,
+		div(cls := "toc-section", id := "toc-funding")(new FundingEditWidget(init.fundingReferences.getOrElse(Nil), cb(fr => _.copy(fundingReferences = Some(fr)))).element).render,
 
 	)
 
 	private def cb[T](upd: T => DoiMeta => DoiMeta): T => Unit = prop => {
 		_meta = upd(prop)(_meta)
 		validateMeta()
-		resetButton.disabled = false
 	}
 
-	private[this] val errorMessages = div(color := Constants.formErrorsTextColor).render
+	private var toolbarInitialized = false
 
 	private def validateMeta(): Unit = {
-		val errors = error.toSeq.flatMap(_.split("\n"))
+		val allErrors = withUrlErrors(_meta.errors)
+		errorCallback(allErrors)
 
-		errorMessages.innerHTML = ""
-		errors.foreach(err => errorMessages.appendChild(p(err).render))
-
-		val canUpdate = _meta != init && {
-			if(_meta.state == DoiPublicationState.draft) withUrlError(_meta.draftError).isEmpty
-			else errors.isEmpty
+		val canUpdate = _meta != saved && {
+			if(_meta.state == DoiPublicationState.draft)
+				withUrlErrors(_meta.draftErrors).isEmpty
+			else allErrors.isEmpty
 		}
 
-		updateButton.disabled = !canUpdate
-		publishButton.disabled = !errors.isEmpty
-		submitButton.disabled = !errors.isEmpty
-		updateButton.className = "btn btn-update-doi btn-" + (if(canUpdate) "primary" else "secondary")
+		if (toolbarInitialized) {
+			toolbar.setUpdateButtonEnabled(canUpdate)
+			toolbar.setSubmitButtonEnabled(allErrors.isEmpty)
+		}
 	}
 
 	private def resetForms(): Unit = {
@@ -107,93 +133,79 @@ class DoiMetaWidget(
 		formElems.innerHTML = ""
 		formElements.foreach(formElems.appendChild)
 		validateMeta()
-		resetButton.disabled = true
 	}
 
-	private[this] val updateButton = button(tpe := "button", disabled := true)("Update").render
-	updateButton.onclick = (_: Event) => {
-		updateButton.disabled = true
-		updater(_meta).failed.foreach{_ => updateButton.disabled = false}
-	}
+	def wireToolbarCallbacks(): Unit = {
+		toolbarInitialized = true
+		validateMeta()
+		toolbar.setUpdateButtonCallback { (_: Event) =>
+			toolbar.setUpdateButtonEnabled(false)
+			val updateFuture = updater(_meta)
+			updateFuture.foreach { _ =>
+				toolbar.showSaveSuccess()
+			}
+			updateFuture.failed.foreach{ _ =>
+				toolbar.setUpdateButtonEnabled(true)
+			}
+		}
 
-	private[this] val submitButton = button(tpe := "button", cls := "btn btn-secondary btn-submit")("Submit for publication").render
-	submitButton.onclick = (_: Event) => {
-		val originalText = submitButton.textContent
-		submitButton.textContent = "Submitting..."
-		submitButton.disabled = true
-		updater(_meta).map{ _ =>
-			Backend.submitForPublication(_meta.doi)
-		}.andThen{
-			case Failure(exc) =>
-				submitButton.textContent = originalText
-				submitButton.disabled = false
-				errorMessages.appendChild(p(exc.getMessage()).render)
-			case Success(_) =>
-				submitButton.textContent = "Submitted"
+		toolbar.setSubmitButtonCallback { (_: Event) =>
+			toolbar.setSubmitButtonEnabled(false)
+			updater(_meta).map{ _ =>
+				Backend.submitForPublication(_meta.doi, envProvider())
+			}.andThen{
+				case Failure(exc) =>
+					toolbar.setSubmitButtonEnabled(true)
+					// Error will be handled by validateMeta() or shown in a banner
+				case Success(_) =>
+					// Keep button disabled after successful submission
+			}
+		}
+
+		toolbar.setStateChangeCallback { (newState: DoiPublicationState) =>
+			val event = (init.state, newState) match {
+				case (_, DoiPublicationState.findable) => Some(DoiPublicationEvent.publish)
+				case (DoiPublicationState.draft, DoiPublicationState.registered) => Some(DoiPublicationEvent.register)
+				case (DoiPublicationState.findable, DoiPublicationState.registered) => Some(DoiPublicationEvent.hide)
+				case _ => None
+			}
+
+			val metaWithEvent = _meta.copy(state = newState, event = event)
+			updater(metaWithEvent).foreach { _ =>
+				_meta = metaWithEvent.copy(event = None)
+				toolbar.updateBadge(newState)
+			}
 		}
 	}
-
-	private[this] val publishButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Publish").render
-	publishButton.onclick = (_: Event) => {
-		publishButton.disabled = true
-		updater(
-			_meta.copy(event = Some(DoiPublicationEvent.publish))
-		).failed.foreach{
-			_ => publishButton.disabled = false
-		}
-	}
-
-	private[this] val deleteButton = button(tpe := "button", cls := "btn btn-secondary admin-control")("Delete").render
-	deleteButton.onclick = (_: Event) => {
-		deleteButton.disabled = true
-		deleteCb(_meta.doi)
-	}
-
-	private[this] val resetButton = button(tpe := "button", cls := "btn btn-secondary", disabled := true)("Reset").render
-	resetButton.onclick = (_: Event) => resetForms()
 
 	private[this] val formElems = div.render
 
-	private[this] val buttons = {
-		_meta.state match {
-			case DoiPublicationState.draft =>
-				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group edit-control")(deleteButton, resetButton),
-					div(cls := "col-auto btn-group edit-control ms-auto")(publishButton, submitButton, updateButton)
-				)
-			case _ =>
-				div(cls := "row")(
-					div(cls := "col-auto me-auto btn-group edit-control")(resetButton),
-					div(cls := "col-auto btn-group edit-control")(updateButton)
-				)
-		}
-	}
-
-	private val tabs = new TabWidget(EditorTab.edit, tabsCb).element
-
 	val element = div(
-		tabs,
-		formElems,
-		errorMessages,
-		buttons
+		formElems
 	).render
 
-	resetForms()
+	// Initialize forms (deferred to avoid calling toolbar during construction)
+	private def initialize(): Unit = {
+		resetForms()
+	}
+
+	// Call initialization when the widget is first accessed
+	initialize()
 }
 
 object DoiMetaWidget{
 
 	class CreatorsEditWidget(init: Seq[Creator], cb: Seq[Creator] => Unit) extends
-		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", 1){
+		MultiEntitiesEditWidget[Creator, CreatorWidget](init, cb)("Creators", required = true){
 
 		protected def makeWidget(value: Creator, updateCb: Creator => Unit) = new CreatorWidget(value, updateCb)
 
-		protected def defaultValue = Creator(GenericName(""), Nil, Nil)
+		protected def defaultValue = Creator(PersonalName("", ""), Nil, Nil)
 	}
 
 
 	class TitlesEditWidget(initTitles: Seq[Title], cb: Seq[Title] => Unit) extends
-		MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb)("Titles", 1){
+		MultiEntitiesEditWidget[Title, TitleWidget](initTitles, cb)("Titles", required = true){
 
 		protected def makeWidget(value: Title, updateCb: Title => Unit) = new TitleWidget(value, updateCb)
 
@@ -236,7 +248,7 @@ object DoiMetaWidget{
 
 		protected def makeWidget(value: Rights, updateCb: Rights => Unit) = new RightsWidget(value, updateCb)
 
-		protected def defaultValue = Rights("", None, None, Some("https://spdx.org/licenses"), Some("SPDX"), Some("eng"))
+		protected def defaultValue = Constants.ccBy4Rights
 	}
 
 
@@ -257,7 +269,7 @@ object DoiMetaWidget{
 	}
 
 	class FundingEditWidget(init: Seq[FundingReference], cb: Seq[FundingReference] => Unit) extends
-		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Funding"){
+		MultiEntitiesEditWidget[FundingReference, FundingWidget](init, cb)("Funding references"){
 
 			protected def makeWidget(value: FundingReference, updateCb: FundingReference => Unit) = new FundingWidget(value, updateCb)
 

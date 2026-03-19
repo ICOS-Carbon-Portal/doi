@@ -14,7 +14,7 @@ class AwardWidget(
 
 	private[this] var _award = init
 
-	private[this] def validate(): Unit = highlightError(awardUriInput.element, _award.error)
+	private[this] def validate(): Unit = highlightError(awardUriInput.element, _award.errorMessage)
 
 	private val awardTitleInput  = awardTextWidget(_award.awardTitle,  textOpt => _award.copy(awardTitle  = textOpt), "Award title")
 	private val awardNumberInput = awardTextWidget(_award.awardNumber, textOpt => _award.copy(awardNumber = textOpt), "Award number")
@@ -31,14 +31,18 @@ class AwardWidget(
 			placeHolder
 		)
 
-	val element = div(cls := "row spacyrow")(
-			div(cls := "col-md-1")(strong("Award title")),
-			div(cls := "col-md-3")(awardTitleInput.element),
-			div(cls := "col-md-8")(div(cls := "row")(
-				div(cls := "col-md-2")(strong("Award number")),
-				div(cls := "col-md-4")(awardNumberInput.element),
-				div(cls := "col-md-2")(strong("Award URI")),
-				div(cls := "col-md-4")(awardUriInput.element)
-			))
-		).render
+	val element = div(cls := "row spacyrow g-3")(
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Award title"),
+			div(awardTitleInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Award number"),
+			div(awardNumberInput.element),
+		),
+		div(cls := "col-md-6")(
+			label(cls := "form-label")("Award URI"),
+			div(awardUriInput.element),
+		),
+	).render
 }

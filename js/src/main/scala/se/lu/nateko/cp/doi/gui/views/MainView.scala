@@ -1,6 +1,5 @@
 package se.lu.nateko.cp.doi.gui.views
 
-import org.scalajs.dom.console
 import org.scalajs.dom.{Event, KeyboardEvent, html}
 import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.meta._
@@ -9,23 +8,29 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.CoolDoi
 import se.lu.nateko.cp.doi.gui.EmptyDoiCreation
+import se.lu.nateko.cp.doi.gui.ResetErrors
 
 import scala.collection.Seq
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.DoiState
 import se.lu.nateko.cp.doi.DoiListMeta
+import org.scalajs.dom.document
+import scala.scalajs.js.timers.setTimeout
+import scala.concurrent.duration.DurationInt
 
 class MainView(d: DoiRedux.Dispatcher) {
 
 	val doiViews = scala.collection.mutable.Map.empty[Doi, DoiView]
 
-	private val listElem = ul(cls := "list-unstyled").render
+	private val listElem = ul(cls := "list-group").render
 
 	private val prefixSpan = span(cls := "input-group-text").render
+	private val envSelect = select(cls := "form-select").render
 
 	private val suffixInput = input(
 		tpe := "text", cls := "form-control",
-		placeholder := "New DOI suffix"
+		placeholder := "suffix"
 	).render
 
 	private def addDoi(): Unit = {
@@ -41,17 +46,28 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private def getPrefix = d.getState.prefix
 
 	private val makeSuffixButton = button(
-		cls := "btn btn-secondary",
+		cls := "btn btn-outline-secondary",
 		tpe := "button",
+		title := "New suffix",
 		onclick := (genSuffix _)
-	)("Generate suffix").render
+	)(i(cls := "fa-solid fa-arrows-rotate")).render
 
 	private val addDoiButton = button(
 		cls := "btn btn-secondary",
 		tpe := "button",
 		disabled := true,
 		onclick := (addDoi _)
-	)("Add new DOI").render
+	)("Create DOI").render
+
+	private val stateFilterSelect = select(
+		cls := "form-select",
+		onchange := (searchDoi _)
+	)(
+		option(value := "", selected)("All states"),
+		option(value := "findable")("Findable"),
+		option(value := "registered")("Registered"),
+		option(value := "draft")("Draft")
+	).render
 
 	private val searchInput = input(
 		tpe := "search", cls := "form-control",
@@ -60,22 +76,40 @@ class MainView(d: DoiRedux.Dispatcher) {
 	).render
 
 	private def searchDoi(): Unit = {
-		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value)))
+		val stateFilter = if (stateFilterSelect.value.isEmpty) None else Some(stateFilterSelect.value)
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), None, stateFilter))
 	}
 
 	private val searchSubmitButton = button(
-		cls := "btn btn-secondary",
+		cls := "btn btn-outline-secondary",
 		onclick := (searchDoi _)
-	)("Search")
+	)(i(cls := "fa-solid fa-magnifying-glass"))
 
-	private val searchResultsStats = p.render
+	private val infoLink = a(
+		href := "https://support.datacite.org/docs/api-queries#using-the-query-parameter",
+		target := "_blank",
+		cls := "btn-link btn-documentation px-3 text-secondary",
+		title := "Search documentation",
+		attr("aria-label") := "Search documentation",
+	)(
+		i(cls := "fa-solid fa-circle-question")
+	)
+
+	private val searchResultsStats = p(style := "min-height: 1.5em").render
+
+	private val paginationElem = div(cls := "mt-3").render
 
 	private val searchCreateControls = div(cls := "d-md-flex justify-content-between")(
 		p(
+			cls := "d-flex align-items-center",
+			div(cls := "input-group me-2", style := "max-width: 120px")(
+				stateFilterSelect
+			),
 			div(cls := "input-group")(
 				searchInput,
 				searchSubmitButton
-			)
+			),
+			infoLink
 		),
 		p(cls := "edit-control")(
 			div(cls := "input-group")(
@@ -84,17 +118,28 @@ class MainView(d: DoiRedux.Dispatcher) {
 				makeSuffixButton,
 				addDoiButton
 			)
-		),
+	),
 	)
 
-	val element = div(id := "main")(
-		searchCreateControls,
-		searchResultsStats,
-		listElem
-	)
-
-	def updateDefaultPrefix(): Unit = {
-		prefixSpan.textContent = getPrefix
+	def updateEnvSelector(state: DoiState): Unit = {
+		val current = if (envSelect.parentNode != null) envSelect else prefixSpan
+		val parent = current.parentNode
+		if (state.envs.size > 1) {
+			envSelect.innerHTML = ""
+			state.envs.foreach { envName =>
+				val pfx = state.prefixes.getOrElse(envName, "")
+				val opt = option(value := envName)(s"$pfx ($envName)").render
+				if (state.activeEnv.contains(envName)) opt.selected = true
+				envSelect.appendChild(opt)
+			}
+			envSelect.onchange = { (_: Event) =>
+				d.dispatch(ThunkActions.SwitchEnvAndRefresh(envSelect.value))
+			}
+			if (current ne envSelect) parent.replaceChild(envSelect, current)
+		} else {
+			prefixSpan.textContent = getPrefix
+			if (current ne prefixSpan) parent.replaceChild(prefixSpan, current)
+		}
 	}
 
 	def supplyDoiList(dois: Seq[DoiMeta], isLoading: Boolean): Unit = {
@@ -103,15 +148,18 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 		if(dois.isEmpty) {
 			if(!isLoading) listElem.appendChild(p("No DOIs found").render)
-			else{
-				listElem.appendChild(h3("Fetching DOI list from DataCite...").render)
-				listElem.appendChild(
-					div(cls := "progress")(
-						div(cls := "progress-bar progress-bar-striped active", role := "progressbar",
-							attr("aria-valuenow") := 100, style := "width: 100%"
+			else {
+				def skeletonItem = div(cls := "list-group-item d-block")(
+					div(cls := "d-flex align-items-center justify-content-between gap-2")(
+						div(cls := "d-flex flex-column flex-grow-1 gap-1 placeholder-glow")(
+							span(cls := "placeholder col-1"),
+							span(cls := s"placeholder placeholder-lg col-${5 + scala.util.Random.nextInt(5)}")
 						)
-					).render
-				)
+					)
+				).render
+				val skeleton = div(cls := "list-group").render
+				for (_ <- 1 to 25) skeleton.appendChild(skeletonItem)
+				listElem.appendChild(skeleton)
 			}
 		} else for(doi <- dois) {
 			val doiView = doiViews.getOrElseUpdate(doi.doi, new DoiView(doi, d))
@@ -122,10 +170,12 @@ class MainView(d: DoiRedux.Dispatcher) {
 
 	def goToPage(event: Event, page: Int) = {
 		event.preventDefault()
-		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), Some(page)))
+		val stateFilter = if (stateFilterSelect.value.isEmpty) None else Some(stateFilterSelect.value)
+		d.dispatch(ThunkActions.DoiListRefreshRequest(Some(searchInput.value), Some(page), stateFilter))
 	}
 
 	def setPagination(listMeta: Option[DoiListMeta]): Unit = {
+		paginationElem.innerHTML = ""
 		listMeta.map(listMeta => {
 			val previousBtnClasses = "page-item" + (if(listMeta.page == 1) " disabled" else "")
 			val nextBtnClasses = "page-item" + (if(listMeta.page >= listMeta.totalPages) " disabled" else "")
@@ -139,7 +189,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 				).render
 			)
 
-			listElem.appendChild(
+			paginationElem.appendChild(
 				ul(cls := "pagination justify-content-center")(
 					li(cls := previousBtnClasses)(
 						a(
@@ -160,23 +210,129 @@ class MainView(d: DoiRedux.Dispatcher) {
 		})
 	}
 
-	def setSelected(doi: Doi, isSelected: Boolean): Unit = {
-		doiViews.get(doi).foreach(_.setSelected(isSelected))
-	}
-
 	def setSearchQuery(text: String): Unit = {
 		searchInput.value = text
 	}
 
-	private[this] val errorView = new ErrorView(400, 300, d)
+	private[this] val errorMessagesContainer = div(cls := "error-messages")
 
-	def appendError(msg: String): Unit = errorView.appendError(msg)
+	private[this] val errorBanner = div(
+		cls := "alert alert-danger alert-dismissible fade",
+		role := "alert",
+		style := "display: none;"
+	)(
+		errorMessagesContainer,
+		button(
+			tpe := "button",
+			cls := "btn-close",
+			attr("data-bs-dismiss") := "alert",
+			attr("aria-label") := "Close",
+			onclick := { (_: Event) => d.dispatch(ResetErrors) }
+		)
+	)
 
-	def clearErrors(): Unit = errorView.clearErrors()
+	private[this] val successMessagesContainer = div(cls := "success-messages")
+
+	private[this] val successBanner = div(
+		cls := "alert alert-success alert-dismissible fade",
+		role := "alert",
+		style := "display: none;"
+	)(
+		successMessagesContainer,
+		button(
+			tpe := "button",
+			cls := "btn-close",
+			attr("data-bs-dismiss") := "alert",
+			attr("aria-label") := "Close",
+			onclick := { (_: Event) => d.dispatch(ResetErrors) }
+		)
+	)
+
+	val element = div(id := "main")(
+		errorBanner,
+		successBanner,
+		searchCreateControls,
+		searchResultsStats,
+		listElem,
+		paginationElem
+	).render
+
+	def appendError(msg: String): Unit = {
+		val errorMessage = if(msg == null || msg.isEmpty) "Unknown error" else msg
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val banner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			if(banner != null) {
+				val msgContainer = banner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(msgContainer != null) {
+					msgContainer.innerHTML = ""
+					for(messageLine <- errorMessage.split("\\n")){
+						msgContainer.appendChild(p(cls := "mb-1")(messageLine).render)
+					}
+					banner.style.display = "block"
+					banner.classList.add("show")
+				}
+			}
+		}
+	}
+
+	def appendSuccess(msg: String): Unit = {
+		val successMessage = if(msg == null || msg.isEmpty) "Success" else msg
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val banner = mainElem.querySelector(".alert-success").asInstanceOf[html.Div]
+			if(banner != null) {
+				val msgContainer = banner.querySelector(".success-messages").asInstanceOf[html.Div]
+				if(msgContainer != null) {
+					msgContainer.innerHTML = ""
+					for(messageLine <- successMessage.split("\\n")){
+						msgContainer.appendChild(p(cls := "mb-1")(messageLine).render)
+					}
+					banner.style.display = "block"
+					banner.classList.add("show")
+				}
+			}
+		}
+	}
+
+	def clearError(): Unit = {
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val errorBanner = mainElem.querySelector(".alert-danger").asInstanceOf[html.Div]
+			if(errorBanner != null) {
+				val errorContainer = errorBanner.querySelector(".error-messages").asInstanceOf[html.Div]
+				if(errorContainer != null) {
+					errorBanner.style.display = "none"
+					errorBanner.classList.remove("show")
+					errorContainer.innerHTML = ""
+				}
+			}
+		}
+	}
+
+	def clearSuccess(): Unit = {
+		val mainElem = document.getElementById("main")
+		if(mainElem != null) {
+			val successBanner = mainElem.querySelector(".alert-success").asInstanceOf[html.Div]
+			if(successBanner != null) {
+				val successContainer = successBanner.querySelector(".success-messages").asInstanceOf[html.Div]
+				if(successContainer != null) {
+					successBanner.style.display = "none"
+					successBanner.classList.remove("show")
+					successContainer.innerHTML = ""
+				}
+			}
+		}
+	}
+
+	def clearMessages(): Unit = {
+		clearError()
+		clearSuccess()
+	}
 
 	def resetDoiAdder(): Unit = {
 		suffixInput.value = ""
 	}
 
-	updateDefaultPrefix()
+	updateEnvSelector(d.getState)
 }

@@ -25,13 +25,18 @@ class ResourceTypeWidget(
 			val rtGen = rtGenOpt.getOrElse(null)
 			_resType = _resType.copy(resourceTypeGeneral = Some(rtGen))
 			updateCb(_resType)
-		}
+		},
+		required = true
 	)
 
 	val element = div(cls := "row")(
-		div(cls := "col-md-4")(rtGenInput.element),
-		div(cls := "col-md-1")(h4(cls := "text-center")("/")),
-		div(cls := "col-md-4")(rtInput.element)
+		div(cls := "col-xl-10 col-lg-9")(
+			div(cls := "input-group")(
+				rtGenInput.element,
+				span(cls := "input-group-text")("/"),
+				rtInput.element
+			)
+		)
 	).render
 
 }

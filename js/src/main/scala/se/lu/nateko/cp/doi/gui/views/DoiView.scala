@@ -4,10 +4,10 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.gui.DoiAction
 import org.scalajs.dom.Event
-import org.scalajs.dom.console
-import se.lu.nateko.cp.doi.gui.SelectDoi
 import se.lu.nateko.cp.doi.gui.DoiRedux
 import se.lu.nateko.cp.doi.gui.ThunkActions
+import se.lu.nateko.cp.doi.gui.NavigateToRoute
+import se.lu.nateko.cp.doi.gui.DetailRoute
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import se.lu.nateko.cp.doi.DoiMeta
 import se.lu.nateko.cp.doi.gui.DoiMetaViewer
@@ -25,86 +25,38 @@ import se.lu.nateko.cp.doi.gui.widgets.EditorTab
 class DoiView(metaInit: DoiMeta, d: DoiRedux.Dispatcher) {
 
 	private[this] var meta = metaInit
-	private[this] var isSelected = false
-	private[this] var hasInitializedBody = false
 
-	private val doiListIcon = span(cls := doiListIconClass, style := "width: 1em").render
+	private val doiSpan = span(cls := "text-muted small").render
+	private val titleSpan = span(cls := "fw-semibold").render
+	private val stateDot = span(cls := "flex-shrink-0").render
 
-	private def doiListIconClass = "fas fa-caret-" +
-		(if(isSelected) "down" else "right")
 
-	private val selectDoi: Event => Unit = e => d.dispatch(SelectDoi(meta.doi))
-	private val titleSpan = span().render
-	private val cardBody = div(cls := "card-body").render
+	private val navigateToDetail: Event => Unit = e => {
+		e.preventDefault()
+		d.dispatch(NavigateToRoute(DetailRoute(meta.doi)))
+	}
 
-	def cardHeaderClasses = "card-header bg-opacity-50 bg-" + (if(meta.state == DoiPublicationState.draft) "warning" else "primary")
-	def cardClasses = "card " + (if(meta.state == DoiPublicationState.draft) "draft-doi" else "published-doi")
-
-	val element = div(cls := cardClasses)(
-		div(cls := cardHeaderClasses, onclick := selectDoi, cursor := "pointer")(
-			doiListIcon,
-			titleSpan
-		),
-		cardBody
+	val element = a(
+		href := s"/doi/${meta.doi}",
+		cls := "list-group-item list-group-item-action d-block text-decoration-none",
+		style := "cursor: pointer",
+		onclick := navigateToDetail
+	)(
+		div(cls := "d-flex align-items-center justify-content-between gap-2")(
+			stateDot,
+			div(cls := "d-flex flex-column flex-grow-1")(
+				doiSpan,
+				titleSpan
+			)
+		)
 	).render
 
 	def updateContentVisibility(): Unit = {
-		val title = meta.titles
-			.flatMap(_.headOption)
-			.map(" | " + _.title)
-			.getOrElse("")
+		val title = DoiMetaHelpers.extractTitle(meta)
 
-		titleSpan.textContent = s" ${meta.doi} $title"
-
-		val display = if(isSelected) "block" else "none"
-		cardBody.style.display = display
-		element.className = cardClasses
+		doiSpan.textContent = meta.doi.toString
+		titleSpan.textContent = title
+		stateDot.className = s"flex-shrink-0 ${DoiMetaHelpers.stateDotClass(meta.state)}"
 	}
 
-	def setSelected(selected: Boolean): Unit = {
-		isSelected = selected
-		if(selected && !hasInitializedBody){
-			cardBody.appendChild(metaViewer.element)
-			hasInitializedBody = true
-		}
-		doiListIcon.className = doiListIconClass
-		updateContentVisibility()
-	}
-
-	private def metaViewer: DoiMetaViewer = new DoiMetaViewer(meta, tabsCb, meta => d.dispatch(DoiCloneRequest(meta)))
-
-	private def metaWidget = new DoiMetaWidget(
-		meta,
-		updateDoiMeta,
-		tabsCb,
-		doi => {
-			d.dispatch(ThunkActions.requestDoiDeletion(doi))
-		}
-	)
-
-	private def metaJsonEditor = new DoiJsonEditor(meta, updateDoiMeta, tabsCb)
-
-	private val tabsCb: Map[EditorTab, () => Unit] = Map(
-		EditorTab.view -> {() => cardBody.replaceChildren(metaViewer.element)},
-		EditorTab.edit -> {() => cardBody.replaceChildren(metaWidget.element)},
-		EditorTab.json -> {() => cardBody.replaceChildren(metaJsonEditor.element)},
-	)
-
-	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
-		val updateDone = Backend.updateMeta(updated)
-		
-		Future(updateDone.onComplete(s => {
-			s match {
-				case Failure(exc) =>
-					d.dispatch(ReportError(s"Failed to update DOI ${updated.doi}:\n${exc.getMessage}"))
-				case Success(s) =>
-					if (!s.isEmpty()) d.dispatch(ReportError(s))
-					//recreate the DOI metadata widget with the updated metadata
-					cardBody.innerHTML = ""
-					meta = updated
-					cardBody.appendChild(metaWidget.element)
-					updateContentVisibility()
-			}
-		}))
-	}
 }

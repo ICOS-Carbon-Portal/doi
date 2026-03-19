@@ -14,7 +14,7 @@ class NameIdentifierWidget(
 
 	private[this] var _nameId = init
 
-	private[this] def validate(): Unit = highlightError(idInput.element, _nameId.error)
+	private[this] def validate(): Unit = highlightError(idInput.element, _nameId.errorMessage)
 
 	private[this] val idInput = new TextInputWidget(init.nameIdentifier, newId => {
 		_nameId = _nameId.copy(nameIdentifier = newId)
@@ -34,9 +34,9 @@ class NameIdentifierWidget(
 		}
 	)
 
-	val element = div(cls := "row")(
-		div(cls := "col-md-6")(idInput.element),
-		div(cls := "col-md-3")(schemeInput.element)
+	val element = div(cls := "input-group")(
+		idInput.element,
+		schemeInput.element
 	).render
 
 	validate()
