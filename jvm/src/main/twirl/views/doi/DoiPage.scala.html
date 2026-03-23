@@ -5,7 +5,7 @@
 @CpCommonPage(s"${devIcon}${pageTitle}"){
 	<link rel="stylesheet" type="text/css" href="/styles.css">
 }{
-	<div id="main-wrapper" class="container-xxl @isAdminClass @isLoggedInClass" data-permissions="@permissions" data-development="@isDevelopment" data-envri="@env.shortName">
+	<div id="main-wrapper" class="container-xxl @isAdminClass @isLoggedInClass" data-development="@isDevelopment" data-envri="@env.shortName">
 		<div class="row">
 			<div class="col">
 				<div class="page-header">
@@ -29,6 +29,13 @@
 
 
 	<script src="/doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			var loginLink = document.getElementById("login-link");
+			if (!loginLink) return;
+			loginLink.href = "https://" + "@authHost" + "/login/?targetUrl=" + encodeURIComponent(window.location.href);
+		});
+	</script>
 
 }
 
@@ -42,7 +49,7 @@
 }
 
 @loginText = {
-	Please <a href='https://@{authHost}'>log in</a> to create or update DOIs.
+	Please <a id="login-link" href=''>log in</a> to create or update DOIs.
 }
 
 @isAdminClass = @{
@@ -60,4 +67,3 @@
 @pageTitle = @{
 	doiSuffix.getOrElse("DOI minting")
 }
-

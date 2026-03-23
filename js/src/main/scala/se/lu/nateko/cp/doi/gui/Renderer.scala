@@ -69,11 +69,6 @@ class Renderer(mainView: MainView, dispatcher: Dispatcher) extends StateListener
 							),
 							div(cls := "row")(
 								div(cls := "col")(
-									p(raw(permissions))
-								)
-							),
-							div(cls := "row")(
-								div(cls := "col")(
 									div(id := "list-wrapper")
 								)
 							)
