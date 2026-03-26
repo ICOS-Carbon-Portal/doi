@@ -4,9 +4,12 @@ import scalatags.JsDom.all._
 import se.lu.nateko.cp.doi.DoiMeta
 import scala.concurrent.Future
 import org.scalajs.dom.Event
+import org.scalajs.dom.html.Anchor
 import scala.collection.Seq
+import scala.collection.mutable
 import se.lu.nateko.cp.doi.meta.ValidationError
 import se.lu.nateko.cp.doi.meta.ValidationSection
+import scala.util.Try
 
 class DoiMetaEditorWithSidebar(
 	init: DoiMeta,
@@ -18,6 +21,9 @@ class DoiMetaEditorWithSidebar(
 
 	private var currentSidebarTab: String = "toc"
 	private var currentErrors: Seq[ValidationError] = Seq.empty
+	private var currentTocSection: Option[String] = None
+
+	private val tocLinksByTargetId = mutable.LinkedHashMap.empty[String, Anchor]
 
 	private val errorCountBadge = span(cls := "error-count-badge").render
 
@@ -66,12 +72,16 @@ class DoiMetaEditorWithSidebar(
 	private val tocContent = ul(cls := "list-unstyled mb-0")(
 		tocSections.zipWithIndex.flatMap { case ((sectionId, sectionLabel, items), idx) =>
 			val sectionCls = if idx == 0 then "toc-section" else "toc-section mt-3"
+			val sectionLink = a(href := s"#$sectionId", cls := "toc-link toc-section-link")(sectionLabel).render
+			tocLinksByTargetId(sectionId) = sectionLink.asInstanceOf[Anchor]
 			val header = li(cls := sectionCls)(
-				a(href := s"#$sectionId", cls := "toc-link toc-section-link")(sectionLabel)
+				sectionLink
 			)
 			val entries = items.map { vs =>
+				val itemLink = a(href := s"#${vs.id}", cls := "toc-link")(vs.label).render
+				tocLinksByTargetId(vs.id) = itemLink.asInstanceOf[Anchor]
 				li(cls := "toc-item")(
-					a(href := s"#${vs.id}", cls := "toc-link")(vs.label)
+					itemLink
 				)
 			}
 			header +: entries
@@ -102,6 +112,45 @@ class DoiMetaEditorWithSidebar(
 			errorsTab.classList.add("sidebar-tab-active")
 			tocBody.style.display = "none"
 			errorBody.style.display = "block"
+		}
+
+		updateActiveTocSection()
+	}
+
+	private def setActiveTocSection(sectionId: Option[String]): Unit = {
+		if (sectionId != currentTocSection) {
+			currentTocSection = sectionId
+			for ((id, link) <- tocLinksByTargetId) {
+				if (Some(id) == sectionId) link.classList.add("toc-link-active")
+				else link.classList.remove("toc-link-active")
+			}
+		}
+	}
+
+	private def stickyHeaderOffset: Double = {
+		val raw = org.scalajs.dom.window
+			.getComputedStyle(org.scalajs.dom.document.documentElement)
+			.getPropertyValue("--sticky-header-height")
+			.trim
+		Try(raw.stripSuffix("px").toDouble).getOrElse(130.0)
+	}
+
+	private def updateActiveTocSection(): Unit = {
+		if (currentSidebarTab == "toc") {
+			val offset = stickyHeaderOffset + 20.0
+			val sections = metaWidget.element.querySelectorAll(".toc-section[id]")
+			var activeId: Option[String] = None
+			for (i <- 0 until sections.length) {
+				val section = sections(i).asInstanceOf[org.scalajs.dom.Element]
+				val rect = section.getBoundingClientRect()
+				if (rect.top <= offset) {
+					val id = section.id
+					if (id.nonEmpty && tocLinksByTargetId.contains(id)) {
+						activeId = Some(id)
+					}
+				}
+			}
+			setActiveTocSection(activeId.orElse(tocLinksByTargetId.keys.headOption))
 		}
 	}
 
@@ -175,6 +224,10 @@ class DoiMetaEditorWithSidebar(
 				}
 			}
 		}
+
+		org.scalajs.dom.window.addEventListener("scroll", (_: Event) => updateActiveTocSection())
+		org.scalajs.dom.window.addEventListener("resize", (_: Event) => updateActiveTocSection())
+		updateActiveTocSection()
 	}
 
 	private def updateErrors(errors: Seq[ValidationError]): Unit = {

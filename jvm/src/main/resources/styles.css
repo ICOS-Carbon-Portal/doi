@@ -144,15 +144,23 @@ span.label{
 
 .doi-editor-with-sidebar .toc-sidebar-editor .toc-link {
 	display: block;
-	padding: 0.4rem 0.5rem;
+	padding: 0.4rem 0.6rem;
 	color: #212529;
 	text-decoration: none;
 	border-radius: 0.25rem;
 	transition: background-color 0.15s ease;
 }
 
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-link.toc-link-active {
+	background-color: rgba(var(--bs-primary-rgb), 0.12);
+}
+
 .doi-editor-with-sidebar .toc-sidebar-editor .toc-link:hover {
 	background-color: #f8f9fa;
+}
+
+.doi-editor-with-sidebar .toc-sidebar-editor .toc-link.toc-link-active:hover {
+	background-color: rgba(var(--bs-primary-rgb), 0.16);
 }
 
 .doi-editor-with-sidebar .toc-sidebar-editor .toc-section-link {
