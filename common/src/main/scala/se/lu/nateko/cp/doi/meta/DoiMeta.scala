@@ -583,12 +583,16 @@ final case class RelatedIdentifier (
 	schemeUri: Option[String],
 	schemeType: Option[String]
 ) extends SelfValidating {
-	def errors: Seq[ValidationError] = combineErrors(
-		requireNonEmptyString(relatedIdentifier, ValidationSection.RelatedIdentifiers, "Related identifier must not be empty", List("relatedIdentifier")),
-		requireDefined(relatedIdentifierType, ValidationSection.RelatedIdentifiers, "Please select a related identifier type", List("relatedIdentifierType")),
-		relatedIdentifierType.toSeq.flatMap(idType => validateIdentifierWithType(relatedIdentifier, idType)),
-		requireDefined(relationType, ValidationSection.RelatedIdentifiers, "Please provide a relation type", List("relationType"))
-	)
+	def errors: Seq[ValidationError] = {
+		val normalizedRelatedIdentifier = relatedIdentifier.trim
+
+		combineErrors(
+			requireNonEmptyString(normalizedRelatedIdentifier, ValidationSection.RelatedIdentifiers, "Related identifier must not be empty", List("relatedIdentifier")),
+			requireDefined(relatedIdentifierType, ValidationSection.RelatedIdentifiers, "Please select a related identifier type", List("relatedIdentifierType")),
+			relatedIdentifierType.toSeq.flatMap(idType => validateIdentifierWithType(normalizedRelatedIdentifier, idType)),
+			requireDefined(relationType, ValidationSection.RelatedIdentifiers, "Please provide a relation type", List("relationType"))
+		)
+	}
 
 	private def validateIdentifierWithType(id: String, idType: RelatedIdentifierType): Seq[ValidationError] = idType match {
 		case RelatedIdentifierType.DOI => validateDoi(id, ValidationSection.RelatedIdentifiers, List("relatedIdentifier"))
