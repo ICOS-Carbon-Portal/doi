@@ -226,7 +226,7 @@ object DoiMetaWidget{
 
 		protected def makeWidget(value: Contributor, updateCb: Contributor => Unit) = new ContributorWidget(value, updateCb)
 
-		protected def defaultValue = Contributor(GenericName(""), Nil, Nil, null)
+		protected def defaultValue = Contributor(GenericName(""), Nil, Nil, None)
 	}
 
 

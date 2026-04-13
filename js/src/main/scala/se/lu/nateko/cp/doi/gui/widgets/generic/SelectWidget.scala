@@ -17,17 +17,22 @@ class SelectWidget[T](
 
 	val element: html.Select = select(cls := "form-select flex-grow-0", style := "flex-basis: content")(options.map(optionElem)).render
 
+	private def selectedOption: Option[SelectOption[T]] = options.lift(element.selectedIndex)
+
 	def validate(): Unit = {
-		val selectedValue = options(element.selectedIndex).value
+		val selectedValue = selectedOption.flatMap(_.value)
 		highlightError(element, if required && selectedValue.isEmpty then Some("") else None)
 	}
 
 	element.onchange = (_: Event) => {
 		validate()
-		updateCb(options(element.selectedIndex).value)
+		updateCb(selectedOption.flatMap(_.value))
 	}
 
-	element.selectedIndex = options.indexWhere(_.value == init)
+	element.selectedIndex = {
+		val selectedIdx = options.indexWhere(_.value == init)
+		if selectedIdx >= 0 then selectedIdx else if options.nonEmpty then 0 else -1
+	}
 
 	validate()
 }
