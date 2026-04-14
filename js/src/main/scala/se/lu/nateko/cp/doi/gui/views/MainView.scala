@@ -88,7 +88,7 @@ class MainView(d: DoiRedux.Dispatcher) {
 	private val infoLink = a(
 		href := "https://support.datacite.org/docs/api-queries#using-the-query-parameter",
 		target := "_blank",
-		cls := "btn-link btn-documentation px-3 text-secondary",
+		cls := "btn-link btn-documentation px-3 text-secondary hide-external",
 		title := "Search documentation",
 		attr("aria-label") := "Search documentation",
 	)(
