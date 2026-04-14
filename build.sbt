@@ -119,10 +119,8 @@ lazy val doiJvm = doi.jvm
 		watchSources ++= (doiJs / Compile / watchSources).value,
 		assembly / assembledMappings := {
 			val finalJsFile = (doiJs / Compile / fullOptJS).value.data
-			val finalJsMap = new java.io.File(finalJsFile.getAbsolutePath + ".map")
 			(assembly / assembledMappings).value :+ sbtassembly.MappingSet(None, Vector(
-				(finalJsFile, finalJsFile.getName),
-				(finalJsMap, finalJsMap.getName)
+				(finalJsFile, finalJsFile.getName)
 			))
 		}
 	)

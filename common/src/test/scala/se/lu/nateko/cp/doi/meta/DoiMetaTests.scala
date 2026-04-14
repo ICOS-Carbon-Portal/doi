@@ -83,4 +83,34 @@ class DoiMetaTests extends AnyFunSpec{
 			assert(wrongExample.errors.exists(_.message == "Title must not be empty"))
 		}
 	}
+
+	describe("RelatedIdentifier validation support"){
+
+		def relatedIdentifierErrors(id: String, idType: RelatedIdentifierType): Seq[ValidationError] =
+			RelatedIdentifier(
+				relationType = Some(RelationType.Cites),
+				relatedIdentifierType = Some(idType),
+				relatedIdentifier = id,
+				resourceTypeGeneral = None,
+				relatedMetadataScheme = None,
+				schemeUri = None,
+				schemeType = None
+			).errors
+
+		it("accepts DOI with surrounding spaces"){
+			assert(relatedIdentifierErrors(" 10.11676/Hk0IPQT1i05pm_mY2yydP8XT ", RelatedIdentifierType.DOI).isEmpty)
+		}
+
+		it("accepts handle with surrounding spaces"){
+			assert(relatedIdentifierErrors(" 11676/Hk0IPQT1i05pm_mY2yydP8XT ", RelatedIdentifierType.Handle).isEmpty)
+		}
+
+		it("accepts URL with surrounding spaces"){
+			assert(relatedIdentifierErrors(" https://meta.icos-cp.eu/objects/-S_VUEUOFnH4L7nqlWmxuRN_ ", RelatedIdentifierType.URL).isEmpty)
+		}
+
+		it("rejects whitespace-only related identifier"){
+			assert(relatedIdentifierErrors("   ", RelatedIdentifierType.URL).exists(_.message == "Related identifier must not be empty"))
+		}
+	}
 }

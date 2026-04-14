@@ -16,7 +16,7 @@ class RelatedIdentifierWidget(init: RelatedIdentifier, protected val updateCb: R
 	private[this] var _relatedIdentifier = init
 
 	private[this] val relatedIdentifierInput = new TextInputWidget(init.relatedIdentifier, ri => {
-		_relatedIdentifier = _relatedIdentifier.copy(relatedIdentifier = ri)
+		_relatedIdentifier = _relatedIdentifier.copy(relatedIdentifier = ri.trim)
 		updateCb(_relatedIdentifier)
 	}, required = true)
 
