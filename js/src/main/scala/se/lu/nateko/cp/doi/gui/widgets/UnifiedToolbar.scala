@@ -128,10 +128,6 @@ class UnifiedToolbar(
 		_meta.state.toString.capitalize
 	).render
 
-	stateDropdownButton.onclick = (_: Event) => {
-		stateDropdownMenu.classList.toggle("show")
-	}
-
 	private val cloneButton = button(
 		tpe := "button",
 		cls := "btn btn-sm btn-outline-secondary"
@@ -213,27 +209,6 @@ class UnifiedToolbar(
 		)
 	).render
 
-	org.scalajs.dom.document.addEventListener("click", (e: Event) => {
-		val target = e.target.asInstanceOf[org.scalajs.dom.Node]
-		var node = target
-		var isInside = false
-		while (node != null && !isInside) {
-			if (node.isInstanceOf[org.scalajs.dom.Element]) {
-				val elem = node.asInstanceOf[org.scalajs.dom.Element]
-				if (elem.classList.contains("dropdown")) {
-					isInside = true
-				}
-			}
-			node = node.parentNode
-		}
-		if (!isInside) {
-			val dropdowns = org.scalajs.dom.document.querySelectorAll(".state-dropdown-menu.show")
-			for (i <- 0 until dropdowns.length) {
-				dropdowns(i).classList.remove("show")
-			}
-		}
-	})
-
 	def setTab(tab: EditorTab): Unit = {
 		currentTab = tab
 		updateTabButtons()
@@ -309,7 +284,6 @@ class UnifiedToolbar(
 			item.onclick = (e: Event) => {
 				e.preventDefault()
 				if (!item.classList.contains("disabled")) {
-					stateDropdownMenu.classList.remove("show")
 					val newState = action.toLowerCase match {
 						case "register" => DoiPublicationState.registered
 						case "publish" => DoiPublicationState.findable

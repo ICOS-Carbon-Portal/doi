@@ -94,7 +94,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private val stickyHeader = div(
 		id := "sticky-header",
-		style := "position: sticky; top: 0; z-index: 1000; background-color: white;"
+		style := "position: sticky; top: 0; z-index: 1; background-color: white;"
 	)(
 		cloneBanner,
 		headerSection,

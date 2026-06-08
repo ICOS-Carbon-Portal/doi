@@ -66,20 +66,7 @@ span.label{
 }
 
 .unified-toolbar .state-dropdown-menu {
-	display: none;
-	position: absolute;
 	min-width: 10rem;
-	padding: 0.5rem 0;
-	margin: 0.125rem 0 0;
-	background-color: #fff;
-	border: 1px solid rgba(0,0,0,.15);
-	border-radius: 0.25rem;
-	box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
-	list-style: none;
-	z-index: 1000;
-}
-.unified-toolbar .state-dropdown-menu.show {
-	display: block;
 }
 .unified-toolbar .state-dropdown-menu .dropdown-item {
 	display: block;
