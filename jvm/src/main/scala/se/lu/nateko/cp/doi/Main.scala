@@ -3,6 +3,7 @@ package se.lu.nateko.cp.doi
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.{`Cache-Control`, CacheDirectives}
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
@@ -31,6 +32,10 @@ object Main{
 		import system.dispatcher
 
 		val conf = DoiConfig.getConfig
+
+		if !conf.development then
+			AssetHash.jsFileName(false)
+			AssetHash.cssFileName(false)
 
 		val authRouting = new AuthRouting(conf.auth)
 
@@ -72,6 +77,12 @@ object Main{
 				views.html.doi.DoiSubmissionEmail(uid, doi).body
 			)
 		)(using ExecutionContext.Implicits.global)
+
+		def noStoreResource(resourceName: String) = respondWithHeader(
+			`Cache-Control`(CacheDirectives.`no-store`)
+		){
+			getFromResource(resourceName)
+		}
 
 		val route = handleExceptions(exceptionHandler){
 			pathPrefix("api"){
@@ -129,7 +140,21 @@ object Main{
 						complete(StatusCodes.OK)
 					}
 				} ~
-				getFromResourceDirectory("") ~
+				path("doi-js-fastopt.js"){
+					noStoreResource("doi-js-fastopt.js")
+				} ~
+				path("doi-js-fastopt.js.map"){
+					noStoreResource("doi-js-fastopt.js.map")
+				} ~
+				path("styles.css"){
+					noStoreResource("styles.css")
+				} ~
+				path("doi\\.[0-9a-f]+\\.js".r){ _ =>
+					getFromResource("doi-js-opt.js")
+				} ~
+				path("styles\\.[0-9a-f]+\\.css".r){ _ =>
+					getFromResource("styles.css")
+				} ~
 				// SPA catch-all - serve index for any /doi/* path
 				pathPrefix("doi"){
 					path(DoiClientRouting.DoiPath){doi =>
