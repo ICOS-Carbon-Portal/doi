@@ -1,9 +1,10 @@
 @import views.html.CpCommonPage
 @import eu.icoscp.envri.Envri
+@import se.lu.nateko.cp.doi.AssetHash
 
 @(isLoggedIn: Boolean, isAdmin: Boolean, isDevelopment: Boolean = false, authHost: String, doiSuffix: Option[String] = None)(implicit env: Envri)
 @CpCommonPage(s"${devIcon}${pageTitle}"){
-	<link rel="stylesheet" type="text/css" href="/styles.css">
+	<link rel="stylesheet" type="text/css" href="/@AssetHash.cssFileName(isDevelopment)">
 }{
 	<div id="main-wrapper" class="container-xxl @isAdminClass @isLoggedInClass" data-development="@isDevelopment" data-envri="@env.shortName">
 		<div class="row">
@@ -28,7 +29,7 @@
 	</div>
 
 
-	<script src="/doi-js-@{if(isDevelopment) "fast" else ""}opt.js"></script>
+	<script src="/@AssetHash.jsFileName(isDevelopment)"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			var loginLink = document.getElementById("login-link");
