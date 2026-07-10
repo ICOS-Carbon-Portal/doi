@@ -1,3 +1,28 @@
+#main-wrapper .btn,
+#main-wrapper .form-control,
+#main-wrapper .form-select,
+#main-wrapper .input-group-text,
+#main-wrapper .dropdown-menu {
+	font-size: 14px;
+}
+
+#main-wrapper .dropdown-menu {
+	--bs-dropdown-font-size: 14px;
+}
+
+#navbar-main #cp_theme_d10_menu,
+#navbar-main #cp_theme_d10_menu .dropdown-menu {
+	font-size: 15px;
+}
+
+#cp-header a,
+#cp-header .header-link,
+#cp-header .cart-link.fs-sm,
+#cp-header .account-link.fs-sm,
+#cp-header .login-link.fs-sm {
+	font-size: 14px;
+}
+
 /* Hide content initially if on detail route to prevent flash */
 #main-wrapper {
 	opacity: 0;
@@ -27,6 +52,14 @@ html, body {
 }
 .row .row + .row {
 	margin-top: 0.5rem;
+}
+.entity-action-buttons {
+	white-space: nowrap;
+}
+.entity-action-btn {
+	margin: 0;
+	padding-right: 0.5rem;
+	padding-left: 0.5rem;
 }
 span.label{
 	font-size: 100%;
