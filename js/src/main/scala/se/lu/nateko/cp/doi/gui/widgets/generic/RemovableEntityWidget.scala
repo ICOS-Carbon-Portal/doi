@@ -19,8 +19,10 @@ class RemovableEntityWidget[E](
 		updateCb(e)
 	})
 
+	private[this] val actionButtonClasses = "btn btn-sm btn-link entity-action-btn"
+
 	private[this] val removeButton =
-		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
+		button(tpe := "button", cls := actionButtonClasses)(
 			span(cls := "fas fa-trash")
 		).render
 
@@ -35,12 +37,12 @@ class RemovableEntityWidget[E](
 	}
 
 	private[this] val moveUpButton =
-		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
+		button(tpe := "button", cls := actionButtonClasses)(
 			span(cls := "fas fa-arrow-up")
 		).render
 
 	private[this] val moveDownButton =
-		button(tpe := "button", cls := "btn btn-sm btn-link m-1")(
+		button(tpe := "button", cls := actionButtonClasses)(
 			span(cls := "fas fa-arrow-down")
 		).render
 
@@ -57,7 +59,9 @@ class RemovableEntityWidget[E](
 	val element =
 		div(cls := "row row-cols-auto")(
 			div(cls := "col-md")(widget.element),
-			div(cls := "col-xl-2 col-lg-3 text-end", style := "min-width: 120px;")(div(moveUpButton, moveDownButton, removeButton))
+			div(cls := "col-xl-2 col-lg-3 text-end", style := "min-width: 120px;")(
+				div(cls := "entity-action-buttons")(moveUpButton, moveDownButton, removeButton)
+			)
 		)
 	.render
 }

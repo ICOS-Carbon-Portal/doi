@@ -28,6 +28,14 @@ html, body {
 .row .row + .row {
 	margin-top: 0.5rem;
 }
+.entity-action-buttons {
+	white-space: nowrap;
+}
+.entity-action-btn {
+	margin: 0;
+	padding-right: 0.5rem;
+	padding-left: 0.5rem;
+}
 span.label{
 	font-size: 100%;
 	color: #000;

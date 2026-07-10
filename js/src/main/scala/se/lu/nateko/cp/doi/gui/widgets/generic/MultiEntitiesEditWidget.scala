@@ -83,7 +83,7 @@ abstract class MultiEntitiesEditWidget[E, W <: EntityWidget[E]](
 	private val addWidgetButton = button(
 			tpe := "button", cls := "btn btn-sm " + buttonType,
 			htmlTitle := "Add another item to the list",
-			onclick := addWidget, marginBottom := 5
+			onclick := addWidget
 		)(
 			span(cls := addIcon + " me-1"),
 			"Add " + title.dropRight(1).toLowerCase
