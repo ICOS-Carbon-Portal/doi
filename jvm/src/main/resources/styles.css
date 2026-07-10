@@ -2,7 +2,8 @@
 #main-wrapper .form-control,
 #main-wrapper .form-select,
 #main-wrapper .input-group-text,
-#main-wrapper .dropdown-menu {
+#main-wrapper .dropdown-menu,
+#main-wrapper .page-link {
 	font-size: 14px;
 }
 
