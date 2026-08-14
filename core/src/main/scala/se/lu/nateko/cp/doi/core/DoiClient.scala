@@ -24,7 +24,9 @@ trait DoiReadonlyClient(conf: DoiEndpointConfig, protected val http: DoiHttp)(us
 
 	def metaUrl(doi: Doi): URI = metaBase.resolve(doi.toString)
 
-	def getMetadata(doi: Doi): Future[Option[DoiMeta]] = http.getJson(metaUrl(doi)).flatMap(
+	private def metaReadUrl(doi: Doi): URI = new URI(s"${metaUrl(doi)}?affiliation=true")
+
+	def getMetadata(doi: Doi): Future[Option[DoiMeta]] = http.getJson(metaReadUrl(doi)).flatMap(
 		resp => analyzeResponse{
 			case 200 => Future.successful(
 				Some(resp.body.parseJson.convertTo[SingleDoiPayload].data.attributes)
@@ -54,7 +56,7 @@ class DoiClient(conf: DoiClientConfig, doiHttp: DoiHttp)(using ExecutionContext)
 	def clientDois(query: String, page: Int, state: Option[String] = None): URI = {
 		val stateParam = state.map(s => s"&state=$s").getOrElse("")
 		new URI(
-			s"${metaBase}?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page$stateParam"
+			s"${metaBase}?query=${URLEncoder.encode(query, "UTF-8")}&client-id=${config.symbol.toLowerCase()}&page[size]=25&page[number]=$page&affiliation=true$stateParam"
 		)
 	}
 
