@@ -476,7 +476,9 @@
 						"givenName": "Christoph",
 						"familyName": "Gerbig",
 						"affiliation": [
-							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+							{
+								"name": "Max Planck Institute for Biogeochemistry, Jena, Germany"
+							}
 						],
 						"nameIdentifiers": [
 							{
@@ -516,7 +518,9 @@
 						"givenName": "Christoph",
 						"familyName": "Gerbig",
 						"affiliation": [
-							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+							{
+								"name": "Max Planck Institute for Biogeochemistry, Jena, Germany"
+							}
 						],
 						"contributorType": "Producer",
 						"nameIdentifiers": [
@@ -532,7 +536,9 @@
 						"givenName": "Frank-Thomas",
 						"familyName": "Koch",
 						"affiliation": [
-							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							{
+								"name": "Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							}
 						],
 						"contributorType": null,
 						"nameIdentifiers": [
@@ -548,7 +554,9 @@
 						"givenName": "Ute",
 						"familyName": "Karstens",
 						"affiliation": [
-							"ICOS Carbon Portal, Lund University, Lund, Sweden"
+							{
+								"name": "ICOS Carbon Portal, Lund University, Lund, Sweden"
+							}
 						],
 						"contributorType": "DataCurator",
 						"nameIdentifiers": [
@@ -641,7 +649,9 @@
 						"givenName": "Christoph",
 						"familyName": "Gerbig",
 						"affiliation": [
-							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+							{
+								"name": "Max Planck Institute for Biogeochemistry, Jena, Germany"
+							}
 						],
 						"nameIdentifiers": [
 							{
@@ -656,7 +666,9 @@
 						"givenName": "Frank-Thomas",
 						"familyName": "Koch",
 						"affiliation": [
-							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							{
+								"name": "Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							}
 						],
 						"nameIdentifiers": [
 							{
@@ -693,7 +705,9 @@
 						"givenName": "Christoph",
 						"familyName": "Gerbig",
 						"affiliation": [
-							"Max Planck Institute for Biogeochemistry, Jena, Germany"
+							{
+								"name": "Max Planck Institute for Biogeochemistry, Jena, Germany"
+							}
 						],
 						"contributorType": "Producer",
 						"nameIdentifiers": [
@@ -709,7 +723,9 @@
 						"givenName": "Frank-Thomas",
 						"familyName": "Koch",
 						"affiliation": [
-							"Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							{
+								"name": "Deutscher Wetterdienst (DWD), Meteorologisches Observatorium Hohenpeißenberg, Germany"
+							}
 						],
 						"contributorType": "ProjectMember",
 						"nameIdentifiers": [
@@ -725,7 +741,9 @@
 						"givenName": "Ute",
 						"familyName": "Karstens",
 						"affiliation": [
-							"ICOS Carbon Portal, Lund University, Lund, Sweden"
+							{
+								"name": "ICOS Carbon Portal, Lund University, Lund, Sweden"
+							}
 						],
 						"contributorType": "DataCurator",
 						"nameIdentifiers": [
