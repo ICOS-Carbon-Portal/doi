@@ -105,6 +105,11 @@ class DoiMetaTests extends AnyFunSpec{
 			assert(relatedIdentifierErrors(" 11676/Hk0IPQT1i05pm_mY2yydP8XT ", RelatedIdentifierType.Handle).isEmpty)
 		}
 
+		it("rejects punctuation outside the allowed DOI and handle character sets"){
+			assert(relatedIdentifierErrors("10.11676/abc?def", RelatedIdentifierType.DOI).nonEmpty)
+			assert(relatedIdentifierErrors("11676/abc?def", RelatedIdentifierType.Handle).nonEmpty)
+		}
+
 		it("accepts URL with surrounding spaces"){
 			assert(relatedIdentifierErrors(" https://meta.icos-cp.eu/objects/-S_VUEUOFnH4L7nqlWmxuRN_ ", RelatedIdentifierType.URL).isEmpty)
 		}
