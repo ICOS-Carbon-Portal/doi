@@ -166,8 +166,8 @@ trait SelfValidating{
 
 object SelfValidating{
 	private val uriRegex = """^https?://.+$""".r
-	private val doiRegex = """^\d{2}\.[0-9]+/[A-Za-z0-9-_]+$""".r
-	private val pidRegex = """^[A-Za-z0-9-_]+/[A-Za-z0-9-_]+$""".r
+	private val doiRegex = """^\d{2}\.[0-9]+/[A-Za-z0-9_-]+$""".r
+	private val pidRegex = """^[A-Za-z0-9_-]+/[A-Za-z0-9_-]+$""".r
 }
 
 object PublicationYear{
