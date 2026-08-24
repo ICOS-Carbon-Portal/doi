@@ -37,7 +37,7 @@ object Main{
 			AssetHash.jsFileName(false)
 			AssetHash.cssFileName(false)
 
-		val authRouting = new AuthRouting(conf.auth)
+		val authRouting = new AuthRouting(conf.auth, if conf.development then conf.developmentUser else None)
 
 		val clients: Map[String, DoiClient] = conf.envConfigs.map{ (envName, envConf) =>
 			val http = new AkkaDoiHttp(envConf.client.member.symbol, envConf.client.member.password)

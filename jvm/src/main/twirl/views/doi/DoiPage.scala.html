@@ -34,7 +34,10 @@
 		document.addEventListener("DOMContentLoaded", function() {
 			var loginLink = document.getElementById("login-link");
 			if (!loginLink) return;
-			loginLink.href = "https://" + "@authHost" + "/login/?targetUrl=" + encodeURIComponent(window.location.href);
+			var authBaseUrl = "@authHost";
+			if (!/^https?:\/\//.test(authBaseUrl)) authBaseUrl = "https://" + authBaseUrl;
+			authBaseUrl = authBaseUrl.replace(/\/+$/, "");
+			loginLink.href = authBaseUrl + "/login/?targetUrl=" + encodeURIComponent(window.location.href);
 		});
 	</script>
 
