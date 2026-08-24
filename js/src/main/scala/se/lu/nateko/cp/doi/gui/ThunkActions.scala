@@ -59,16 +59,17 @@ object ThunkActions {
 
 		val env = d.getState.activeEnv
 		val newDoi = meta.doi.copy(suffix = CoolDoi.makeRandom)
-		val newMeta = meta.copy(doi = newDoi, state = DoiPublicationState.draft)
+		val newMeta = meta.copy(
+			doi = newDoi,
+			state = DoiPublicationState.draft,
+			event = None
+		)
 
-		// First dispatch the clone request to update state with the new metadata
-		d.dispatch(DoiCloneRequest(meta, newMeta))
-
-		// Then save the cloned DOI to the backend
 		Backend.updateMeta(newMeta, env).onComplete {
 			case Success(result) =>
-				if (!result.isEmpty) {
-					d.dispatch(ReportError(s"Failed to save clone: $result"))
+				d.dispatch(DoiCloneRequest(meta, newMeta))
+				if (result.nonEmpty) {
+					d.dispatch(ReportError(result))
 				}
 			case Failure(err) =>
 				d.dispatch(ReportError(s"Failed to save clone $newDoi: ${err.getMessage}"))
