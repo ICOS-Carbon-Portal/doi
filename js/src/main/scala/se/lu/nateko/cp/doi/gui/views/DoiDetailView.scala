@@ -61,7 +61,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 		meta,
 		backToList,
 		tabsCb,
-		meta => d.dispatch(ThunkActions.requestDoiClone(meta)),
+		_ => requestClone(),
 		updateDoiMeta,
 		doi => d.dispatch(ThunkActions.requestDoiDeletion(doi)),
 		initialTab,
@@ -213,6 +213,24 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 			}
 		},
 	)
+
+	private def requestClone(): Unit = {
+		val unsavedWarning = workingMeta match {
+			case Some(working) if working != meta =>
+				"\n\nYou have unsaved changes. The clone will be copied from the last saved version; unsaved changes will not be included."
+			case None =>
+				"\n\nThe JSON editor contains invalid or unsaved changes. The clone will be copied from the last saved version; these changes will not be included."
+			case _ => ""
+		}
+
+		val confirmed = org.scalajs.dom.window.confirm(
+			s"Clone DOI ${meta.doi}?\n\n" +
+			"This will create a new draft DOI with a new identifier, copied from this DOI." +
+			unsavedWarning +
+			"\n\nContinue and create the clone?"
+		)
+		if (confirmed) d.dispatch(ThunkActions.requestDoiClone(meta))
+	}
 
 	private def updateDoiMeta(updated: DoiMeta): Future[Unit] = {
 		Backend.updateMeta(updated, d.getState.activeEnv).flatMap { errorMsg =>

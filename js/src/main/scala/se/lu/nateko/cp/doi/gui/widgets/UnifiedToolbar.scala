@@ -7,7 +7,7 @@ import se.lu.nateko.cp.doi.Doi
 import se.lu.nateko.cp.doi.meta.DoiPublicationState
 import se.lu.nateko.cp.doi.gui.UserInfo
 import se.lu.nateko.cp.doi.gui.views.DoiMetaHelpers
-import org.scalajs.dom.html.{Button, Div}
+import org.scalajs.dom.html.Button
 import scala.concurrent.Future
 import scala.scalajs.js.timers.{setTimeout, clearTimeout}
 
@@ -130,10 +130,11 @@ class UnifiedToolbar(
 
 	private val cloneButton = button(
 		tpe := "button",
-		cls := "btn btn-sm btn-outline-secondary"
+		cls := "btn btn-sm btn-outline-secondary",
+		title := "Create a separate draft copy with a new DOI"
 	)(
 		i(cls := "fa-solid fa-copy me-1"),
-		"Clone"
+		"Clone DOI"
 	).render
 	cloneButton.onclick = (_: Event) => cloneCb(_meta)
 
@@ -170,22 +171,14 @@ class UnifiedToolbar(
 	).render
 	deleteButton.onclick = (_: Event) => deleteCb(_meta.doi)
 
-	private val actionButtons: Div = _meta.state match {
-		case DoiPublicationState.draft =>
-			div(cls := "d-flex gap-2")(
-				submitButtonWrapper,
-				deleteButton,
-				updateButton
-			).render
+	private val submitControl = _meta.state match {
+		case DoiPublicationState.draft => submitButtonWrapper
+		case _ => span().render
+	}
 
-		case DoiPublicationState.registered =>
-			div(cls := "d-flex gap-2")(
-				updateButton
-			).render
-		case _ =>
-			div(cls := "d-flex gap-2")(
-				updateButton
-			).render
+	private val deleteControl = _meta.state match {
+		case DoiPublicationState.draft => deleteButton
+		case _ => span().render
 	}
 
 	val element = div(
@@ -203,9 +196,11 @@ class UnifiedToolbar(
 
 			div(cls := "flex-grow-1"),
 
-			if (userInfo.isAdmin) stateDropdown else stateDisplay,
 			if (userInfo.isLoggedIn) cloneButton else span().render,
-			actionButtons
+			deleteControl,
+			if (userInfo.isAdmin) stateDropdown else stateDisplay,
+			submitControl,
+			updateButton
 		)
 	).render
 
