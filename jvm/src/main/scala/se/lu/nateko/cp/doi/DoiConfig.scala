@@ -33,6 +33,7 @@ case class DoiConfig(
 	mailing: EmailConfig,
 	metaHost: String,
 	development: Boolean,
+	developmentUser: Option[UserId],
 	skipCacheInvalidation: Boolean
 )
 
@@ -59,6 +60,7 @@ object DoiConfig {
 			mailing = getMailingConfig(doiConf),
 			metaHost = doiConf.getString("metaHost"),
 			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false,
+			developmentUser = if doiConf.hasPath("developmentUser") then Some(UserId(doiConf.getString("developmentUser"))) else None,
 			skipCacheInvalidation = if doiConf.hasPath("skipCacheInvalidation") then doiConf.getBoolean("skipCacheInvalidation") else false
 		)
 	}
