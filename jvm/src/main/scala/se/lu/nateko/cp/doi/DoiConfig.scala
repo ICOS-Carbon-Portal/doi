@@ -25,6 +25,7 @@ case class ClientEnvConfig(
 )
 
 case class DoiConfig(
+	envri: Envri,
 	httpBindInterface: String,
 	httpBindPort: Int,
 	envConfigs: Map[String, ClientEnvConfig],
@@ -32,7 +33,9 @@ case class DoiConfig(
 	admins: Seq[UserId],
 	mailing: EmailConfig,
 	metaHost: String,
+	publicHost: String,
 	development: Boolean,
+	developmentUser: Option[UserId],
 	skipCacheInvalidation: Boolean
 )
 
@@ -40,25 +43,37 @@ object DoiConfig {
 
 	private val envNames = Seq("test", "production")
 
-	def getConfig(using envri: Envri): DoiConfig = {
+	def getConfig: DoiConfig = {
 		val allConf = ConfigLoader.appConfig
 
 		val doiConf = allConf.getConfig("cpdoi")
+		val envri = Envri.valueOf(if doiConf.hasPath("envri") then doiConf.getString("envri") else "ICOS")
+		val development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false
+		val developmentUser =
+			if development && doiConf.hasPath("developmentUser") then Some(UserId(doiConf.getString("developmentUser")))
+			else None
+		val envriSpecificConf =
+			if doiConf.hasPath(s"envriConfigs.$envri") then doiConf.getConfig(s"envriConfigs.$envri")
+			else doiConf
+		val envriConf = envriSpecificConf.withFallback(doiConf)
 
 		val envConfigs = envNames
-			.filter(doiConf.hasPath)
-			.map(name => name -> getClientEnvConfig(doiConf.getConfig(name)))
+			.filter(envriSpecificConf.hasPath)
+			.map(name => name -> getClientEnvConfig(envriSpecificConf.getConfig(name)))
 			.toMap
 
 		DoiConfig(
+			envri = envri,
 			httpBindInterface = doiConf.getString("httpBindInterface"),
 			httpBindPort = doiConf.getInt("httpBindPort"),
 			envConfigs = envConfigs,
 			auth = ConfigLoader.authPubConfig(envri),
 			admins = allConf.getStringList("cpdoi.admins").asScala.map(UserId(_)).toIndexedSeq,
-			mailing = getMailingConfig(doiConf),
-			metaHost = doiConf.getString("metaHost"),
-			development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false,
+			mailing = getMailingConfig(envriConf),
+			metaHost = envriConf.getString("metaHost"),
+			publicHost = envriConf.getString("publicHost"),
+			development = development,
+			developmentUser = developmentUser,
 			skipCacheInvalidation = if doiConf.hasPath("skipCacheInvalidation") then doiConf.getBoolean("skipCacheInvalidation") else false
 		)
 	}

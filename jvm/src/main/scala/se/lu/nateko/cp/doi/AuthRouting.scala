@@ -10,11 +10,11 @@ import scala.util.Failure
 import se.lu.nateko.cp.cpauth.core.CookieToToken
 import akka.http.javadsl.server.CustomRejection
 
-class AuthRouting(authConfig: PublicAuthConfig) {
+class AuthRouting(authConfig: PublicAuthConfig, developmentUser: Option[UserId] = None) {
 
 	private[this] val authenticator = Authenticator(authConfig).get
 
-	val user: Directive1[UserId] = cookie(authConfig.authCookieName).flatMap{cookie => {
+	private val authenticatedUser: Directive1[UserId] = cookie(authConfig.authCookieName).flatMap{cookie => {
 		val tokenTry = for(
 			signedToken <- CookieToToken.recoverToken(cookie.value);
 			token <- authenticator.unwrapToken(signedToken)
@@ -25,6 +25,10 @@ class AuthRouting(authConfig: PublicAuthConfig) {
 			case Failure(err) => reject(new CpauthAuthenticationFailedRejection(toMessage(err)))
 		}
 	}}
+
+	val user: Directive1[UserId] = developmentUser match
+		case Some(devUser) => authenticatedUser | provide(devUser)
+		case None => authenticatedUser
 
 	val userOpt: Directive1[Option[UserId]] = user.map(Some(_)) | provide(None)
 
