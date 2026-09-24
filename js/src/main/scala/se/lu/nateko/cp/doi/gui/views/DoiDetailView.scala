@@ -53,7 +53,7 @@ class DoiDetailView(metaInit: DoiMeta, d: DoiRedux.Dispatcher, isClone: Boolean 
 
 	private val doiUrl = "https://doi.org/" + meta.doi
 	private val dataciteUrl = "https://commons.datacite.org/doi.org/" + meta.doi
-	private val fabricaUrl = "https://doi.datacite.org/doi.org/" + meta.doi
+	private val fabricaUrl = "https://doi.datacite.org/dois/" + scala.scalajs.js.URIUtils.encodeURIComponent(meta.doi.toString.toLowerCase)
 
 	private val contentBody = div().render
 
