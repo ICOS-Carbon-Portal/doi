@@ -47,19 +47,16 @@ object DoiConfig {
 		val allConf = ConfigLoader.appConfig
 
 		val doiConf = allConf.getConfig("cpdoi")
-		val envri = Envri.valueOf(if doiConf.hasPath("envri") then doiConf.getString("envri") else "ICOS")
-		val development = if doiConf.hasPath("development") then doiConf.getBoolean("development") else false
+		val envri = Envri.valueOf(doiConf.getString("envri"))
+		val development = doiConf.getBoolean("development")
 		val developmentUser =
 			if development && doiConf.hasPath("developmentUser") then Some(UserId(doiConf.getString("developmentUser")))
 			else None
-		val envriSpecificConf =
-			if doiConf.hasPath(s"envriConfigs.$envri") then doiConf.getConfig(s"envriConfigs.$envri")
-			else doiConf
-		val envriConf = envriSpecificConf.withFallback(doiConf)
+		val envriConf = doiConf.getConfig(s"envriConfigs.$envri")
 
 		val envConfigs = envNames
-			.filter(envriSpecificConf.hasPath)
-			.map(name => name -> getClientEnvConfig(envriSpecificConf.getConfig(name)))
+			.filter(envriConf.hasPath)
+			.map(name => name -> getClientEnvConfig(envriConf.getConfig(name)))
 			.toMap
 
 		DoiConfig(
@@ -74,7 +71,7 @@ object DoiConfig {
 			publicHost = envriConf.getString("publicHost"),
 			development = development,
 			developmentUser = developmentUser,
-			skipCacheInvalidation = if doiConf.hasPath("skipCacheInvalidation") then doiConf.getBoolean("skipCacheInvalidation") else false
+			skipCacheInvalidation = doiConf.getBoolean("skipCacheInvalidation")
 		)
 	}
 
