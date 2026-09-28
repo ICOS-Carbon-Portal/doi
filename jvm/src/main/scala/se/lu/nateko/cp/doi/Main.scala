@@ -24,7 +24,6 @@ import eu.icoscp.envri.Envri
 object Main{
 
 	private given ToResponseMarshaller[Html] = TemplatePageMarshalling.marshaller
-	private given Envri = Envri.ICOS
 
 	def main(args: Array[String]): Unit = {
 
@@ -32,12 +31,13 @@ object Main{
 		import system.dispatcher
 
 		val conf = DoiConfig.getConfig
+		given Envri = conf.envri
 
 		if !conf.development then
 			AssetHash.jsFileName(false)
 			AssetHash.cssFileName(false)
 
-		val authRouting = new AuthRouting(conf.auth)
+		val authRouting = new AuthRouting(conf.auth, conf.developmentUser)
 
 		val clients: Map[String, DoiClient] = conf.envConfigs.map{ (envName, envConf) =>
 			val http = new AkkaDoiHttp(envConf.client.member.symbol, envConf.client.member.password)
@@ -74,7 +74,7 @@ object Main{
 			emailSender.send(
 				conf.mailing.toAddresses,
 				"DOI submitted for publication",
-				views.html.doi.DoiSubmissionEmail(uid, doi).body
+				views.html.doi.DoiSubmissionEmail(uid, doi, conf.publicHost).body
 			)
 		)(using ExecutionContext.Implicits.global)
 
